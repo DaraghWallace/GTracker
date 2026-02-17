@@ -1,0 +1,24 @@
+USERS:
+    userID: UUID
+    Username: string
+    Password: string
+    Email: string
+
+Session:
+    SessionID: UUID
+    userID: userID
+    Date
+    Time
+    Focus: string
+    Exorsises: [{Exorsise}]
+
+Exorsise:
+    exorsiseID: UUID
+    SessionID: SessionID
+    Exorsise: string
+    targetGroup: string
+    targetSpec:
+    toFailure: boolean
+    Sets:[]
+        reps:
+        Weight:
