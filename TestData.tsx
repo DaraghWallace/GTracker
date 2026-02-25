@@ -1,12 +1,26 @@
-interface User {
-    userID: String,
-    username: String,
-    password: String,
-    email: String,
+interface UserProfile {
+  userId: string;
+  email: string;
+  username: string;
+
+  stats?: {
+    height_cm?: number;
+    cur_weight_kg?: number;
+    tar_weight_kg?: number;
+  };
+
+  goals?: {
+    description: string,
+    achieved: boolean,
+  }[];
+  role: "member" | "trainer";
+
+  createdAt: string;
+  updatedAt?: string;
 }
 
 interface Exercise {
-    exerciseID: string
+    exerciseId: string
     name: string
     targetGroup: string
     targetMuscle: string
@@ -18,45 +32,9 @@ interface Exercise {
 }
 
 interface Session {
-    sessionID: String,
-    userID: User["userID"],
+    sessionId: String,
+    userId: UserProfile["userId"],
     date: Date,
     focus: string
     exorsises: [Exercise[]]
 }
-
-export const userData: User[] = [
-    {
-        userID: "userID-a",
-        username:"Billy_Bicep",
-        password:"bigarmz123",
-        email:"curl@arm.com",
-    },{
-        userID: "userID-b",
-        username:"Lenneard_Leg_Day",
-        password:"biglegz123",
-        email:"squat@legs.com",
-    },
-]
-
-export const exerciseData: Exercise[] = [
-    {
-        exerciseID: "exA1",
-        name: "curl",
-        targetGroup: "arms",
-        targetMuscle: "bicep",
-        toFailure: true,
-        sets: [
-            {repetitions: 3, weight: 20}
-        ]
-    },{
-        exerciseID: "exL2",
-        name: "squat",
-        targetGroup: "Leg",
-        targetMuscle: "Glutes",
-        toFailure: false,
-        sets: [
-            {repetitions: 2, weight: 90}
-        ]
-    },  
-]

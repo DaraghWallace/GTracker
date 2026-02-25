@@ -1,16 +1,104 @@
-import * as cdk from 'aws-cdk-lib/core';
+import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import {  UserPool, UserPoolClient, AccountRecovery, UserPoolDomain, CfnUserPoolGroup} from 'aws-cdk-lib/aws-cognito';
+
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 
 export class TrackerCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+    
+    //#region: Auth / userpool-client-groups
+    const userPool= new UserPool( this, 'UserPool',{
+      userPoolName: 'gTrackUserPool',
+      selfSignUpEnabled: true, //create user through cmd
+      signInAliases:{
+        email: true,
+      },autoVerify:{ //For testing remove before prod
+        email: true
+      },
+      accountRecovery: AccountRecovery.EMAIL_ONLY,
 
-    // The code that defines your stack goes here
+      passwordPolicy: {
+        minLength: 8,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireDigits: true,
+      },
+      removalPolicy: cdk.RemovalPolicy.DESTROY //big red button
+    })
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'TrackerCdkQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const userpoolClient = new UserPoolClient( this, 'UserPoolClient',{
+      userPool,
+      generateSecret: false,
+      authFlows:{
+        userPassword:true,
+        userSrp: true,
+      }
+    })
+
+    new CfnUserPoolGroup(this, 'MembersGroup', {
+      groupName: 'members',
+      userPoolId: userPool.userPoolId,
+    });
+
+    new CfnUserPoolGroup(this, 'TrainersGroup', {
+      groupName: 'trainers',
+      userPoolId: userPool.userPoolId,
+    });
+
+    new CfnUserPoolGroup(this, 'AdminsGroup', {
+      groupName: 'admins',
+      userPoolId: userPool.userPoolId,
+    });
+
+    new cdk.CfnOutput(this, 'UserPoolId', {
+      value: userPool.userPoolId,
+    });
+
+    new cdk.CfnOutput(this, 'UserPoolClientId',{
+      value: userpoolClient.userPoolClientId
+    })
+    //#endregion
+    
+    //#region:: UserPfofiles / dynamoDB table / lamda functions
+    const userTable = new dynamodb.Table(this, 'UserProfileTable', {
+      tableName: 'UserProfiles',
+
+      partitionKey: {
+        name: 'userId',
+        type: dynamodb.AttributeType.STRING,
+      },
+
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
+    });
+
+    //create profile
+    const postConfirmFn = new lambda.Function(this, 'PostConfirmFn', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/post-confirm'),
+
+      environment: {
+        TABLE_NAME: userTable.tableName,
+      },
+    });
+
+    userTable.grantWriteData(postConfirmFn);
+
+    userPool.addTrigger(
+      cognito.UserPoolOperation.POST_CONFIRMATION,
+      postConfirmFn
+    );
+
+    
+    //#endregion
   }
 }
+
+//#region:
+//#endregion
