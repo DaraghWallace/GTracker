@@ -1,22 +1,66 @@
-import { DynamoDB } from "aws-sdk";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+} from "@aws-sdk/lib-dynamodb";
 
-const dynamo = new DynamoDB.DocumentClient();
+import {
+  PostConfirmationTriggerEvent,
+  Context,
+  Callback,
+} from "aws-lambda";
 
-export const handler = async (event: any) => {
-  console.log("Post confirmation trigger:", JSON.stringify(event, null, 2));
+//#region: User Profiles:
+class UserProfileService {
+  private docClient: DynamoDBDocumentClient;
+  private tableName: string;
 
-  const { sub, email } = event.request.userAttributes;
+  constructor() {
+    const client = new DynamoDBClient({});
+    this.docClient = DynamoDBDocumentClient.from(client);
+    this.tableName = process.env.TABLE_NAME!;
+  }
 
-  await dynamo.put({
-    TableName: process.env.TABLE_NAME!,
-    Item: {
-      userId: sub,
-      email,
-      role: "member",
-      stats: {},
-      createdAt: new Date().toISOString(),
-    },
-  }).promise();
+  async createUserProfile(userId: string, email?: string) {
+    const command = new PutCommand({
+      TableName: this.tableName,
+      Item: {
+        userId,
+        email,
+        createdAt: new Date().toISOString(),
+      },
+      ConditionExpression: "attribute_not_exists(userId)", // avoid overwrite
+    });
 
-  return event;
+    await this.docClient.send(command);
+  }
+}
+
+class PostConfirmationHandler {
+  private service = new UserProfileService();
+
+  async handle(event: PostConfirmationTriggerEvent) {
+    const userId = event.request.userAttributes.sub;
+    const email = event.request.userAttributes.email;
+
+    await this.service.createUserProfile(userId, email);
+
+    return event;
+  }
+}
+//#endregion
+
+
+const handlerInstance = new PostConfirmationHandler();
+export const handler = async (
+  event: PostConfirmationTriggerEvent,
+  context: Context,
+  callback: Callback
+) => {
+  try {
+    const result = await handlerInstance.handle(event);
+    callback(null, result);
+  } catch (error) {
+    callback(error as Error);
+  }
 };

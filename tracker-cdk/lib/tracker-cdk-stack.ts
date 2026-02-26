@@ -6,6 +6,8 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+
 export class TrackerCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -63,7 +65,7 @@ export class TrackerCdkStack extends cdk.Stack {
     })
     //#endregion
     
-    //#region:: UserPfofiles / dynamoDB table / lamda functions
+    //#region:: UserProfiles / dynamoDB table 
     const userTable = new dynamodb.Table(this, 'UserProfileTable', {
       tableName: 'UserProfiles',
 
@@ -79,7 +81,7 @@ export class TrackerCdkStack extends cdk.Stack {
 
     //create profile
     const postConfirmFn = new lambda.Function(this, 'PostConfirmFn', {
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda/post-confirm'),
 
@@ -97,6 +99,77 @@ export class TrackerCdkStack extends cdk.Stack {
 
     
     //#endregion
+  
+    //#region: Sessions:  / dynamoDB table / Create-Get-Update-Delete
+    const sessionTable = new dynamodb.Table(this, "SessionsTable", {
+      tableName: "Sessions",
+
+      partitionKey: {
+        name: "userId",
+        type: dynamodb.AttributeType.STRING,
+      },
+
+      sortKey: {
+        name: "sessionId",
+        type: dynamodb.AttributeType.STRING,
+      },
+
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
+    });
+
+    const createSessionFn = new NodejsFunction(this, "CreateSessionFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/sessions/create.ts",
+      environment: {
+        TABLE_NAME: sessionTable.tableName,
+      }, bundling: {
+        forceDockerBundling: false,
+      },
+    });
+    sessionTable.grantWriteData(createSessionFn);
+
+    const getSessionsFn = new NodejsFunction(this, "GetSessionsFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/sessions/get.ts",
+      environment: {
+        TABLE_NAME: sessionTable.tableName,
+      }, bundling: {
+        forceDockerBundling: false,
+      },
+    });
+    sessionTable.grantReadData(getSessionsFn);    
+    //#endregion
+    
+    //#region: Exersises:  / dynamoDB table / Create-Get-Update-Delete
+      const exersisesTable = new dynamodb.Table(this, "ExersisesTable", {
+      tableName: "Exersises",
+
+      partitionKey: {
+        name: "exersiseId",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
+    });
+    //#endregion
+
+    //#region: Sets:  / dynamoDB table / Create-Get-Update-Delete
+      const setsTable = new dynamodb.Table(this, "SetsTable", {
+      tableName: "Sets",
+
+      partitionKey: {
+        name: "setId",
+        type: dynamodb.AttributeType.STRING,
+      },sortKey: {
+        name: "exersiseId",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
+    });
+    //#endregion
+
   }
 }
 
