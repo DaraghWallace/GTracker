@@ -152,6 +152,28 @@ export class TrackerCdkStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
     });
+
+    const createExersiseFn = new NodejsFunction(this, "CreateExersiseFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/exersises/create.ts",
+      environment: {
+        TABLE_NAME: exersisesTable.tableName,
+      }, bundling: {
+        forceDockerBundling: false,
+      },
+    });
+    sessionTable.grantWriteData(createExersiseFn);
+
+    const getExersisesFn = new NodejsFunction(this, "GetExersiseFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/exersises/get.ts",
+      environment: {
+        TABLE_NAME: exersisesTable.tableName,
+      }, bundling: {
+        forceDockerBundling: false,
+      },
+    });
+    sessionTable.grantReadData(getExersisesFn);     
     //#endregion
 
     //#region: Sets:  / dynamoDB table / Create-Get-Update-Delete
