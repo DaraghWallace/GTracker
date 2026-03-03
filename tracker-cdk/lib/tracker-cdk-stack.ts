@@ -8,6 +8,11 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 
+// import { LambdaRestApi, LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
+// import { HttpMethod } from 'aws-cdk-lib/aws-events';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+
+
 export class TrackerCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -65,7 +70,7 @@ export class TrackerCdkStack extends cdk.Stack {
     })
     //#endregion
     
-    //#region:: UserProfiles / dynamoDB table 
+    //#region: UserProfiles / dynamoDB table 
     const userTable = new dynamodb.Table(this, 'UserProfileTable', {
       tableName: 'UserProfiles',
 
@@ -142,7 +147,7 @@ export class TrackerCdkStack extends cdk.Stack {
     //#endregion
     
     //#region: Exersises:  / dynamoDB table / Create-Get-Update-Delete
-      const exersisesTable = new dynamodb.Table(this, "ExersisesTable", {
+    const exersisesTable = new dynamodb.Table(this, "ExersisesTable", {
       tableName: "Exersises",
 
       partitionKey: {
@@ -162,7 +167,7 @@ export class TrackerCdkStack extends cdk.Stack {
         forceDockerBundling: false,
       },
     });
-    sessionTable.grantWriteData(createExersiseFn);
+    exersisesTable.grantWriteData(createExersiseFn);
 
     const getExersisesFn = new NodejsFunction(this, "GetExersiseFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
@@ -173,7 +178,7 @@ export class TrackerCdkStack extends cdk.Stack {
         forceDockerBundling: false,
       },
     });
-    sessionTable.grantReadData(getExersisesFn);     
+    exersisesTable.grantReadData(getExersisesFn);     
     //#endregion
 
     //#region: Sets:  / dynamoDB table / Create-Get-Update-Delete
@@ -192,6 +197,56 @@ export class TrackerCdkStack extends cdk.Stack {
     });
     //#endregion
 
+    //#region: RestAPI
+    // const apiAuthorizer = new apigateway.CognitoUserPoolsAuthorizer(
+    //   this, "ApiAuthorizer", {cognitoUserPools: [userPool],}
+    // );
+
+    const api = new apigateway.RestApi(this, "TrackerApi", {
+      restApiName: "Gym Track Service",
+      description: "API for gym sessions and exercises",
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+      },
+    })
+
+    const sessions = api.root.addResource("sessions");
+    sessions.addMethod("POST", 
+      new apigateway.LambdaIntegration(createSessionFn), //{
+      //   authorizer: apiAuthorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
+
+    sessions.addMethod("GET", 
+      new apigateway.LambdaIntegration(getSessionsFn),// {
+      //   authorizer: apiAuthorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
+
+    const exercises = api.root.addResource("exercises");
+    exercises.addMethod("POST",
+      new apigateway.LambdaIntegration(createExersiseFn), //{
+      //   authorizer: apiAuthorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
+
+    exercises.addMethod("GET",
+      new apigateway.LambdaIntegration(getExersisesFn), //{
+      //   authorizer: apiAuthorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
+
+    new cdk.CfnOutput(this, "ApiUrl", {
+      value: api.url,
+    });
+    //#endregion
+  
   }
 }
 

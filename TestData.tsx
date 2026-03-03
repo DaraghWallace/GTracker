@@ -27,8 +27,6 @@ export interface Exercise {
   name: string;
   targetGroup: string;
   targetMuscle: string;
-  toFailure: boolean;
-  sets: ExerciseSet[];
 }
 
 export interface Session {

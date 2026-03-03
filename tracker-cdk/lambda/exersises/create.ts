@@ -23,7 +23,14 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   );
 
   return {
-    statusCode: 201,
-    body: JSON.stringify(exersise),
+  statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+    },
+    body: JSON.stringify({
+      message: "Exercise created",
+    }),
   };
 };
