@@ -1,32 +1,33 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  QueryCommand,
-} from "@aws-sdk/lib-dynamodb";
-import { APIGatewayProxyEvent } from "aws-lambda";
+import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
+
 
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
-const tableName = process.env.TABLE_NAME!;
+const ddbClient = new DynamoDBClient({ region: "ap-southeast-2" });
 
-export const handler = async (event: APIGatewayProxyEvent) => {
-  const userId = event.pathParameters?.userId;
+export const handler = async () => {
+  try {
+    const params = { TableName: "Exercises" };
+    const data = await ddbClient.send(new ScanCommand(params));
 
-  if (!userId) {
-    return { statusCode: 400, body: "Missing userId" };
-  }
-
-  const result = await docClient.send(
-    new QueryCommand({
-      TableName: tableName,
-      KeyConditionExpression: "userId = :uid",
-      ExpressionAttributeValues: {
-        ":uid": userId,
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PATCH,DELETE",
+        "Access-Control-Allow-Headers": "*",
       },
-    })
-  );
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(result.Items ?? []),
-  };
+      body: JSON.stringify(data.Items),
+    };
+  } catch (error) {
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PATCH,DELETE",
+        "Access-Control-Allow-Headers": "*",
+      },
+      body: `Could not 'getPageItems()': ${error}`,
+    };
+  }
 };
