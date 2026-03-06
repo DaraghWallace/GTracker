@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react';
 
-import { createExercise, createSession, getExercises } from './APIfunctions';
+import { createExercise, createSession, getExercises , getSessions} from './APIfunctions';
 
 type Exercise = {
   exerciseId: string;
   name: string;
 };
-
+type Session = {
+  sessionId: string;
+  name: string;
+};
 function App() {
   const [exercices, setExercises] = useState([])
+  const [sessions, setSessions] = useState([])
 
   useEffect(() => {
     // setSiteStatus("Pending")
     try {
       (async () => {
         setExercises(await getExercises())
+        setSessions(await getSessions())
         // setSiteStatus("Ready")
       })()      
     } catch (error) {
@@ -36,15 +41,13 @@ function App() {
 
       <div>
         <button onClick={handleCreateSession}>make session</button>
-
-        {/* {exercices.map((exercise:Exercise)=>{
-          return <div>{exercise.exerciseId} - {exercise.name}</div>
-        })} */}
+        {sessions.map((session:Session)=>{
+          return <div>{session.sessionId} - {session.name}</div>
+        })}
       </div>
 
       <div>
         <button onClick={handleCreateSet}>make set</button>        
-
         {/* {exercices.map((exercise:Exercise)=>{
           return <div>{exercise.exerciseId} - {exercise.name}</div>
         })} */}

@@ -138,11 +138,8 @@ export class TrackerCdkStack extends cdk.Stack {
     const getSessionsFn = new NodejsFunction(this, "GetSessionsFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: "lambda/sessions/get.ts",
-      environment: {
-        TABLE_NAME: sessionTable.tableName,
-      }, bundling: {
-        forceDockerBundling: false,
-      },
+      environment: {TABLE_NAME: sessionTable.tableName,},
+      bundling: {forceDockerBundling: false,},
     });
     sessionTable.grantReadData(getSessionsFn);    
     //#endregion
@@ -175,7 +172,6 @@ export class TrackerCdkStack extends cdk.Stack {
       environment: {TABLE_NAME: exercisesTable.tableName,},
       bundling: {forceDockerBundling: false,},
     });
-
     exercisesTable.grantReadData(getExercisesFn);     
     //#endregion
 

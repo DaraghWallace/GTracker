@@ -50,7 +50,7 @@ export async function getExercises() {
 //#region: Sessions
 // C
 export async function createSession() {
-   const url = "https://6g1chwalmj.execute-api.ap-southeast-2.amazonaws.com/prod/sessions";
+   const url = "https://q5yv5ilvsh.execute-api.ap-southeast-2.amazonaws.com/prod/sessions";
     try {
         console.log("creating...");
         const response = await fetch(url, {
@@ -82,6 +82,14 @@ export async function createSession() {
     }
 }
 // R
+export async function getSessions() {
+  const response = await fetch("https://q5yv5ilvsh.execute-api.ap-southeast-2.amazonaws.com/prod/sessions",{method: 'GET'})
+  const data = await response.json();
+  console.log("getPageItems() succesfully executed");
+  console.log(data);
+  
+  return Promise.resolve(data)
+}
 // U
 // D
 //#endregion
