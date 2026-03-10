@@ -1,26 +1,27 @@
 import { useEffect, useState } from 'react';
 
-import { createExercise, createSession, getExercises , getSessions} from './APIfunctions';
+import { 
+  createExercise, createSession, createSet,
+  // getExercises , getSessions, 
+  getSets
+} from './APIfunctions';
 
-type Exercise = {
-  exerciseId: string;
-  name: string;
-};
-type Session = {
-  sessionId: string;
-  name: string;
-};
+type Set = {
+  id: string,
+  weight: number
+}
+
 function App() {
-  const [exercices, setExercises] = useState([])
-  const [sessions, setSessions] = useState([])
+  // const [exercises, setExercises] = useState([])
+  // const [sessions, setSessions] = useState([])
+  const [sets, setSets] = useState([])
 
   useEffect(() => {
-    // setSiteStatus("Pending")
     try {
       (async () => {
-        setExercises(await getExercises())
-        setSessions(await getSessions())
-        // setSiteStatus("Ready")
+        // setExercises(await getExercises())
+        // setSessions(await getSessions())
+        setSets(await getSets())
       })()      
     } catch (error) {
       console.error("problem with fetchData: " + error);
@@ -30,27 +31,24 @@ function App() {
   return (
     <>
       <div>
-      </div>
-
-      <div>
-        <button onClick={handleCreateExersise}>make exersise</button>
-        {exercices.map((exercise:Exercise)=>{
+        <button onClick={handleCreateExersise}>make exercise</button>
+        {/* {exercises.map((exercise:Exercise)=>{
           return <div>{exercise.exerciseId} - {exercise.name}</div>
-        })}
+        })} */}
       </div>
 
       <div>
         <button onClick={handleCreateSession}>make session</button>
-        {sessions.map((session:Session)=>{
+        {/* {sessions.map((session:Session)=>{
           return <div>{session.sessionId} - {session.name}</div>
-        })}
+        })} */}
       </div>
 
       <div>
         <button onClick={handleCreateSet}>make set</button>        
-        {/* {exercices.map((exercise:Exercise)=>{
-          return <div>{exercise.exerciseId} - {exercise.name}</div>
-        })} */}
+        {sets.map((set:Set)=>{
+          return <div>{set.id} - {set.weight}</div>
+        })}
       </div>
     </>
   )
@@ -58,16 +56,14 @@ function App() {
 
 async function handleCreateExersise() {
   createExercise()
-
 }
 
 function handleCreateSession() {
-  console.log("createSession");
   createSession()
 }
 
 function handleCreateSet() {
-  console.log("createSet");
+  createSet();
 }
 
 export default App

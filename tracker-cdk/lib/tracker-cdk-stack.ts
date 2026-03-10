@@ -5,13 +5,9 @@ import {  UserPool, UserPoolClient, AccountRecovery, UserPoolDomain, CfnUserPool
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
-
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 
-// import { LambdaRestApi, LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
-// import { HttpMethod } from 'aws-cdk-lib/aws-events';
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-import { ResponseHeadersPolicy } from 'aws-cdk-lib/aws-cloudfront';
 
 
 export class TrackerCdkStack extends cdk.Stack {
@@ -95,15 +91,12 @@ export class TrackerCdkStack extends cdk.Stack {
         TABLE_NAME: userTable.tableName,
       },
     });
-
     userTable.grantWriteData(postConfirmFn);
 
     userPool.addTrigger(
       cognito.UserPoolOperation.POST_CONFIRMATION,
       postConfirmFn
     );
-
-    
     //#endregion
   
     //#region: Sessions:  / dynamoDB table / Create-Get-Update-Delete
@@ -126,7 +119,7 @@ export class TrackerCdkStack extends cdk.Stack {
 
     const createSessionFn = new NodejsFunction(this, "CreateSessionFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: "lambda/sessions/create.ts",
+      entry: "lambda/functions/create.ts",
       environment: {
         TABLE_NAME: sessionTable.tableName,
       }, bundling: {
@@ -137,7 +130,7 @@ export class TrackerCdkStack extends cdk.Stack {
 
     const getSessionsFn = new NodejsFunction(this, "GetSessionsFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: "lambda/sessions/get.ts",
+      entry: "lambda/functions/get.ts",
       environment: {TABLE_NAME: sessionTable.tableName,},
       bundling: {forceDockerBundling: false,},
     });
@@ -157,7 +150,7 @@ export class TrackerCdkStack extends cdk.Stack {
 
     const createExerciseFn = new NodejsFunction(this, "CreateExerciseFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: "lambda/exercises/create.ts",
+      entry: "lambda/functions/create.ts",
       environment: {
         TABLE_NAME: exercisesTable.tableName,
       }, bundling: {
@@ -168,7 +161,7 @@ export class TrackerCdkStack extends cdk.Stack {
 
     const getExercisesFn = new NodejsFunction(this, "GetExercisesFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: "lambda/exercises/get.ts",
+      entry: "lambda/functions/get.ts",
       environment: {TABLE_NAME: exercisesTable.tableName,},
       bundling: {forceDockerBundling: false,},
     });
@@ -176,19 +169,36 @@ export class TrackerCdkStack extends cdk.Stack {
     //#endregion
 
     //#region: Sets:  / dynamoDB table / Create-Read-Update-Delete
-      const setsTable = new dynamodb.Table(this, "SetsTable", {
+    const setsTable = new dynamodb.Table(this, "SetsTable", {
       tableName: "Sets",
 
       partitionKey: {
         name: "setId",
         type: dynamodb.AttributeType.STRING,
-      },sortKey: {
-        name: "exerciseId",
-        type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
     });
+
+    const createSetFn = new NodejsFunction(this, "CreateSetFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/create.ts",
+      environment: {
+        TABLE_NAME: setsTable.tableName,
+      }, bundling: {
+        forceDockerBundling: false,
+      },
+    });
+    setsTable.grantWriteData(createSetFn);
+
+    const getSetsFn = new NodejsFunction(this, "GetSetsFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/get.ts",
+      environment: {TABLE_NAME: setsTable.tableName,},
+      bundling: {forceDockerBundling: false,},
+    });
+    setsTable.grantReadData(getSetsFn);     
+
     //#endregion
 
     //#region: RestAPI
@@ -202,26 +212,24 @@ export class TrackerCdkStack extends cdk.Stack {
     })
 
     const sessions = api.root.addResource("sessions");
-    sessions.addMethod("POST", new apigateway.LambdaIntegration(createSessionFn)); //Working
+    sessions.addMethod("POST", new apigateway.LambdaIntegration(createSessionFn));
     sessions.addMethod("GET", new apigateway.LambdaIntegration(getSessionsFn));
     //U
     //D
 
     const exercises = api.root.addResource("exercises");
-    exercises.addMethod("POST", new apigateway.LambdaIntegration(createExerciseFn)); //Working
+    exercises.addMethod("POST", new apigateway.LambdaIntegration(createExerciseFn));
     exercises.addMethod("GET", new apigateway.LambdaIntegration(getExercisesFn));
     //U
     //D
 
     const sets = api.root.addResource("sets");
-    //C
-    //R
+    sets.addMethod("POST", new apigateway.LambdaIntegration(createSetFn));
+    sets.addMethod("GET", new apigateway.LambdaIntegration(getSetsFn));
     //U
     //D
 
-    new cdk.CfnOutput(this, "ApiUrl", {
-      value: api.url,
-    });
+    new cdk.CfnOutput(this, "ApiUrl", {value: api.url});
     //#endregion
   }
 }
