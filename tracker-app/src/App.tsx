@@ -1,69 +1,57 @@
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
 
 import { 
-  createExercise, createSession, createSet,
-  // getExercises , getSessions, 
-  getSets
+  //createExercise, createSession, createSet,
+  // getExercises , getSessions, getSets
 } from './APIfunctions';
-
-type Set = {
-  id: string,
-  weight: number
-}
+import { register, confirm, login, logout, } from './Helpers/amplify';
+import { getCurrentUser  } from "aws-amplify/auth";
 
 function App() {
-  // const [exercises, setExercises] = useState([])
-  // const [sessions, setSessions] = useState([])
-  const [sets, setSets] = useState([])
+  // useEffect(() => {
+  //   try {
+  //     (async () => {
 
-  useEffect(() => {
-    try {
-      (async () => {
-        // setExercises(await getExercises())
-        // setSessions(await getSessions())
-        setSets(await getSets())
-      })()      
-    } catch (error) {
-      console.error("problem with fetchData: " + error);
-    }
-  }, []);
+  //     })()      
+  //   } catch (error) {
+  //     console.error("problem with fetchData: " + error);
+  //   }
+  // }, []);
 
   return (
-    <>
-      <div>
-        <button onClick={handleCreateExersise}>make exercise</button>
-        {/* {exercises.map((exercise:Exercise)=>{
-          return <div>{exercise.exerciseId} - {exercise.name}</div>
-        })} */}
-      </div>
+    <div>
+      <button onClick={handleSignUp}>Sign up</button>
+      <button onClick={handleConfirm}>confirm</button>
+      <button onClick={handleLogin}>Sign in</button>
+      <button onClick={logout}>Sign out</button>
+      <button onClick={getUser}>get userdata</button>
 
-      <div>
-        <button onClick={handleCreateSession}>make session</button>
-        {/* {sessions.map((session:Session)=>{
-          return <div>{session.sessionId} - {session.name}</div>
-        })} */}
-      </div>
-
-      <div>
-        <button onClick={handleCreateSet}>make set</button>        
-        {sets.map((set:Set)=>{
-          return <div>{set.id} - {set.weight}</div>
-        })}
-      </div>
-    </>
+      <h1>User</h1>
+      <div>username: </div>
+      <div>Email: </div>
+      <div>Current Weight: </div>
+      <div>Target Weight: </div>
+    </div>
   )
 }
 
-async function handleCreateExersise() {
-  createExercise()
+async function handleSignUp() {
+  const response = await register("daraghwallace99@gmail.com","Shhhhhhhhhhhhhh1!")
+  console.log(response);
 }
 
-function handleCreateSession() {
-  createSession()
+async function handleConfirm() {
+  const response = await confirm("daraghwallace99@gmail.com","267671")
+  console.log(response);
 }
 
-function handleCreateSet() {
-  createSet();
+async function handleLogin() {
+  const response = await login("daraghwallace99@gmail.com","Shhhhhhhhhhhhhh1!")
+  console.log(response);
 }
 
+async function getUser() {
+  const response = await getCurrentUser();
+  console.log(response);
+}
 export default App

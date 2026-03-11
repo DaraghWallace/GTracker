@@ -31,7 +31,7 @@ export class TrackerCdkStack extends cdk.Stack {
         requireUppercase: true,
         requireDigits: true,
       },
-      removalPolicy: cdk.RemovalPolicy.DESTROY //big red button
+      removalPolicy: cdk.RemovalPolicy.DESTROY
     })
 
     const userpoolClient = new UserPoolClient( this, 'UserPoolClient',{
@@ -65,9 +65,13 @@ export class TrackerCdkStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolClientId',{
       value: userpoolClient.userPoolClientId
     })
+
+    const authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, "GymAuthorizer", {
+      cognitoUserPools: [userPool],
+    });
     //#endregion
     
-    //#region: UserProfiles / dynamoDB table 
+    //#region: UserProfiles / dynamoDB table c-r-u-d
     const userTable = new dynamodb.Table(this, 'UserProfileTable', {
       tableName: 'UserProfiles',
 
@@ -78,7 +82,7 @@ export class TrackerCdkStack extends cdk.Stack {
 
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
 
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     //create profile
@@ -86,7 +90,6 @@ export class TrackerCdkStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda/post-confirm'),
-
       environment: {
         TABLE_NAME: userTable.tableName,
       },
@@ -99,22 +102,19 @@ export class TrackerCdkStack extends cdk.Stack {
     );
     //#endregion
   
-    //#region: Sessions:  / dynamoDB table / Create-Get-Update-Delete
+    //#region: Sessions:  / dynamoDB table / C-R-u-d
     const sessionTable = new dynamodb.Table(this, "SessionsTable", {
       tableName: "Sessions",
-
       partitionKey: {
         name: "sessionId",
         type: dynamodb.AttributeType.STRING,
       },
-
       sortKey: {
         name: "userId",
         type: dynamodb.AttributeType.STRING,
       },
-
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     const createSessionFn = new NodejsFunction(this, "CreateSessionFn", {
@@ -137,7 +137,7 @@ export class TrackerCdkStack extends cdk.Stack {
     sessionTable.grantReadData(getSessionsFn);    
     //#endregion
     
-    //#region: Exercises:  / dynamoDB table / Create-Read-Update-Delete
+    //#region: Exercises:  / dynamoDB table / C-R-u-d
     const exercisesTable = new dynamodb.Table(this, "ExercisesTable", {
       tableName: "Exercises",
       partitionKey: {
@@ -145,7 +145,7 @@ export class TrackerCdkStack extends cdk.Stack {
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     const createExerciseFn = new NodejsFunction(this, "CreateExerciseFn", {
@@ -168,7 +168,7 @@ export class TrackerCdkStack extends cdk.Stack {
     exercisesTable.grantReadData(getExercisesFn);     
     //#endregion
 
-    //#region: Sets:  / dynamoDB table / Create-Read-Update-Delete
+    //#region: Sets:  / dynamoDB table / C-R-u-d
     const setsTable = new dynamodb.Table(this, "SetsTable", {
       tableName: "Sets",
 
@@ -177,7 +177,7 @@ export class TrackerCdkStack extends cdk.Stack {
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // dev only
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     const createSetFn = new NodejsFunction(this, "CreateSetFn", {
@@ -212,25 +212,57 @@ export class TrackerCdkStack extends cdk.Stack {
     })
 
     const sessions = api.root.addResource("sessions");
-    sessions.addMethod("POST", new apigateway.LambdaIntegration(createSessionFn));
-    sessions.addMethod("GET", new apigateway.LambdaIntegration(getSessionsFn));
+    sessions.addMethod("POST",new apigateway.LambdaIntegration(createSessionFn),
+      // {
+      //   authorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
+
+    sessions.addMethod("GET",new apigateway.LambdaIntegration(getSessionsFn),
+      // {
+      //   authorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
     //U
     //D
 
     const exercises = api.root.addResource("exercises");
-    exercises.addMethod("POST", new apigateway.LambdaIntegration(createExerciseFn));
-    exercises.addMethod("GET", new apigateway.LambdaIntegration(getExercisesFn));
+    exercises.addMethod("POST", new apigateway.LambdaIntegration(createExerciseFn),
+      // {
+      //   authorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
+    exercises.addMethod("GET", new apigateway.LambdaIntegration(getExercisesFn),
+      // {
+      //   authorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
     //U
     //D
 
     const sets = api.root.addResource("sets");
-    sets.addMethod("POST", new apigateway.LambdaIntegration(createSetFn));
-    sets.addMethod("GET", new apigateway.LambdaIntegration(getSetsFn));
+    sets.addMethod("POST", new apigateway.LambdaIntegration(createSetFn),
+      // {
+      //   authorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
+    sets.addMethod("GET", new apigateway.LambdaIntegration(getSetsFn),
+      // {
+      //   authorizer,
+      //   authorizationType: apigateway.AuthorizationType.COGNITO,
+      // }
+    );
     //U
     //D
 
     new cdk.CfnOutput(this, "ApiUrl", {value: api.url});
     //#endregion
+  
   }
 }
 
