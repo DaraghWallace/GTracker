@@ -3,7 +3,8 @@
 import { 
   //createExercise, createSession, createSet,
   // getExercises , getSessions, getSets
-} from './APIfunctions';
+  // createUser
+} from './Helpers/APIfunctions';
 import { register, confirm, login, logout, } from './Helpers/amplify';
 import { getCurrentUser  } from "aws-amplify/auth";
 
@@ -36,17 +37,22 @@ function App() {
 }
 
 async function handleSignUp() {
-  const response = await register("daraghwallace99@gmail.com","Shhhhhhhhhhhhhh1!")
+  const response = await register(
+    "daraghwallace99@gmail.com", 
+    "Password1"
+  )
   console.log(response);
 }
 
 async function handleConfirm() {
-  const response = await confirm("daraghwallace99@gmail.com","267671")
+  const response = await confirm("daraghwallace99@gmail.com","357328")
   console.log(response);
+
+  // createUser()
 }
 
 async function handleLogin() {
-  const response = await login("daraghwallace99@gmail.com","Shhhhhhhhhhhhhh1!")
+  const response = await login("daraghwallace99@gmail.com","Password1")
   console.log(response);
 }
 

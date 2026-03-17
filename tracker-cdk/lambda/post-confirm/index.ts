@@ -21,12 +21,14 @@ class UserProfileService {
     this.tableName = process.env.TABLE_NAME!;
   }
 
-  async createUserProfile(userId: string, email?: string) {
+  async createUserProfile(nickname:string, userType: string, userId: string, email?: string) {
     const command = new PutCommand({
       TableName: this.tableName,
       Item: {
         userId,
         email,
+        nickname,
+        userType,
         createdAt: new Date().toISOString(),
       },
       ConditionExpression: "attribute_not_exists(userId)", // avoid overwrite
@@ -42,8 +44,10 @@ class PostConfirmationHandler {
   async handle(event: PostConfirmationTriggerEvent) {
     const userId = event.request.userAttributes.sub;
     const email = event.request.userAttributes.email;
+    const nickname = event.request.userAttributes.nickname;
+    const userType = event.request.userAttributes.userType;
 
-    await this.service.createUserProfile(userId, email);
+    await this.service.createUserProfile(nickname, userType, userId, email);
 
     return event;
   }

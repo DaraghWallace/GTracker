@@ -18,13 +18,13 @@ export class TrackerCdkStack extends cdk.Stack {
     const userPool= new UserPool( this, 'UserPool',{
       userPoolName: 'gTrackUserPool',
       selfSignUpEnabled: true, //create user through cmd
-      signInAliases:{
-        email: true,
-      },autoVerify:{ //For testing remove before prod
-        email: true
+      signInAliases:{email: true},
+      customAttributes: {
+        nickname: new cognito.StringAttribute({ mutable: true }),
+        userType: new cognito.StringAttribute({ mutable: true })
       },
+      autoVerify:{email: true },//For testing remove before prod
       accountRecovery: AccountRecovery.EMAIL_ONLY,
-
       passwordPolicy: {
         minLength: 8,
         requireLowercase: true,
@@ -43,25 +43,13 @@ export class TrackerCdkStack extends cdk.Stack {
       }
     })
 
-    new CfnUserPoolGroup(this, 'MembersGroup', {
-      groupName: 'members',
-      userPoolId: userPool.userPoolId,
-    });
+    const userPId = userPool.userPoolId
 
-    new CfnUserPoolGroup(this, 'TrainersGroup', {
-      groupName: 'trainers',
-      userPoolId: userPool.userPoolId,
-    });
-
-    new CfnUserPoolGroup(this, 'AdminsGroup', {
-      groupName: 'admins',
-      userPoolId: userPool.userPoolId,
-    });
-
-    new cdk.CfnOutput(this, 'UserPoolId', {
-      value: userPool.userPoolId,
-    });
-
+    new CfnUserPoolGroup(this, 'MembersGroup', { groupName: 'members', userPoolId: userPId });
+    new CfnUserPoolGroup(this, 'TrainersGroup', { groupName: 'trainers', userPoolId: userPId });
+    new CfnUserPoolGroup(this, 'AdminsGroup', { groupName: 'admins', userPoolId: userPId });
+    new cdk.CfnOutput(this, 'UserPoolId', {  value: userPId });
+    
     new cdk.CfnOutput(this, 'UserPoolClientId',{
       value: userpoolClient.userPoolClientId
     })
@@ -73,8 +61,8 @@ export class TrackerCdkStack extends cdk.Stack {
     
     //#region: UserProfiles / dynamoDB table c-r-u-d
     const userTable = new dynamodb.Table(this, 'UserProfileTable', {
-      tableName: 'UserProfiles',
-
+      tableName: 'GtUserProfiles',
+      
       partitionKey: {
         name: 'userId',
         type: dynamodb.AttributeType.STRING,
@@ -213,49 +201,49 @@ export class TrackerCdkStack extends cdk.Stack {
 
     const sessions = api.root.addResource("sessions");
     sessions.addMethod("POST",new apigateway.LambdaIntegration(createSessionFn),
-      // {
-      //   authorizer,
-      //   authorizationType: apigateway.AuthorizationType.COGNITO,
-      // }
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
     );
 
     sessions.addMethod("GET",new apigateway.LambdaIntegration(getSessionsFn),
-      // {
-      //   authorizer,
-      //   authorizationType: apigateway.AuthorizationType.COGNITO,
-      // }
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
     );
     //U
     //D
 
     const exercises = api.root.addResource("exercises");
     exercises.addMethod("POST", new apigateway.LambdaIntegration(createExerciseFn),
-      // {
-      //   authorizer,
-      //   authorizationType: apigateway.AuthorizationType.COGNITO,
-      // }
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
     );
     exercises.addMethod("GET", new apigateway.LambdaIntegration(getExercisesFn),
-      // {
-      //   authorizer,
-      //   authorizationType: apigateway.AuthorizationType.COGNITO,
-      // }
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
     );
     //U
     //D
 
     const sets = api.root.addResource("sets");
     sets.addMethod("POST", new apigateway.LambdaIntegration(createSetFn),
-      // {
-      //   authorizer,
-      //   authorizationType: apigateway.AuthorizationType.COGNITO,
-      // }
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
     );
     sets.addMethod("GET", new apigateway.LambdaIntegration(getSetsFn),
-      // {
-      //   authorizer,
-      //   authorizationType: apigateway.AuthorizationType.COGNITO,
-      // }
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
     );
     //U
     //D

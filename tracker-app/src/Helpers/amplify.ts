@@ -7,8 +7,8 @@ import {
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: "ap-southeast-2_xILaYFqSf",
-      userPoolClientId: "1lfnvk3ehjtttts59mvvibpe46",
+      userPoolId: "ap-southeast-2_9h9sSyVJF",
+      userPoolClientId: "uc164ie1gijhpq73o499024mc",
       loginWith: {
         email: true
       }
@@ -21,13 +21,7 @@ export async function register(email: string, password: string) {
   const result = await signUp({
     username: email,
     password,
-    options: {
-      userAttributes: {
-        email
-      }
-    }
   });
-
   return result;
 }
 
