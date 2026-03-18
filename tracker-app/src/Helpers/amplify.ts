@@ -1,14 +1,14 @@
 import { Amplify } from "aws-amplify";
 import { 
   signUp, confirmSignUp, signIn, signOut ,
-  // fetchAuthSession, 
+  fetchAuthSession, 
 } from "aws-amplify/auth";
 
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: "ap-southeast-2_9h9sSyVJF",
-      userPoolClientId: "uc164ie1gijhpq73o499024mc",
+      userPoolId: "ap-southeast-2_306bleehp",
+      userPoolClientId: "6khov3oabv339qb794dv1ue5nt",
       loginWith: {
         email: true
       }
@@ -17,20 +17,28 @@ Amplify.configure({
 });
 
 
-export async function register(email: string, password: string) {
+export async function register(email: string, password: string, nickname: string, userType: string) {
   const result = await signUp({
     username: email,
     password,
+    options: {
+      userAttributes: {
+        email,
+        "nickname": nickname,
+        "custom:userType": userType,
+      }
+    }
   });
   return result;
 }
 
 
 export async function confirm(email: string, code: string) {
-  await confirmSignUp({
+  const response = await confirmSignUp({
     username: email,
     confirmationCode: code
   });
+  return(response)
 }
 
 
@@ -45,18 +53,15 @@ export async function login(email: string, password: string) {
 
 export async function logout(){await signOut();}
 
-// export async function getToken() {
-//   const session = await fetchAuthSession();
-
-//   return session.tokens?.idToken?.toString();
-// }
-
-// const token = await getToken();
-
-// await fetch(`url`, {
-//   method: "POST",
-//   headers: {
-//     Authorization: `Bearer ${token}`,
-//     "Content-Type": "application/json"
-//   },
-// });
+export async function getUserAttributes() {
+  const session = await fetchAuthSession();
+  const payload = session.tokens?.idToken?.payload;
+  console.log("payload", payload);
+  //access payload = const payload = session.tokens?.idToken?.payload;
+  return {
+    userId: payload?.sub,
+    email: payload?.email,
+    nickname: payload?.nickname,
+    userType: payload?.["custom:userType"],
+  };
+}

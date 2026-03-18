@@ -8,8 +8,6 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 
-
-
 export class TrackerCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -21,7 +19,7 @@ export class TrackerCdkStack extends cdk.Stack {
       signInAliases:{email: true},
       customAttributes: {
         nickname: new cognito.StringAttribute({ mutable: true }),
-        userType: new cognito.StringAttribute({ mutable: true })
+        userType: new cognito.StringAttribute({ mutable: true }),
       },
       autoVerify:{email: true },//For testing remove before prod
       accountRecovery: AccountRecovery.EMAIL_ONLY,
@@ -34,14 +32,20 @@ export class TrackerCdkStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY
     })
 
-    const userpoolClient = new UserPoolClient( this, 'UserPoolClient',{
+    const userpoolClient = new UserPoolClient(this, 'UserPoolClient', {
       userPool,
       generateSecret: false,
-      authFlows:{
-        userPassword:true,
+      authFlows: {
+        userPassword: true,
         userSrp: true,
-      }
-    })
+      },
+      readAttributes: new cognito.ClientAttributes()
+        .withStandardAttributes({ nickname: true, email: true })
+        .withCustomAttributes('userType'),
+      writeAttributes: new cognito.ClientAttributes()
+        .withStandardAttributes({ nickname: true, email: true })
+        .withCustomAttributes('userType'),
+    });
 
     const userPId = userPool.userPoolId
 
@@ -62,26 +66,24 @@ export class TrackerCdkStack extends cdk.Stack {
     //#region: UserProfiles / dynamoDB table c-r-u-d
     const userTable = new dynamodb.Table(this, 'UserProfileTable', {
       tableName: 'GtUserProfiles',
-      
       partitionKey: {
         name: 'userId',
         type: dynamodb.AttributeType.STRING,
       },
-
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     //create profile
-    const postConfirmFn = new lambda.Function(this, 'PostConfirmFn', {
+    const postConfirmFn = new NodejsFunction(this, 'PostConfirmFn', {
       runtime: lambda.Runtime.NODEJS_22_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromAsset('lambda/post-confirm'),
+      entry: 'lambda/post-confirm/index.ts',
+      handler: 'handler',
       environment: {
         TABLE_NAME: userTable.tableName,
       },
     });
+
     userTable.grantWriteData(postConfirmFn);
 
     userPool.addTrigger(

@@ -40,15 +40,13 @@ class UserProfileService {
 
 class PostConfirmationHandler {
   private service = new UserProfileService();
-
   async handle(event: PostConfirmationTriggerEvent) {
     const userId = event.request.userAttributes.sub;
     const email = event.request.userAttributes.email;
-    const nickname = event.request.userAttributes.nickname;
-    const userType = event.request.userAttributes.userType;
+    const nickname = event.request.userAttributes["nickname"];
+    const userType = event.request.userAttributes["custom:userType"];
 
     await this.service.createUserProfile(nickname, userType, userId, email);
-
     return event;
   }
 }
