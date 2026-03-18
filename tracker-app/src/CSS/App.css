@@ -1,0 +1,12 @@
+.App{
+  background-color: darkblue;
+  position: absolute;
+  top: 0;
+  width: 60%;
+  height: 100%;
+}
+
+.app-section{
+  background-color: rgb(80, 80, 100);
+  margin: 15px;
+}
