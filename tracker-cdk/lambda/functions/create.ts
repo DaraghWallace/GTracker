@@ -6,14 +6,14 @@ const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const tableName = process.env.TABLE_NAME!;
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  // const claims = event.requestContext?.authorizer?.claims;
+  const claims = event.requestContext?.authorizer?.claims;
 
-  // if (!claims) {
-  //   return {
-  //     statusCode: 401,
-  //     body: JSON.stringify({ message: "Unauthorized" }),
-  //   };
-  // }
+  if (!claims) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ message: "Unauthorized" }),
+    };
+  }
 
   const body = JSON.parse(event.body || "{}");
   const session = {

@@ -1,4 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
+import { fetchAuthSession } from "aws-amplify/auth";
+import type { session } from "./customTypes";
+
 const invokeid = "mvtpo7wewh"
 
 //#region: 
@@ -10,9 +12,11 @@ const invokeid = "mvtpo7wewh"
 
 //#region: Sessions
 // C works
-export async function createSession() {
+export async function createSession(newSession: session) {
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions`;
-
+    console.log(newSession);
+    const authSession = await fetchAuthSession();
+    const token = authSession.tokens?.idToken?.toString();
     try {
         console.log("creating session...");
 
@@ -20,24 +24,16 @@ export async function createSession() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": token ?? "",
             },
-            body: JSON.stringify({
-                sessionId: uuidv4(),
-                userId: "string",
-                focus: "string",
-                sets: [],
-            }),
+            body: JSON.stringify(newSession),
         });
 
         const text = await response.text();
         console.log("RAW RESPONSE:", text);
 
-        let result;
-        try {
-            result = JSON.parse(text);
-        } catch {
-            result = text;
-        }
+        const result = JSON.parse(text);
+
         console.log("Session created:", result);
         return result;
     } catch (error) {
@@ -46,13 +42,21 @@ export async function createSession() {
     }
 }
 // R works
-export async function getSessions() {
-  const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions`,{method: 'GET'})
-  const data = await response.json();
-  console.log("getSessions() succesfully executed");
-  console.log(data);
-  
-  return Promise.resolve(data)
+export async function getSessions(userId: string) {
+  const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions?userId=${userId}`;
+
+  const authSession = await fetchAuthSession();
+  const token = authSession.tokens?.idToken?.toString();
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": token ?? "",
+    },
+  });
+
+  const text = await response.text();
+  return JSON.parse(text);
 }
 // U
 // D
@@ -69,7 +73,7 @@ export async function createExercise() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                exerciseId: uuidv4(),
+                // exerciseId: uuidv4(),
                 name: "testEx",
                 targetGroup: "string",
                 targetMuscle: "string",
@@ -119,7 +123,7 @@ export async function createSet() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                setId: uuidv4(),
+                // setId: uuidv4(),
                 sessionId: "string",
                 weight: 100,
                 repititions: 10,
