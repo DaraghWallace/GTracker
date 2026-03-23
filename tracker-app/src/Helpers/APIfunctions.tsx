@@ -1,7 +1,10 @@
 import { fetchAuthSession } from "aws-amplify/auth";
-import type { session } from "./customTypes";
+import type { exercise, session, set } from "./customTypes";
 
-const invokeid = "mvtpo7wewh"
+const invokeid = "zyuq79jc9c"
+const authSession = await fetchAuthSession();
+const token = authSession.tokens?.idToken?.toString();
+
 
 //#region: 
 // C
@@ -15,8 +18,7 @@ const invokeid = "mvtpo7wewh"
 export async function createSession(newSession: session) {
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions`;
     console.log(newSession);
-    const authSession = await fetchAuthSession();
-    const token = authSession.tokens?.idToken?.toString();
+
     try {
         console.log("creating session...");
 
@@ -64,20 +66,16 @@ export async function getSessions(userId: string) {
 
 //#region: Exercises
 // C - works
-export async function createExercise() {
+export async function createExercise(newExercise: exercise) {
    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`;
     try {
         const response = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": token ?? "",
             },
-            body: JSON.stringify({
-                // exerciseId: uuidv4(),
-                name: "testEx",
-                targetGroup: "string",
-                targetMuscle: "string",
-            }),
+            body: JSON.stringify(newExercise),
         });
 
         const text = await response.text();
@@ -90,7 +88,7 @@ export async function createExercise() {
             result = text;
         }
 
-        console.log("Exercise created:", result);
+        console.log(newExercise.name , " created:", result);
     } catch (error) {
         console.error("Failed to Post:", error);
         throw error;
@@ -98,12 +96,19 @@ export async function createExercise() {
 }
 // R - works
 export async function getExercises() {
-  const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`,{method: 'GET'})
-  const data = await response.json();
-  console.log("getPageItems() succesfully executed");
-  console.log(data);
-  
-  return Promise.resolve(data)
+  const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`
+  const authSession = await fetchAuthSession();
+  const token = authSession.tokens?.idToken?.toString();
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": token ?? "",
+    },
+  });
+
+  const text = await response.text();
+  return JSON.parse(text);
 }
 // U
 // D
@@ -111,7 +116,7 @@ export async function getExercises() {
 
 //#region: Sets
 // C
-export async function createSet() {
+export async function createSet(newSet: set) {
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sets`;
 
     try {
@@ -121,14 +126,9 @@ export async function createSet() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": token ?? "",
             },
-            body: JSON.stringify({
-                // setId: uuidv4(),
-                sessionId: "string",
-                weight: 100,
-                repititions: 10,
-                failed: false
-            }),
+            body: JSON.stringify(newSet),
         });
 
         const text = await response.text();
@@ -148,13 +148,20 @@ export async function createSet() {
     }
 }
 // R
-export async function getSets() {
-  const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sets`,{method: 'GET'})
-  const data = await response.json();
-  console.log("getSets() succesfully executed");
-  console.log(data);
-  
-  return Promise.resolve(data)
+export async function getSetBySession(sessionId:string) {
+  const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sets?sessionId=${sessionId}`
+  const authSession = await fetchAuthSession();
+  const token = authSession.tokens?.idToken?.toString();
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": token ?? "",
+    },
+  });
+
+  const text = await response.text();
+  return JSON.parse(text);
 }
 // U
 // D

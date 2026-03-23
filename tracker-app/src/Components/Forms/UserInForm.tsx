@@ -30,6 +30,7 @@ export default function UserInForm({ setCurrentUser }: Props) {
         userType: attrs.userType as string,
         cur_weight: 0,
         tar_weight: 0,
+        // clients: []
       });
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");

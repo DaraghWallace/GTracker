@@ -140,7 +140,7 @@ export class TrackerCdkStack extends cdk.Stack {
 
     const getSessionsByUserFn = new NodejsFunction(this, "getSessionsByUserFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: "lambda/functions/getByUser.ts", // updated
+      entry: "lambda/functions/getByUser.ts",
       environment: { TABLE_NAME: sessionTable.tableName },
       bundling: { forceDockerBundling: false },
     });
@@ -181,13 +181,20 @@ export class TrackerCdkStack extends cdk.Stack {
     //#region: Sets:  / dynamoDB table / C-R-u-d
     const setsTable = new dynamodb.Table(this, "SetsTable", {
       tableName: "Sets",
-
       partitionKey: {
         name: "setId",
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    setsTable.addGlobalSecondaryIndex({
+      indexName: "sessionId-index",
+      partitionKey: {
+        name: "sessionId",
+        type: dynamodb.AttributeType.STRING,
+      },
     });
 
     const createSetFn = new NodejsFunction(this, "CreateSetFn", {
@@ -201,13 +208,13 @@ export class TrackerCdkStack extends cdk.Stack {
     });
     setsTable.grantWriteData(createSetFn);
 
-    const getSetsFn = new NodejsFunction(this, "GetSetsFn", {
+    const getSetsBySessionFn = new NodejsFunction(this, "getSetsBySessionFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: scanPath,
+      entry: "lambda/functions/getBySession.ts",
       environment: {TABLE_NAME: setsTable.tableName,},
       bundling: {forceDockerBundling: false,},
     });
-    setsTable.grantReadData(getSetsFn);     
+    setsTable.grantReadData(getSetsBySessionFn);     
 
     //#endregion
 
@@ -264,11 +271,10 @@ export class TrackerCdkStack extends cdk.Stack {
         authorizationType: apigateway.AuthorizationType.COGNITO,
       }
     );
-    sets.addMethod("GET", new apigateway.LambdaIntegration(getSetsFn), {
-        authorizer,
-        authorizationType: apigateway.AuthorizationType.COGNITO,
-      }
-    );
+    sets.addMethod("GET", new apigateway.LambdaIntegration(getSetsBySessionFn), {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
     //U
     //D
 

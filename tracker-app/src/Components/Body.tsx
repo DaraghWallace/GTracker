@@ -1,36 +1,43 @@
 import NewSessionForm from "./Forms/NewSessionForm"
-import type { user } from "../Helpers/customTypes";
+import SessionEle from "../Components/Elements/SessionEle"
+import type { exercise, session, set, user } from "../Helpers/customTypes";
 import { useState } from "react";
+import NewExerciseForm from "./Forms/NewExerciseForm";
 
 type Props = {
   currentUser: user | null;
+  sessionData: session[];
+  exercises: exercise[];
+  setData: set[];
 }
-export default function Body({currentUser}: Props){
+
+export default function Body({currentUser, sessionData, exercises, setData}: Props){
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
+  const [newExerciseFormOpen, setNewExerciseFormOpen] = useState(false);
   
   return(
     <div>
-      {
-        newSessionFormOpen && <NewSessionForm userId={currentUser?.userId ?? ""} />
-      }
+      {newSessionFormOpen && <NewSessionForm userId={currentUser?.userId ?? ""} />}
+      {newExerciseFormOpen && <NewExerciseForm />}
       
       <div>
         <button onClick={() => setNewSessionFormOpen(true)}>new session</button>
-        <button>my progress</button>        
+        <button onClick={() => setNewExerciseFormOpen(true)}>new exercise</button>
       </div>
 
 
       <div>
-        <h2>Sessions</h2>
-
-      </div>
-      <div>
-        <h2>Month reveiw</h2>
-        <div>Exercises | M | M | M | M | M | M | M</div>
-        <div>Exercise1 | # | # | # | # | # | # | #</div>
-        <div>Exercise2 | # | # | # | # | # | # | #</div>
-        <div>Exercise3 | # | # | # | # | # | # | #</div>
-        <div>Exercise4 | # | # | # | # | # | # | #</div>
+        <h2>Sessions</h2> 
+        <button onClick={()=> console.log(sessionData)}>sessions?</button>
+        {
+          sessionData.map((session) => (
+            <SessionEle key={session.sessionId}
+              session = {session}
+              exercises = {exercises}
+              setData = {setData}
+            />
+          ))
+        }
       </div>
     </div>
   )

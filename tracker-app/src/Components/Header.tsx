@@ -2,6 +2,8 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import type { user } from "../Helpers/customTypes";
 import UserInForm from "./Forms/UserInForm";
 import { logout } from "../Helpers/amplify";
+import { getRandomQuote } from "../Helpers/seeds";
+
 
 type Props = {
   currentUser: user | null;
@@ -10,16 +12,15 @@ type Props = {
 
 export default function Header({ currentUser, setCurrentUser }: Props) {
   const [userInFormOpen, setUserInFormOpen] = useState(false);
-  
+  const  bar = getRandomQuote()
+
   return (
     <div>
-      {
-        userInFormOpen && <UserInForm setCurrentUser = {setCurrentUser}/>
-      }
+      {userInFormOpen && <UserInForm setCurrentUser = {setCurrentUser}/>}
       
 
       <h1>Hello {currentUser?.nickname}</h1>
-      <h2>Bar eg: "Whos gunna Carry the boats!" or sumthin</h2>
+      <h2>"{bar.quote}" - {bar.author}</h2>
       
       <div>
         <button onClick={() => setUserInFormOpen(true)}>Sign up or sign in</button>
@@ -30,3 +31,4 @@ export default function Header({ currentUser, setCurrentUser }: Props) {
     </div>
   )
 }
+

@@ -5,6 +5,7 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 export const handler = async (event: APIGatewayProxyEvent) => {
+
   const userId = event.queryStringParameters?.userId;
 
   if (!userId) {
