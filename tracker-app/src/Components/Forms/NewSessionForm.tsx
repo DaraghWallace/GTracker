@@ -5,9 +5,10 @@ import { createSession } from "../../Helpers/APIfunctions";
 
 type Props = {
   userId: string;
+  loadUserData: (userId: string) => Promise<void>;
 }
 
-export default function NewSessionForm({ userId }: Props) {
+export default function NewSessionForm({ userId, loadUserData }: Props) {
   const [date, setDate] = useState("");
   const [focus, setFocus] = useState("");
   const [notes, setNotes] = useState("");
@@ -27,6 +28,7 @@ export default function NewSessionForm({ userId }: Props) {
     try {
       createSession(newSession);
       setMessage("Session created!");
+      loadUserData(userId)
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
     }

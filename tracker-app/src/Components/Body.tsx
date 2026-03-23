@@ -4,21 +4,23 @@ import type { exercise, session, set, user } from "../Helpers/customTypes";
 import { useState } from "react";
 import NewExerciseForm from "./Forms/NewExerciseForm";
 
+
 type Props = {
   currentUser: user | null;
   sessionData: session[];
   exercises: exercise[];
   setData: set[];
+  loadUserData: (userId: string) => Promise<void>;
 }
 
-export default function Body({currentUser, sessionData, exercises, setData}: Props){
+export default function Body({currentUser, sessionData, exercises, setData, loadUserData}: Props){
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
   const [newExerciseFormOpen, setNewExerciseFormOpen] = useState(false);
   
   return(
     <div>
-      {newSessionFormOpen && <NewSessionForm userId={currentUser?.userId ?? ""} />}
-      {newExerciseFormOpen && <NewExerciseForm />}
+      {newSessionFormOpen && <NewSessionForm userId={currentUser?.userId ?? ""} loadUserData={loadUserData} />}
+      {newExerciseFormOpen && <NewExerciseForm userId={currentUser?.userId ?? ""} loadUserData={loadUserData}/>}
       
       <div>
         <button onClick={() => setNewSessionFormOpen(true)}>new session</button>

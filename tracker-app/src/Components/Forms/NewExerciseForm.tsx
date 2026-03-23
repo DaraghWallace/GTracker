@@ -2,7 +2,12 @@ import { useState } from "react";
 import type { exercise } from "../../Helpers/customTypes";
 import { createExercise } from "../../Helpers/APIfunctions";
 
-export default function NewExerciseForm() {
+type Props = {
+  userId: string;
+  loadUserData: (userId: string) => Promise<void>;
+}
+
+export default function NewExerciseForm({ userId, loadUserData }: Props) {
   const [name, setName] = useState("");
   const [group, setGroup] = useState("");
   const [muscle, setMuscle] = useState("");
@@ -25,6 +30,7 @@ export default function NewExerciseForm() {
     try {
       await createExercise(newExercise);
       setMessage("Exercise created!");
+      loadUserData(userId)
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
     }

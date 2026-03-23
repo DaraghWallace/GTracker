@@ -6,18 +6,46 @@ import Body from './Components/Body';
 
 import type { user, session, exercise, set } from "./Helpers/customTypes";
 
-import { getUserAttributes } from './Helpers/amplify';
+import { getUserAttributes, logout } from './Helpers/amplify';
 import { getExercises, getSessions, getSetBySession } from './Helpers/APIfunctions';
-import {seedExercises} from './Helpers/seeds'
+// import {seedExercises} from './Helpers/seeds'
 
 import './CSS/App.css';
 
 export default function App() {
+  const [pageStatus, setPageStatus] = useState("NoUser"); // NoUser | Loading | Ready | Dud
   const [currentUser, setCurrentUser] = useState<user | null>(null);
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [setData, setSetData] = useState<set[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
   
+  async function loadUserData(userId: string) {
+    setPageStatus("Loading");
+    const sessions = await getSessions(userId);
+    const allSets = await Promise.all(
+      sessions.map((session: session) => getSetBySession(session.sessionId))
+    );
+    const allExercises = await getExercises();
+
+    fullSet(allExercises,sessions,allSets )
+  }
+
+  async function fullSet(allExercises: exercise[], sessions: session[], allSets: set[]) {
+    setExercises(allExercises);
+    setSessionData(sessions);
+    setSetData(allSets.flat());
+    setPageStatus("Ready");
+  }
+
+  async function handleSignOut() {
+    await logout();
+    setCurrentUser(null);
+    setSessionData([]);
+    setSetData([]);
+    setExercises([]);
+    setPageStatus("Loading");
+  }
+
   useEffect(() => {
     fetchAuthSession().then(session => {
       if (session.tokens) {
@@ -29,45 +57,53 @@ export default function App() {
             userType: attrs.userType as string,
             cur_weight: 0,
             tar_weight: 0,
-            // clients: []
           };
-          setCurrentUser(user);
 
-          const sessions = await getSessions(user.userId);
-          setSessionData(sessions);
-          
-          const allSets = await Promise.all(
-            sessions.map((session: session) => getSetBySession(session.sessionId))
-          );
-          setSetData(allSets.flat());
-          
-          const allExercises = await getExercises();
-          setExercises(allExercises);
+          setCurrentUser(user);
+          await loadUserData(user.userId);
         });
       }
     }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
+  
   return (
+
     <div className="App">
       <div className="app-section">
-        <Header
-          currentUser = {currentUser}
-          setCurrentUser = {setCurrentUser}
-        />
+        {pageStatus !== "loading" && 
+          <Header
+            currentUser = {currentUser}
+            setCurrentUser = {setCurrentUser}
+            loadUserData = {loadUserData}
+            handleSignOut = {handleSignOut}
+            pageStatus = {pageStatus}
+          />        
+        }
+
       </div>
+      
       <div className="app-section">
-        <Body
-          currentUser = {currentUser}
-          sessionData = {sessionData}
-          exercises = {exercises}
-          setData = {setData}
-        />
-        </div>
-      <div className="app-section">
+        {pageStatus === "Loading" && 
+          <div>loading</div>
+        }
+        {pageStatus === "Ready" && 
+          <Body
+            currentUser = {currentUser}
+            sessionData = {sessionData}
+            exercises = {exercises}
+            setData = {setData}
+            loadUserData = {loadUserData}
+          />
+        }
+      </div>
+      {/* <div className="app-section">
         <button onClick={seedExercises}>seed exercises</button>
         <button onClick={()=>console.log(exercises)}>log exercises</button>
-      </div>
+      </div> */}
     </div>
   )
 }
+

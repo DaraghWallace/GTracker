@@ -7,9 +7,10 @@ type Tab = "login" | "signup" | "confirm";
 
 type Props = {  
   setCurrentUser: Dispatch<SetStateAction<user | null>>;
+  loadUserData: (userId: string) => Promise<void>;
 }
 
-export default function UserInForm({ setCurrentUser }: Props) {
+export default function UserInForm({ setCurrentUser, loadUserData }: Props) {
   const [tab, setTab] = useState<Tab>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,6 +33,8 @@ export default function UserInForm({ setCurrentUser }: Props) {
         tar_weight: 0,
         // clients: []
       });
+      loadUserData(attrs.userId as string)
+        
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
     }
