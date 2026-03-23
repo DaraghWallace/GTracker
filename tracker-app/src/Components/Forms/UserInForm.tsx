@@ -24,6 +24,7 @@ export default function UserInForm({ setCurrentUser, loadUserData }: Props) {
     try {
       await login(email, password);
       const attrs = await getUserAttributes();
+      console.log("attrs", attrs);
       setCurrentUser({
         userId: attrs.userId as string,
         email: attrs.email as string,
@@ -34,7 +35,7 @@ export default function UserInForm({ setCurrentUser, loadUserData }: Props) {
         // clients: []
       });
       loadUserData(attrs.userId as string)
-        
+      console.log("userId", attrs.userId);  
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
     }

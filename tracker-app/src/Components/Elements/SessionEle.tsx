@@ -6,10 +6,11 @@ type Props = {
   session: session;  
   exercises: exercise[];  
   setData: set[];
-  
+  loadUserData: (userId: string) => Promise<void>;
+  userId: string;
 }
 
-export default function SessionEle({session, exercises, setData}: Props) {
+export default function SessionEle({session, exercises, setData, loadUserData, userId}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
   
   return (
@@ -32,6 +33,8 @@ export default function SessionEle({session, exercises, setData}: Props) {
           newSetFormOpen && <NewSetForm 
             sessionId = {session?.sessionId} 
             exercises = {exercises}
+            loadUserData = {loadUserData}
+            userId = {userId}
           />
         }        
       </div>

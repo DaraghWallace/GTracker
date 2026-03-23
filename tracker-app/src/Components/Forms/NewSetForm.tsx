@@ -5,9 +5,11 @@ import { createSet } from "../../Helpers/APIfunctions";
 type Props = {
   sessionId: string;
   exercises: exercise[];
+  loadUserData: (userId: string) => Promise<void>;
+  userId: string
 }
 
-export default function NewSetForm({ sessionId, exercises }: Props) {
+export default function NewSetForm({ sessionId, exercises, loadUserData, userId }: Props) {
   // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
   const [reps, setReps] = useState("");
@@ -36,6 +38,7 @@ export default function NewSetForm({ sessionId, exercises }: Props) {
     try {
       await createSet(newSet);
       setMessage("Set created!");
+      loadUserData(userId)
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
     }

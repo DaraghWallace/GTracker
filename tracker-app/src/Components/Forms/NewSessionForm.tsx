@@ -26,7 +26,7 @@ export default function NewSessionForm({ userId, loadUserData }: Props) {
     };
 
     try {
-      createSession(newSession);
+      await createSession(newSession);
       setMessage("Session created!");
       loadUserData(userId)
     } catch (e: unknown) {

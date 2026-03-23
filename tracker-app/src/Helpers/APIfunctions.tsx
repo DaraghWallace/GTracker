@@ -45,20 +45,21 @@ export async function createSession(newSession: session) {
 }
 // R works
 export async function getSessions(userId: string) {
-  const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions?userId=${userId}`;
+    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions?userId=${userId}`;
 
-  const authSession = await fetchAuthSession();
-  const token = authSession.tokens?.idToken?.toString();
+    const authSession = await fetchAuthSession();
+    const token = authSession.tokens?.idToken?.toString();
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Authorization": token ?? "",
-    },
-  });
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+        "Authorization": token ?? "",
+        },
+    });
 
-  const text = await response.text();
-  return JSON.parse(text);
+    const text = await response.text();
+    const parsed = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed : parsed.Items ?? [];
 }
 // U
 // D

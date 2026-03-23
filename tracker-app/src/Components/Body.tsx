@@ -37,6 +37,8 @@ export default function Body({currentUser, sessionData, exercises, setData, load
               session = {session}
               exercises = {exercises}
               setData = {setData}
+              loadUserData={loadUserData}
+              userId={currentUser!.userId}
             />
           ))
         }

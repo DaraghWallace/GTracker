@@ -8,11 +8,11 @@ type Props = {
   currentUser: user | null;
   setCurrentUser: Dispatch<SetStateAction<user | null>>;
   loadUserData: (userId: string) => Promise<void>;
-  pageStatus: string,
+  // pageStatus: string,
   handleSignOut: () => Promise<void>;
 }
 
-export default function Header({ currentUser, setCurrentUser, loadUserData, pageStatus, handleSignOut }: Props) {
+export default function Header({ currentUser, setCurrentUser, loadUserData, /*pageStatus,*/ handleSignOut }: Props) {
   const [userInFormOpen, setUserInFormOpen] = useState(false);
   const  bar = getRandomQuote()
 
@@ -30,12 +30,9 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, page
       <h2>"{bar.quote}" - {bar.author}</h2>
       
       <div>
-        
-        {pageStatus === "NoUser" &&
-            <button onClick={() => setUserInFormOpen(true)}>Sign up or sign in</button>
-        }{pageStatus !== "NoUser" &&
+          <button onClick={() => setUserInFormOpen(true)}>Sign up or sign in</button>
           <button onClick={handleSignOut}>sign out</button>
-        }
+
       </div>
     </div>
   )

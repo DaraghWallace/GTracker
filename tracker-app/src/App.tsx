@@ -13,28 +13,29 @@ import { getExercises, getSessions, getSetBySession } from './Helpers/APIfunctio
 import './CSS/App.css';
 
 export default function App() {
-  const [pageStatus, setPageStatus] = useState("NoUser"); // NoUser | Loading | Ready | Dud
+  // const [pageStatus, setPageStatus] = useState("NoUser"); // NoUser | Loading | Ready | Dud | 
   const [currentUser, setCurrentUser] = useState<user | null>(null);
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [setData, setSetData] = useState<set[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
   
   async function loadUserData(userId: string) {
-    setPageStatus("Loading");
+    // setPageStatus("Loading");
     const sessions = await getSessions(userId);
+    console.log(sessions);
     const allSets = await Promise.all(
       sessions.map((session: session) => getSetBySession(session.sessionId))
     );
     const allExercises = await getExercises();
 
-    fullSet(allExercises,sessions,allSets )
+    fullSet(allExercises,sessions,allSets )      
   }
 
   async function fullSet(allExercises: exercise[], sessions: session[], allSets: set[]) {
     setExercises(allExercises);
     setSessionData(sessions);
     setSetData(allSets.flat());
-    setPageStatus("Ready");
+    // setPageStatus("Ready");
   }
 
   async function handleSignOut() {
@@ -43,7 +44,7 @@ export default function App() {
     setSessionData([]);
     setSetData([]);
     setExercises([]);
-    setPageStatus("Loading");
+    // setPageStatus("NoUser");
   }
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function App() {
           };
 
           setCurrentUser(user);
-          await loadUserData(user.userId);
+          await loadUserData(attrs.userId as string);
         });
       }
     }).catch(() => {});
@@ -73,23 +74,23 @@ export default function App() {
 
     <div className="App">
       <div className="app-section">
-        {pageStatus !== "loading" && 
+        {/* {pageStatus !== "Loading" &&  */}
           <Header
             currentUser = {currentUser}
             setCurrentUser = {setCurrentUser}
             loadUserData = {loadUserData}
             handleSignOut = {handleSignOut}
-            pageStatus = {pageStatus}
+            // pageStatus = {pageStatus}
           />        
-        }
+        {/* } */}
 
       </div>
       
       <div className="app-section">
-        {pageStatus === "Loading" && 
-          <div>loading</div>
-        }
-        {pageStatus === "Ready" && 
+        {/* {pageStatus === "Loading" &&  */}
+          {/* <div>loading</div> */}
+        {/* } */}
+        {/* {pageStatus === "Ready" &&  */}
           <Body
             currentUser = {currentUser}
             sessionData = {sessionData}
@@ -97,7 +98,7 @@ export default function App() {
             setData = {setData}
             loadUserData = {loadUserData}
           />
-        }
+        {/* } */}
       </div>
       {/* <div className="app-section">
         <button onClick={seedExercises}>seed exercises</button>
