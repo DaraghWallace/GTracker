@@ -22,12 +22,14 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, /*pa
         userInFormOpen && <UserInForm 
           setCurrentUser = {setCurrentUser}
           loadUserData = {loadUserData}
+          setUserInFormOpen = {setUserInFormOpen}
         />
       }
       
 
-      <h1>Hello {currentUser?.nickname}</h1>
-      <h2>"{bar.quote}" - {bar.author}</h2>
+      <div>Hello {currentUser?.nickname}</div>
+      <div>"{bar.quote}"</div>
+      <div>{bar.author}</div>
       
       <div>
           <button onClick={() => setUserInFormOpen(true)}>Sign up or sign in</button>

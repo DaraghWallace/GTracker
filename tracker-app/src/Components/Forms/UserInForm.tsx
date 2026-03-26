@@ -3,14 +3,17 @@ import type { user } from "../../Helpers/customTypes";
 
 import { login, register, confirm , getUserAttributes} from "../../Helpers/amplify";
 
+import "../../CSS/Form.css";
+
 type Tab = "login" | "signup" | "confirm";
 
 type Props = {  
   setCurrentUser: Dispatch<SetStateAction<user | null>>;
   loadUserData: (userId: string) => Promise<void>;
+  setUserInFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export default function UserInForm({ setCurrentUser, loadUserData }: Props) {
+export default function UserInForm({ setCurrentUser, loadUserData , setUserInFormOpen}: Props) {
   const [tab, setTab] = useState<Tab>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,45 +65,54 @@ export default function UserInForm({ setCurrentUser, loadUserData }: Props) {
   }
 
   return (
-    <div>
-      {tab !== "confirm" && (
-        <div>
-          <button onClick={() => setTab("login")}>Sign in</button>
-          <button onClick={() => setTab("signup")}>Sign up</button>
-        </div>
-      )}
+    <div className="Form">
+      <div className="F_feildCont">
+        {tab !== "confirm" && (
+          <div>
+            <button onClick={() => setTab("login")}>Sign in</button>
+            <button onClick={() => setTab("signup")}>Sign up</button>
+          </div>
+        )}
 
-      {tab === "login" && (
-        <div>
-          <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-          <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-          <button onClick={handleLogin}>Sign in</button>
-        </div>
-      )}
+        {tab === "login" && (
+          <div className="f_fc_Column">
+            <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+            <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+            <div>
+              <button onClick={handleLogin}>Sign in</button>
+              <button onClick={() => setUserInFormOpen(false)}>Cancel</button>            
+            </div>  
 
-      {tab === "signup" && (
-        <div>
-          <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-          <input placeholder="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} />
-          <select value={userType} onChange={e => setUserType(e.target.value)}>
-            <option value="">Select...</option>
-            <option value="member">Member</option>
-            <option value="trainer">Trainer</option>
-          </select>
-          <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-          <button onClick={handleSignUp}>Create account</button>
-        </div>
-      )}
+          </div>
+        )}
 
-      {tab === "confirm" && (
-        <div>
-          <p>Check your email for a verification code.</p>
-          <input placeholder="123456" value={code} onChange={e => setCode(e.target.value)} />
-          <button onClick={handleConfirm}>Verify</button>
-        </div>
-      )}
+        {tab === "signup" && (
+          <div className="f_fc_Column">
+            <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+            <input placeholder="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} />
+            <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+            <select value={userType} onChange={e => setUserType(e.target.value)}>
+              <option value="">Select...</option>
+              <option value="member">Member</option>
+              <option value="trainer">Trainer</option>
+            </select>
+            <div>
+              <button onClick={handleSignUp}>Create account</button>
+              <button onClick={() => setUserInFormOpen(false)}>Cancel</button>               
+            </div>
+          </div>
+        )}
 
-      {message && <p>{message}</p>}
+        {tab === "confirm" && (
+          <div>
+            <p>Check your email for a verification code.</p>
+            <input placeholder="123456" value={code} onChange={e => setCode(e.target.value)} />
+            <button onClick={handleConfirm}>Verify</button>
+          </div>
+        )}
+
+        {message && <p>{message}</p>}        
+      </div>
     </div>
   )
 }

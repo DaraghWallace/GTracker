@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { set, exercise } from "../../Helpers/customTypes";
 import { createSet } from "../../Helpers/APIfunctions";
 
+import '../../CSS/Form.css'
+
 type Props = {
   sessionId: string;
   exercises: exercise[];
@@ -45,16 +47,19 @@ export default function NewSetForm({ sessionId, exercises, loadUserData, userId 
   }
 
   return (
-    <div>
+    <div className="f_fc_Column">
       <div>
         <div>Exercise: {selectedExercise && selectedExercise.name}</div>
 
-        {exercises.map((exercise) => (
-          <button key={exercise.exerciseId} onClick={()=>setSelectedExercise(exercise)}>
-            {exercise.name}
-          </button>
-        ))}
+        <div>
+          {exercises.map((exercise) => (
+            <button key={exercise.exerciseId} onClick={()=>setSelectedExercise(exercise)}>
+              {exercise.name}
+            </button>
+          ))}          
+        </div>
       </div>
+
 
       <input
         type="number"
@@ -80,6 +85,6 @@ export default function NewSetForm({ sessionId, exercises, loadUserData, userId 
 
       <button onClick={handleSubmit}>Add set</button>
       {message && <p>{message}</p>}
-    </div>
+    </div>        
   );
 }

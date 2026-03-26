@@ -13,14 +13,12 @@ import { getExercises, getSessions, getSetBySession } from './Helpers/APIfunctio
 import './CSS/App.css';
 
 export default function App() {
-  // const [pageStatus, setPageStatus] = useState("NoUser"); // NoUser | Loading | Ready | Dud | 
   const [currentUser, setCurrentUser] = useState<user | null>(null);
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [setData, setSetData] = useState<set[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
   
   async function loadUserData(userId: string) {
-    // setPageStatus("Loading");
     const sessions = await getSessions(userId);
     console.log(sessions);
     const allSets = await Promise.all(
@@ -33,9 +31,8 @@ export default function App() {
 
   async function fullSet(allExercises: exercise[], sessions: session[], allSets: set[]) {
     setExercises(allExercises);
-    setSessionData(sessions);
+    setSessionData([...sessions].sort((a, b) => new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime()));
     setSetData(allSets.flat());
-    // setPageStatus("Ready");
   }
 
   async function handleSignOut() {
@@ -44,7 +41,6 @@ export default function App() {
     setSessionData([]);
     setSetData([]);
     setExercises([]);
-    // setPageStatus("NoUser");
   }
 
   useEffect(() => {
@@ -65,7 +61,6 @@ export default function App() {
         });
       }
     }).catch(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -74,36 +69,26 @@ export default function App() {
 
     <div className="App">
       <div className="app-section">
-        {/* {pageStatus !== "Loading" &&  */}
-          <Header
-            currentUser = {currentUser}
-            setCurrentUser = {setCurrentUser}
-            loadUserData = {loadUserData}
-            handleSignOut = {handleSignOut}
-            // pageStatus = {pageStatus}
-          />        
-        {/* } */}
-
+        <Header
+          currentUser = {currentUser}
+          setCurrentUser = {setCurrentUser}
+          loadUserData = {loadUserData}
+          handleSignOut = {handleSignOut}
+        />        
       </div>
       
       <div className="app-section">
-        {/* {pageStatus === "Loading" &&  */}
-          {/* <div>loading</div> */}
-        {/* } */}
-        {/* {pageStatus === "Ready" &&  */}
+        {currentUser && 
           <Body
             currentUser = {currentUser}
             sessionData = {sessionData}
             exercises = {exercises}
             setData = {setData}
             loadUserData = {loadUserData}
-          />
-        {/* } */}
+          />        
+        }
+
       </div>
-      {/* <div className="app-section">
-        <button onClick={seedExercises}>seed exercises</button>
-        <button onClick={()=>console.log(exercises)}>log exercises</button>
-      </div> */}
     </div>
   )
 }

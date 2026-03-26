@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import type { session } from "../../Helpers/customTypes";
 import { createSession } from "../../Helpers/APIfunctions";
 
+import '../../CSS/Form.css'
+
 type Props = {
   userId: string;
   loadUserData: (userId: string) => Promise<void>;
+  setNewSessionFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export default function NewSessionForm({ userId, loadUserData }: Props) {
+export default function NewSessionForm({ userId, loadUserData, setNewSessionFormOpen }: Props) {
   const [date, setDate] = useState("");
   const [focus, setFocus] = useState("");
   const [notes, setNotes] = useState("");
@@ -20,7 +23,7 @@ export default function NewSessionForm({ userId, loadUserData }: Props) {
     const newSession: session = {
       sessionId: uuidv4(),
       userId,
-      date,
+      dateDone: date,
       focus: focus || null,
       notes: notes || null,
     };
@@ -35,12 +38,21 @@ export default function NewSessionForm({ userId, loadUserData }: Props) {
   }
 
   return (
-    <div>
-      <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-      <input placeholder="Focus (optional)" value={focus} onChange={e => setFocus(e.target.value)} />
-      <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
-      <button onClick={handleSubmit}>Create session</button>
-      {message && <p>{message}</p>}
+    <div className="Form">
+      <div className="F_feildCont">
+        <div className="f_fc_Column">
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+          <input placeholder="Focus (optional)" value={focus} onChange={e => setFocus(e.target.value)} />
+          <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
+          {message && <p>{message}</p>}   
+          <div>
+            <button onClick={handleSubmit}>Create session</button>
+            <button onClick={() => setNewSessionFormOpen(false)}>Cancel</button>
+          </div>       
+          
+        </div>
+      </div>
+
     </div>
   );
 }
