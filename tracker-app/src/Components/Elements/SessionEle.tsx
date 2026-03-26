@@ -21,23 +21,8 @@ export default function SessionEle({session, exercises, setData, loadUserData, u
   return (
     <div className="session_ele">
       <div>{session.focus} {displayDate(session.dateDone)}</div>
-
-      {setData.filter(set => set.sessionId === session.sessionId).map(set => {
-        const setEx = getExercise(set.exerciseId, exercises);
-        return (
-          <div className="s_e_set" key={set.setId}>
-            {setEx?.name}:
-            <div className="s_e_s_weights">
-              {displayRep(set.weights_kgs).map(weight=>{return (
-                <div className="s_e_s_w_num" key={uuidv4()}>{weight}</div>
-              )})}
-            </div>
-          </div>
-        );
-      })}
-      
-      <button onClick={()=> setNewSetFormOpen(true)}>New Set</button>
-
+      {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}>Add exercise</button>}
+      {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}>Cancel</button>}
       <div>
         {
           newSetFormOpen && <NewSetForm 
@@ -48,6 +33,19 @@ export default function SessionEle({session, exercises, setData, loadUserData, u
           />
         }        
       </div>
+      {setData.filter(set => set.sessionId === session.sessionId).map(set => {
+        const setEx = getExercise(set.exerciseId, exercises);
+        return (
+          <div className="s_e_set" key={set.setId}>
+            {setEx?.name}:
+            <div className="s_e_s_weights">
+              {displaySet(set.weights_kgs).map(weight=>{return (
+                <div className="s_e_s_w_num" key={uuidv4()}>{weight} (x##)</div>
+              )})}
+            </div>
+          </div>
+        );
+      })}
     </div>
   )
 }
@@ -61,7 +59,7 @@ function displayDate(date: string): string {
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-function displayRep( reps :string) : number[]{
+function displaySet( reps :string) : number[]{
   const weightStrArr = reps.split(',')
   const weightNumArr : number[] = []
   weightStrArr.forEach(weight => {

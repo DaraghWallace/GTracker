@@ -2,7 +2,7 @@ import NewSessionForm from "./Forms/NewSessionForm"
 import SessionEle from "../Components/Elements/SessionEle"
 import type { exercise, session, set, user } from "../Helpers/customTypes";
 import { useState } from "react";
-import NewExerciseForm from "./Forms/NewExerciseForm";
+// import NewExerciseForm from "./Forms/NewExerciseForm";
 
 import '../CSS/Body.css'
 
@@ -15,9 +15,9 @@ type Props = {
 }
 
 export default function Body({currentUser, sessionData, exercises, setData, loadUserData}: Props){
-  const [page, setPage] = useState("sessions");
+  // const [page, setPage] = useState("sessions");
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
-  const [newExerciseFormOpen, setNewExerciseFormOpen] = useState(false);
+  // const [newExerciseFormOpen, setNewExerciseFormOpen] = useState(false);
   
   return(
     <div>
@@ -26,7 +26,7 @@ export default function Body({currentUser, sessionData, exercises, setData, load
         loadUserData={loadUserData} 
         setNewSessionFormOpen={setNewSessionFormOpen}
       />}
-      {newExerciseFormOpen && <NewExerciseForm userId={currentUser?.userId ?? ""} loadUserData={loadUserData}/>}
+      {/* {newExerciseFormOpen && <NewExerciseForm userId={currentUser?.userId ?? ""} loadUserData={loadUserData}/>} */}
       {/* <div>
         <button onClick={() => setPage("sessions")}>Gym Sessions</button>
         <button onClick={() => setPage("progress")}>My Progress</button>
@@ -34,7 +34,7 @@ export default function Body({currentUser, sessionData, exercises, setData, load
       
 
 
-      {page == "sessions" && 
+      {/* {page == "sessions" &&  */}
         <div>
           {/* <h2>Sessions</h2>  */}
           <div>
@@ -58,14 +58,14 @@ export default function Body({currentUser, sessionData, exercises, setData, load
           </div>
 
         </div>      
-      }{page == "progress" && 
+      {/* }{page == "progress" && 
         <div>
           <h2>Progress</h2> 
           <div>
 
           </div>
         </div>      
-      }
+      } */}
 
     </div>
   )

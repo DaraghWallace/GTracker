@@ -14,7 +14,7 @@ type Props = {
 export default function NewSetForm({ sessionId, exercises, loadUserData, userId }: Props) {
   // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
-  const [reps, setReps] = useState("");
+  const [reps, setReps] = useState(Number);
   const [weights, setWeights] = useState("");
   const [toFailure, setToFailure] = useState(false);
   const [message, setMessage] = useState("");
@@ -33,8 +33,7 @@ export default function NewSetForm({ sessionId, exercises, loadUserData, userId 
       sessionId: sessionId,
       exerciseId: selectedExercise.exerciseId,
       toFailure,
-      repetitions: Number(reps),
-      weights_kgs: weights, // e.g "15,25,27"
+      weights_kgs: weights, // e.g "Wt(reps),25(10),27(8)"
     };
 
     try {
@@ -65,14 +64,18 @@ export default function NewSetForm({ sessionId, exercises, loadUserData, userId 
         type="number"
         placeholder="Reps"
         value={reps}
-        onChange={e => setReps(e.target.value)}
+        onChange={e => setReps(Number(e.target.value))}
+        min={1}
       />
 
-      <input
+
+      {displayReps(reps)}
+
+      {/* <input
         placeholder='Weight (kgs)'
         value={weights}
         onChange={e => setWeights(e.target.value)}
-      />
+      /> */}
 
       <label>
         <input
@@ -87,4 +90,24 @@ export default function NewSetForm({ sessionId, exercises, loadUserData, userId 
       {message && <p>{message}</p>}
     </div>        
   );
+}
+
+function displayReps(reps: number) {
+  return Array.from({ length: reps }, (_, i) => (
+    <div key={i} className="f_fc_Row">
+      <div>Set {i + 1}: <input
+          className="thin_input"
+          type="number"
+          placeholder= {`weight (kg)`}
+        /> 
+      </div>
+
+      <div>Reps: <input
+          className="thin_input"
+          type="number"
+          placeholder= "#"
+        /> 
+      </div>
+    </div>
+  ));
 }

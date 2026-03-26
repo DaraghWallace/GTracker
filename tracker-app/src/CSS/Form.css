@@ -24,3 +24,14 @@
   justify-content: center;
   align-items: center;  
 }
+
+.f_fc_Row{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;  
+}
+
+.thin_input{
+  width: 50%;
+}

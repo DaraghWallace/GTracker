@@ -31,7 +31,6 @@ export type set = {
   sessionId: string
   exerciseId: string
   toFailure: boolean
-  repetitions: number
   weights_kgs: string
 }
 
