@@ -32,6 +32,7 @@ export default function NewSessionForm({ userId, loadUserData, setNewSessionForm
       await createSession(newSession);
       setMessage("Session created!");
       loadUserData(userId)
+      setNewSessionFormOpen(false)
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
     }

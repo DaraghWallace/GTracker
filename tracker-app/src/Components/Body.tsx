@@ -1,6 +1,6 @@
 import NewSessionForm from "./Forms/NewSessionForm"
 import SessionEle from "../Components/Elements/SessionEle"
-import type { exercise, session, set, user } from "../Helpers/customTypes";
+import type { exercise, session, sessionExercise, user } from "../Helpers/customTypes";
 import { useState } from "react";
 // import NewExerciseForm from "./Forms/NewExerciseForm";
 
@@ -10,11 +10,11 @@ type Props = {
   currentUser: user | null;
   sessionData: session[];
   exercises: exercise[];
-  setData: set[];
+  sessionExercises: sessionExercise[];
   loadUserData: (userId: string) => Promise<void>;
 }
 
-export default function Body({currentUser, sessionData, exercises, setData, loadUserData}: Props){
+export default function Body({currentUser, sessionData, exercises, sessionExercises, loadUserData}: Props){
   // const [page, setPage] = useState("sessions");
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
   // const [newExerciseFormOpen, setNewExerciseFormOpen] = useState(false);
@@ -49,7 +49,7 @@ export default function Body({currentUser, sessionData, exercises, setData, load
                 <SessionEle key={session.sessionId}
                   session = {session}
                   exercises = {exercises}
-                  setData = {setData}
+                  sessionExercises = {sessionExercises}
                   loadUserData={loadUserData}
                   userId={currentUser!.userId}
                 />

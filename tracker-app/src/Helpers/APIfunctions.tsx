@@ -1,7 +1,7 @@
 import { fetchAuthSession } from "aws-amplify/auth";
-import type { exercise, session, set } from "./customTypes";
+import type { exercise, session, sessionExercise } from "./customTypes";
 
-const invokeid = "zyuq79jc9c"
+const invokeid = "2egaivggi6"
 const authSession = await fetchAuthSession();
 const token = authSession.tokens?.idToken?.toString();
 
@@ -59,6 +59,7 @@ export async function getSessions(userId: string) {
 
     const text = await response.text();
     const parsed = JSON.parse(text);
+    
     return Array.isArray(parsed) ? parsed : parsed.Items ?? [];
 }
 // U
@@ -117,11 +118,11 @@ export async function getExercises() {
 
 //#region: Sets
 // C
-export async function createSet(newSet: set) {
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sets`;
+export async function createSessionExercise(newSessionExercise: sessionExercise) {
+    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise`;
 
     try {
-        console.log("creating set...");
+        console.log("creating SessionExercise...");
 
         const response = await fetch(url, {
             method: "POST",
@@ -129,7 +130,7 @@ export async function createSet(newSet: set) {
                 "Content-Type": "application/json",
                 "Authorization": token ?? "",
             },
-            body: JSON.stringify(newSet),
+            body: JSON.stringify(newSessionExercise),
         });
 
         const text = await response.text();
@@ -141,7 +142,7 @@ export async function createSet(newSet: set) {
         } catch {
             result = text;
         }
-        console.log("Set created:", result);
+        console.log("SessionExercise created:", result);
         return result;
     } catch (error) {
         console.error("Failed to Post:", error);
@@ -149,20 +150,23 @@ export async function createSet(newSet: set) {
     }
 }
 // R
-export async function getSetBySession(sessionId:string) {
-  const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sets?sessionId=${sessionId}`
-  const authSession = await fetchAuthSession();
-  const token = authSession.tokens?.idToken?.toString();
+export async function getSessionExerciseBySession(sessionId:string) {
+    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise?sessionId=${sessionId}`
+    const authSession = await fetchAuthSession();
+    const token = authSession.tokens?.idToken?.toString();
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Authorization": token ?? "",
-    },
-  });
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+        "Authorization": token ?? "",
+        },
+    });
 
-  const text = await response.text();
-  return JSON.parse(text);
+    
+
+    const text = await response.text();
+    
+    return JSON.parse(text);
 }
 // U
 // D

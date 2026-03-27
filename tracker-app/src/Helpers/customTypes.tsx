@@ -26,12 +26,12 @@ export type exercise = {
   // demoLink: string // link to youtube vid
 }
 
-export type set = {
-  setId: string // PK - uuid
+export type sessionExercise = {
+  sessionExerciseId: string // PK - uuid
   sessionId: string
   exerciseId: string
   toFailure: boolean
-  weights_kgs: string
+  sets: string
 }
 
 

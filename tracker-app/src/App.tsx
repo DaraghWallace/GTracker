@@ -4,10 +4,10 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 import Header from './Components/Header';
 import Body from './Components/Body';
 
-import type { user, session, exercise, set } from "./Helpers/customTypes";
+import type { user, session, exercise, sessionExercise } from "./Helpers/customTypes";
 
 import { getUserAttributes, logout } from './Helpers/amplify';
-import { getExercises, getSessions, getSetBySession } from './Helpers/APIfunctions';
+import { getExercises, getSessions, getSessionExerciseBySession } from './Helpers/APIfunctions';
 // import {seedExercises} from './Helpers/seeds'
 
 import './CSS/App.css';
@@ -15,31 +15,31 @@ import './CSS/App.css';
 export default function App() {
   const [currentUser, setCurrentUser] = useState<user | null>(null);
   const [sessionData, setSessionData] = useState<session[]>([]);
-  const [setData, setSetData] = useState<set[]>([]);
+  const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
   
   async function loadUserData(userId: string) {
     const sessions = await getSessions(userId);
-    console.log(sessions);
+    // console.log(sessions);
     const allSets = await Promise.all(
-      sessions.map((session: session) => getSetBySession(session.sessionId))
+      sessions.map((session: session) => getSessionExerciseBySession(session.sessionId))
     );
     const allExercises = await getExercises();
 
     fullSet(allExercises,sessions,allSets )      
   }
 
-  async function fullSet(allExercises: exercise[], sessions: session[], allSets: set[]) {
+  async function fullSet(allExercises: exercise[], sessions: session[], allSessionExercises: sessionExercise[]) {
     setExercises(allExercises);
     setSessionData([...sessions].sort((a, b) => new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime()));
-    setSetData(allSets.flat());
+    setSessionExercises(allSessionExercises.flat());
   }
 
   async function handleSignOut() {
     await logout();
     setCurrentUser(null);
     setSessionData([]);
-    setSetData([]);
+    setSessionExercises([]);
     setExercises([]);
   }
 
@@ -66,8 +66,8 @@ export default function App() {
 
   
   return (
-
     <div className="App">
+      {/* <button onClick={seedExercises}>seed</button> */}
       <div className="app-section">
         <Header
           currentUser = {currentUser}
@@ -83,11 +83,10 @@ export default function App() {
             currentUser = {currentUser}
             sessionData = {sessionData}
             exercises = {exercises}
-            setData = {setData}
+            sessionExercises = {sessionExercises}
             loadUserData = {loadUserData}
           />        
         }
-
       </div>
     </div>
   )

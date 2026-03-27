@@ -53,5 +53,4 @@ export const bars = [
   { "quote": "Doubt me, that's all the fuel I need.", "author": "Natalie Hanson" },
   { "quote": "Your comfort zone is a beautiful place but nothing grows there.", "author": "Summer Cook" },
   { "quote": "I don't sweat glitter, I sweat progress.", "author": "Tamara Walcott" },
-  { "quote": "Every time I step on the platform I leave everything I have out there.", "author": "Tamara Walcott" }
 ]

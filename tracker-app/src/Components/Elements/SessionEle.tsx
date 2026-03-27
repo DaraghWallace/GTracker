@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 
-import type { exercise, session, set } from "../../Helpers/customTypes";
-import NewSetForm from "../Forms/NewSetForm";
+import type { exercise, session, sessionExercise } from "../../Helpers/customTypes";
+import NewSetForm from "../Forms/NewSessionExerciseForm";
 
 import '../../CSS/Body.css'
 
@@ -10,12 +10,12 @@ import '../../CSS/Body.css'
 type Props = {
   session: session;  
   exercises: exercise[];  
-  setData: set[];
+  sessionExercises: sessionExercise[];
   loadUserData: (userId: string) => Promise<void>;
   userId: string;
 }
 
-export default function SessionEle({session, exercises, setData, loadUserData, userId}: Props) {
+export default function SessionEle({session, exercises, sessionExercises, loadUserData, userId}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
   
   return (
@@ -33,13 +33,13 @@ export default function SessionEle({session, exercises, setData, loadUserData, u
           />
         }        
       </div>
-      {setData.filter(set => set.sessionId === session.sessionId).map(set => {
-        const setEx = getExercise(set.exerciseId, exercises);
+      {sessionExercises.filter(set => set.sessionId === session.sessionId).map(sessionExercise => {
+        const setEx = getExercise(sessionExercise.exerciseId, exercises);
         return (
-          <div className="s_e_set" key={set.setId}>
+          <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
             {setEx?.name}:
             <div className="s_e_s_weights">
-              {displaySet(set.weights_kgs).map(weight=>{return (
+              {displaySet(sessionExercise.sets).map(weight=>{return (
                 <div className="s_e_s_w_num" key={uuidv4()}>{weight} (x##)</div>
               )})}
             </div>

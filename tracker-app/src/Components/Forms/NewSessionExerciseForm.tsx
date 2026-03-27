@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { set, exercise } from "../../Helpers/customTypes";
-import { createSet } from "../../Helpers/APIfunctions";
+import type { sessionExercise, exercise } from "../../Helpers/customTypes";
+import { createSessionExercise } from "../../Helpers/APIfunctions";
 
 import '../../CSS/Form.css'
 
@@ -11,11 +11,11 @@ type Props = {
   userId: string
 }
 
-export default function NewSetForm({ sessionId, exercises, loadUserData, userId }: Props) {
+export default function NewSessionExerciseForm({ sessionId, exercises, loadUserData, userId }: Props) {
   // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
   const [reps, setReps] = useState(Number);
-  const [weights, setWeights] = useState("");
+  const [sets, setSets] = useState("");
   const [toFailure, setToFailure] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -26,18 +26,18 @@ export default function NewSetForm({ sessionId, exercises, loadUserData, userId 
   async function handleSubmit() {
     if (!selectedExercise) return setMessage("Select an exercise.");
     if (!reps) return setMessage("Enter reps.");
-    if (!weights) return setMessage("Enter weights.");
+    if (!sets) return setMessage("Enter weights.");
 
-    const newSet: set = {
-      setId: crypto.randomUUID(),
+    const newSessionExercise: sessionExercise = {
+      sessionExerciseId: crypto.randomUUID(),
       sessionId: sessionId,
       exerciseId: selectedExercise.exerciseId,
-      toFailure,
-      weights_kgs: weights, // e.g "Wt(reps),25(10),27(8)"
+      toFailure: toFailure,
+      sets: sets, // e.g "Wt(reps),25(10),27(8)"
     };
 
     try {
-      await createSet(newSet);
+      await createSessionExercise(newSessionExercise);
       setMessage("Set created!");
       loadUserData(userId)
     } catch (e: unknown) {

@@ -39,6 +39,7 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
       });
       loadUserData(attrs.userId as string)
       console.log("userId", attrs.userId);  
+      setUserInFormOpen(false)
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
     }

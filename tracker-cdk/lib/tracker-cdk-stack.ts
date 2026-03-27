@@ -178,18 +178,26 @@ export class TrackerCdkStack extends cdk.Stack {
     exercisesTable.grantReadData(getExercisesFn);     
     //#endregion
 
-    //#region: Sets:  / dynamoDB table / C-R-u-d
-    const setsTable = new dynamodb.Table(this, "SetsTable", {
-      tableName: "Sets",
+    //#region: SessionExercise:  / dynamoDB table / C-R-u-d
+    const sessionExerciseTable = new dynamodb.Table(this, "SessionExerciseTable", {
+      tableName: "SessionExercises",
       partitionKey: {
-        name: "setId",
+        name: "sessionExerciseId",
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    setsTable.addGlobalSecondaryIndex({
+    sessionExerciseTable.addGlobalSecondaryIndex({
+      indexName: "sessionExerciseId-index",
+      partitionKey: {
+        name: "sessionExerciseId",
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+
+    sessionExerciseTable.addGlobalSecondaryIndex({
       indexName: "sessionId-index",
       partitionKey: {
         name: "sessionId",
@@ -197,24 +205,24 @@ export class TrackerCdkStack extends cdk.Stack {
       },
     });
 
-    const createSetFn = new NodejsFunction(this, "CreateSetFn", {
+    const createSessionExerciseFn = new NodejsFunction(this, "CreateSessionExerciseFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: createPath,
       environment: {
-        TABLE_NAME: setsTable.tableName,
+        TABLE_NAME: sessionExerciseTable.tableName,
       }, bundling: {
         forceDockerBundling: false,
       },
     });
-    setsTable.grantWriteData(createSetFn);
+    sessionExerciseTable.grantWriteData(createSessionExerciseFn);
 
-    const getSetsBySessionFn = new NodejsFunction(this, "getSetsBySessionFn", {
+    const getSessionExerciseBySessionFn = new NodejsFunction(this, "getSessionExerciseTableBySessionFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: "lambda/functions/getBySession.ts",
-      environment: {TABLE_NAME: setsTable.tableName,},
+      environment: {TABLE_NAME: sessionExerciseTable.tableName,},
       bundling: {forceDockerBundling: false,},
     });
-    setsTable.grantReadData(getSetsBySessionFn);     
+    sessionExerciseTable.grantReadData(getSessionExerciseBySessionFn);     
 
     //#endregion
 
@@ -265,13 +273,13 @@ export class TrackerCdkStack extends cdk.Stack {
     //U
     //D
 
-    const sets = api.root.addResource("sets");
-    sets.addMethod("POST", new apigateway.LambdaIntegration(createSetFn), {
+    const sessionExercise = api.root.addResource("sessionExercise");
+    sessionExercise.addMethod("POST", new apigateway.LambdaIntegration(createSessionExerciseFn), {
         authorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,
       }
     );
-    sets.addMethod("GET", new apigateway.LambdaIntegration(getSetsBySessionFn), {
+    sessionExercise.addMethod("GET", new apigateway.LambdaIntegration(getSessionExerciseBySessionFn), {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });

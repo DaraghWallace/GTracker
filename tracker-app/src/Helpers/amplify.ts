@@ -7,8 +7,8 @@ import {
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: "ap-southeast-2_8v6Vo61bi",
-      userPoolClientId: "v936afp3u0avukkh67hkqpr2a",
+      userPoolId: "ap-southeast-2_VUGo0kWkr",
+      userPoolClientId: "6mpvlu76jfl46s4hh8pnio6nrl",
       loginWith: {
         email: true
       }
@@ -56,7 +56,7 @@ export async function logout(){await signOut();}
 export async function getUserAttributes() {
   const session = await fetchAuthSession();
   const payload = session.tokens?.idToken?.payload;
-  console.log("payload", payload);
+  // console.log("payload", payload);
   //access payload = const payload = session.tokens?.idToken?.payload;
   return {
     userId: payload?.sub,
