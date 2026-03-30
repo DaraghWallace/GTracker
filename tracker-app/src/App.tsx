@@ -20,7 +20,6 @@ export default function App() {
   
   async function loadUserData(userId: string) {
     const sessions = await getSessions(userId);
-    // console.log(sessions);
     const allSets = await Promise.all(
       sessions.map((session: session) => getSessionExerciseBySession(session.sessionId))
     );
@@ -61,6 +60,7 @@ export default function App() {
         });
       }
     }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 

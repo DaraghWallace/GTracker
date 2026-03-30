@@ -12,7 +12,7 @@
 }
 
 .s_e_set{
-  background-color: dimgray;
+  background-color: rgb(105, 105, 105);
   margin: 3px;
 
   display: flex;
@@ -26,8 +26,8 @@
 }
 
 .s_e_s_w_num{
-  /* background-color: rgb(0, 97, 153); */
-  margin: 1px;
+  border: solid black 3px;
+  padding: 2px;
   display: flex;
   justify-content: center;
   padding-left: auto;

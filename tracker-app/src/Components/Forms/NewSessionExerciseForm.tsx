@@ -1,21 +1,24 @@
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import type { sessionExercise, exercise } from "../../Helpers/customTypes";
 import { createSessionExercise } from "../../Helpers/APIfunctions";
 
 import '../../CSS/Form.css'
+import NseSetFormEle from "../Elements/NseFormSetEle";
 
 type Props = {
   sessionId: string;
   exercises: exercise[];
   loadUserData: (userId: string) => Promise<void>;
   userId: string
+  setNewSetFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export default function NewSessionExerciseForm({ sessionId, exercises, loadUserData, userId }: Props) {
+
+export default function NewSessionExerciseForm({ sessionId, exercises, loadUserData, userId, setNewSetFormOpen }: Props) {
   // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
-  const [reps, setReps] = useState(Number);
-  const [sets, setSets] = useState("");
+  const [numOfSets, setNumOfSets] = useState(Number);
+  const [setArr, setSetArr] = useState<string[]>([]);
   const [toFailure, setToFailure] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -25,21 +28,29 @@ export default function NewSessionExerciseForm({ sessionId, exercises, loadUserD
 
   async function handleSubmit() {
     if (!selectedExercise) return setMessage("Select an exercise.");
-    if (!reps) return setMessage("Enter reps.");
-    if (!sets) return setMessage("Enter weights.");
+    if (!numOfSets) return setMessage("Enter Set(s).");
+    if (!setArr) return setMessage("Enter weight(s).");
 
+    // console.log(setArr);
+    const setArrString  = setArr.toString()
+    
     const newSessionExercise: sessionExercise = {
       sessionExerciseId: crypto.randomUUID(),
       sessionId: sessionId,
       exerciseId: selectedExercise.exerciseId,
       toFailure: toFailure,
-      sets: sets, // e.g "Wt(reps),25(10),27(8)"
+      sets: setArrString, // e.g "Wt(reps),25(10),27(8)"
     };
+
+    console.log(newSessionExercise);
+    
 
     try {
       await createSessionExercise(newSessionExercise);
       setMessage("Set created!");
+      setNewSetFormOpen(false)
       loadUserData(userId)
+      
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
     }
@@ -58,24 +69,18 @@ export default function NewSessionExerciseForm({ sessionId, exercises, loadUserD
           ))}          
         </div>
       </div>
-
+      
+      <div className="f_fc_Row">Weight | Reps | Done?</div>
+      {displayReps(numOfSets,setArr, setSetArr)}
 
       <input
         type="number"
         placeholder="Reps"
-        value={reps}
-        onChange={e => setReps(Number(e.target.value))}
+        value={numOfSets}
+        onChange={e => setNumOfSets(Number(e.target.value))}
         min={1}
       />
 
-
-      {displayReps(reps)}
-
-      {/* <input
-        placeholder='Weight (kgs)'
-        value={weights}
-        onChange={e => setWeights(e.target.value)}
-      /> */}
 
       <label>
         <input
@@ -92,22 +97,25 @@ export default function NewSessionExerciseForm({ sessionId, exercises, loadUserD
   );
 }
 
-function displayReps(reps: number) {
-  return Array.from({ length: reps }, (_, i) => (
-    <div key={i} className="f_fc_Row">
-      <div>Set {i + 1}: <input
-          className="thin_input"
-          type="number"
-          placeholder= {`weight (kg)`}
-        /> 
-      </div>
-
-      <div>Reps: <input
-          className="thin_input"
-          type="number"
-          placeholder= "#"
-        /> 
-      </div>
-    </div>
+function displayReps(numOfSets: number, setArr: string[], setSetArr: Dispatch<SetStateAction<string[]>>) {
+  return Array.from({ length: numOfSets }, (_, i) => (
+    <NseSetFormEle key={i} index = {i} setArr={setArr} setSetArr={setSetArr} />
   ));
 }
+  // return Array.from({ length: reps }, (_, i) => (
+  //   <div key={i} className="f_fc_Row">
+  //     <div>Set {i + 1}: <input
+  //         className="thin_input"
+  //         type="number"
+  //         placeholder= {`weight (kg)`}
+  //       /> 
+  //     </div>
+
+  //     <div>Reps: <input
+  //         className="thin_input"
+  //         type="number"
+  //         placeholder= "#"
+  //       /> 
+  //     </div>
+  //   </div>
+  // ));
