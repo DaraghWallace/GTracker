@@ -1,6 +1,6 @@
 @media (min-width: 1000px) {
   .App{
-    background-color: darkblue;
+    background-color: rgb(255, 255, 255);
     position: absolute;
     top: 0;
     width: 60%;
@@ -14,7 +14,7 @@
 
 @media (max-width: 1000px) {
   .App{
-    background-color: darkblue;
+    background-color: rgb(58, 190, 255);
     position: absolute;
     top: 0;
     
@@ -27,7 +27,9 @@
     justify-content: space-between;
   }
   .app-section{
-    background-color: rgb(80, 80, 100);
-    margin: 15px;
+    background-color: rgb(94, 94, 94);
+    padding: 3px;
+    margin: 3px;
+    
   }
 }

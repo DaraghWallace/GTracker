@@ -3,6 +3,7 @@ import type { user } from "../Helpers/customTypes";
 import UserInForm from "./Forms/UserInForm";
 import { getRandomQuote } from "../Helpers/seeds";
 
+import '../CSS/Header.css'
 
 type Props = {
   currentUser: user | null;
@@ -17,7 +18,7 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, /*pa
   const  bar = getRandomQuote()
 
   return (
-    <div>
+    <div className="Header">
       {
         userInFormOpen && <UserInForm 
           setCurrentUser = {setCurrentUser}
@@ -25,16 +26,16 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, /*pa
           setUserInFormOpen = {setUserInFormOpen}
         />
       }
-      
 
-      <div>Hello {currentUser?.nickname}</div>
-      <div>"{bar.quote}"</div>
-      <div>{bar.author}</div>
-      
-      <div>
-          <button onClick={() => setUserInFormOpen(true)}>Sign up or sign in</button>
-          <button onClick={handleSignOut}>sign out</button>
+      <div className="h_top_bar">
+        <div className="h_tb_hello">Hello {currentUser?.nickname}</div>
+        {!currentUser && <button onClick={() => setUserInFormOpen(true)}>Sign up or sign in</button>}
+        {currentUser && <button onClick={handleSignOut}>sign out</button>}
+      </div>
 
+      <div className="h_bar">
+        <div>"{bar.quote}"</div>
+        <div>- {bar.author}</div>        
       </div>
     </div>
   )
