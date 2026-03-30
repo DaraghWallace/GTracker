@@ -33,6 +33,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, loadUserD
 
     // console.log(setArr);
     const setArrString  = setArr.toString()
+    if (setArrString === "") return setMessage("Complete sets.");
     
     const newSessionExercise: sessionExercise = {
       sessionExerciseId: crypto.randomUUID(),

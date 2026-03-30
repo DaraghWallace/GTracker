@@ -13,6 +13,8 @@ export default function NseSetFormEle({setArr, setSetArr}: Props) {
 
 
   async function completeSet() {
+    if (weight == "") return
+    if (reps == "") return
     if (!completed) {
       const tempArr = setArr 
       tempArr.push(`${weight}x${reps}`)
