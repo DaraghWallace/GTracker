@@ -64,12 +64,26 @@ export async function getSessions(userId: string) {
 }
 // U
 // D
+export const deleteSession = async (sessionId: string) => {
+    if (!token) throw new Error("No auth token");
+    const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions/${sessionId}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": token ?? "",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete session");
+  } else console.log("Session Deleted");
+};
+
 //#endregion
 
 //#region: Exercises
 // C - works
 export async function createExercise(newExercise: exercise) {
-   const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`;
+    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`;
     try {
         const response = await fetch(url, {
             method: "POST",
@@ -116,7 +130,7 @@ export async function getExercises() {
 // D
 //#endregion
 
-//#region: Sets
+//#region: SessionExercise
 // C
 export async function createSessionExercise(newSessionExercise: sessionExercise) {
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise`;
@@ -170,4 +184,17 @@ export async function getSessionExerciseBySession(sessionId:string) {
 }
 // U
 // D
+export const deleteSessionExercise = async (sessionExerciseId: string) => {
+    if (!token) throw new Error("No auth token");
+    const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise/${sessionExerciseId}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": token ?? "",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete Session Exercise");
+  } else console.log("Session Exercise Deleted");
+};
 //#endregion

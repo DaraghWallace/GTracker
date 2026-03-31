@@ -95,7 +95,7 @@ export class TrackerCdkStack extends cdk.Stack {
     );
     //#endregion
   
-    //#region: Sessions:  / dynamoDB table / C-R-u-d
+    //#region: Sessions:  / dynamoDB table / C-R-u-D
     const sessionTable = new dynamodb.Table(this, "SessionsTable", {
       tableName: "Sessions",
       partitionKey: {
@@ -145,6 +145,16 @@ export class TrackerCdkStack extends cdk.Stack {
       bundling: { forceDockerBundling: false },
     });
     sessionTable.grantReadData(getSessionsByUserFn);    
+
+    const deleteSessionFn = new NodejsFunction(this, "DeleteSessionFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/deleteSession.ts",
+      environment: { TABLE_NAME: sessionTable.tableName },
+      bundling: { forceDockerBundling: false },
+    });
+    sessionTable.grantWriteData(deleteSessionFn);
+
+
     //#endregion
     
     //#region: Exercises:  / dynamoDB table / C-R-u-d
@@ -224,6 +234,13 @@ export class TrackerCdkStack extends cdk.Stack {
     });
     sessionExerciseTable.grantReadData(getSessionExerciseBySessionFn);     
 
+    const deleteSessionExerciseFn = new NodejsFunction(this, "DeleteSessionExerciseFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/deleteSessionExercise.ts",
+      environment: { TABLE_NAME: sessionExerciseTable.tableName },
+      bundling: { forceDockerBundling: false },
+    });
+    sessionExerciseTable.grantWriteData(deleteSessionExerciseFn);
     //#endregion
 
     //#region: RestAPI
@@ -238,6 +255,13 @@ export class TrackerCdkStack extends cdk.Stack {
 
     const sessions = api.root.addResource("sessions");
     const allSessions = api.root.addResource("sessions-all");
+    const sessionById = sessions.addResource("{sessionId}", {
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+      },
+    });
 
     sessions.addMethod("POST",new apigateway.LambdaIntegration(createSessionFn),{
         authorizer,
@@ -256,7 +280,10 @@ export class TrackerCdkStack extends cdk.Stack {
       }
     );
     //U
-    //D
+    sessionById.addMethod("DELETE", new apigateway.LambdaIntegration(deleteSessionFn), {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     const exercises = api.root.addResource("exercises");
     exercises.addMethod("POST", new apigateway.LambdaIntegration(createExerciseFn), {
@@ -274,6 +301,13 @@ export class TrackerCdkStack extends cdk.Stack {
     //D
 
     const sessionExercise = api.root.addResource("sessionExercise");
+    const sessionExerciseById = sessionExercise.addResource("{sessionExerciseId}", {
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+      },
+    });
     sessionExercise.addMethod("POST", new apigateway.LambdaIntegration(createSessionExerciseFn), {
         authorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,
@@ -284,7 +318,10 @@ export class TrackerCdkStack extends cdk.Stack {
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
     //U
-    //D
+    sessionExerciseById.addMethod("DELETE", new apigateway.LambdaIntegration(deleteSessionExerciseFn), {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     new cdk.CfnOutput(this, "ApiUrl", {value: api.url});
     //#endregion

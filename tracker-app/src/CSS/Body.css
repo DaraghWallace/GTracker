@@ -8,7 +8,7 @@
 .session_ele{
   background-color: rgb(51, 51, 51);
   margin: 3px;
-  min-width: 250px;
+  min-width: 300px;
   padding: 3px;
 }
 
@@ -29,12 +29,13 @@
 
 .s_e_s_w_num{
   /* border: solid black 3px; */
-  background-color: rgb(51, 51, 51);
+  background-color: rgb(58, 190, 255);
+  color: rgb(51, 51, 51);
+  font-weight: bold;
   padding-left: 6px;
   padding-right: 6px;
   margin-right: 2px;
   margin-left: 2px;
-  margin-bottom: 1px;
   display: flex;
   justify-content: center;
   padding-left: auto;

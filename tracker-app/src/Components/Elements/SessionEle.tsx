@@ -5,6 +5,7 @@ import type { exercise, session, sessionExercise } from "../../Helpers/customTyp
 import NewSetForm from "../Forms/NewSessionExerciseForm";
 
 import '../../CSS/Body.css'
+import { deleteSession, deleteSessionExercise } from "../../Helpers/APIfunctions";
 
 
 type Props = {
@@ -20,7 +21,10 @@ export default function SessionEle({session, exercises, sessionExercises, loadUs
   
   return (
     <div className="session_ele">
-      <div>{session.focus} {displayDate(session.dateDone)} <button onClick={()=> console.log(session)}>?</button></div>
+      <div>
+        <div onClick={()=> console.log(session)}>{session.focus} {displayDate(session.dateDone)}</div>
+        <button onClick={()=>handleDeleteSession(session.sessionId, loadUserData, userId)}>Del</button>
+      </div>
       {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}>Add exercise</button>}
       {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}>Cancel</button>}
       <div>
@@ -39,7 +43,10 @@ export default function SessionEle({session, exercises, sessionExercises, loadUs
         
         return (
           <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
-            <div>{setEx?.name} <button onClick={()=> console.log(sessionExercise)}>(?)</button>:</div>
+            <div>
+              <div onClick={()=> console.log(sessionExercise)}>{setEx?.name}:</div>
+              <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, loadUserData, userId)}>Del</button>
+            </div>
             <div className="s_e_s_weights">
               {displaySet(sessionExercise.sets).map(set=>{return (
                 <div className="s_e_s_w_num" key={uuidv4()}>{set.weight}kg x {set.reps}</div>
@@ -67,4 +74,14 @@ function displaySet(sets: string): SetObj[] {
     const [weight, reps] = weightStr.split('x');
     return { weight: Number(weight), reps: Number(reps) };
   });
+}
+
+async function handleDeleteSession(sessionId:string, loadUserData: (userId: string) => Promise<void>, userId: string ){
+  await deleteSession(sessionId)
+  loadUserData(userId)
+}
+
+async function handleDeleteSessionExercise(sessionExerciseId:string, loadUserData: (userId: string) => Promise<void>, userId: string ){
+  await deleteSessionExercise(sessionExerciseId)
+  loadUserData(userId)
 }
