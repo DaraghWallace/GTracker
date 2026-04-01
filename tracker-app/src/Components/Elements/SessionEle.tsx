@@ -21,29 +21,32 @@ export default function SessionEle({session, exercises, sessionExercises, loadUs
   
   return (
     <div className="session_ele">
-      <div>
+      <div className="s_e_header">
         <div onClick={()=> console.log(session)}>{session.focus} {displayDate(session.dateDone)}</div>
         <button onClick={()=>handleDeleteSession(session.sessionId, loadUserData, userId)}>Del</button>
       </div>
-      {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}>Add exercise</button>}
-      {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}>Cancel</button>}
-      <div>
-        {
-          newSetFormOpen && <NewSetForm 
+
+      <div className="middle_column">
+        {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}>Add exercise</button>}
+        {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}>Cancel</button>}
+      </div>
+      {newSetFormOpen && 
+        <div className="F_inset_feildCont">
+          <NewSetForm 
             sessionId = {session?.sessionId} 
             exercises = {exercises}
             loadUserData = {loadUserData}
             userId = {userId}
             setNewSetFormOpen = {setNewSetFormOpen}
           />
-        }        
-      </div>
+        </div>
+      }        
       {sessionExercises.filter(set => set.sessionId === session.sessionId).map(sessionExercise => {
         const setEx = getExercise(sessionExercise.exerciseId, exercises);
         
         return (
           <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
-            <div>
+            <div className="s_e_header">
               <div onClick={()=> console.log(sessionExercise)}>{setEx?.name}:</div>
               <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, loadUserData, userId)}>Del</button>
             </div>

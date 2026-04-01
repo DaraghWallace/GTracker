@@ -7,25 +7,30 @@ import Body from './Components/Body';
 import type { user, session, exercise, sessionExercise } from "./Helpers/customTypes";
 
 import { getUserAttributes, logout } from './Helpers/amplify';
-import { getExercises, getSessions, getSessionExerciseBySession } from './Helpers/APIfunctions';
-// import {seedExercises} from './Helpers/seeds'
+import { getExercises, getSessions, getSessionExerciseBySession, /*getToken*/ } from './Helpers/APIfunctions';
+// import {seedExercises, getRandomQuote} from './Helpers/seeds'
 
 import './CSS/App.css';
 
 export default function App() {
+  // const [securityToken, setSecurityToken] = useState("");
+  const [pageState, setPageState] = useState("");
   const [currentUser, setCurrentUser] = useState<user | null>(null);
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
-  
+  // const bar = getRandomQuote()
+
   async function loadUserData(userId: string) {
+    setPageState("loading")
     const sessions = await getSessions(userId);
     const allSets = await Promise.all(
       sessions.map((session: session) => getSessionExerciseBySession(session.sessionId))
     );
     const allExercises = await getExercises();
 
-    fullSet(allExercises,sessions,allSets )      
+    fullSet(allExercises,sessions,allSets ) 
+    setPageState("ready")
   }
 
   async function fullSet(allExercises: exercise[], sessions: session[], allSessionExercises: sessionExercise[]) {
@@ -78,17 +83,23 @@ export default function App() {
       </div>
       
       <div className="app-section">
-        {currentUser && 
+        {pageState === "loading" ? (
+          <div>
+            Loading
+            {/*<div>{bar.quote}</div>
+            <div>{bar.author}</div>*/}
+          </div>
+
+        ) : (
           <Body
-            currentUser = {currentUser}
-            sessionData = {sessionData}
-            exercises = {exercises}
-            sessionExercises = {sessionExercises}
-            loadUserData = {loadUserData}
-          />        
-        }
+            currentUser={currentUser}
+            sessionData={sessionData}
+            exercises={exercises}
+            sessionExercises={sessionExercises}
+            loadUserData={loadUserData}
+          />
+        )}
       </div>
     </div>
   )
 }
-

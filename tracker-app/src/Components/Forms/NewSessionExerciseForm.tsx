@@ -60,15 +60,21 @@ export default function NewSessionExerciseForm({ sessionId, exercises, loadUserD
   return (
     <div className="f_fc_Column">
       <div>
-        <div>Exercise: {selectedExercise && selectedExercise.name}</div>
-
         <div>
-          {exercises.map((exercise) => (
-            <button key={exercise.exerciseId} onClick={()=>setSelectedExercise(exercise)}>
-              {exercise.name}
-            </button>
-          ))}          
+          Exercise: {selectedExercise && selectedExercise.name}
+          {selectedExercise && <button onClick={()=>setSelectedExercise(null)}>Change</button>}
         </div>
+
+        {!selectedExercise && 
+          <div className="f_fc_exercises">
+            {exercises.map((exercise) => (
+              <button key={exercise.exerciseId} onClick={()=>setSelectedExercise(exercise)}>
+                {exercise.name}
+              </button>
+            ))}          
+          </div>        
+        }
+
       </div>
       
       <div className="f_fc_Row">Weight | Reps | Done?</div>

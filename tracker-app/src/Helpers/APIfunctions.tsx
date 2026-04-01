@@ -5,6 +5,10 @@ const invokeid = "2egaivggi6"
 const authSession = await fetchAuthSession();
 const token = authSession.tokens?.idToken?.toString();
 
+export async function getToken(): Promise<string> {
+  const session = await fetchAuthSession();
+  return session.tokens?.idToken?.toString() ?? "";
+}
 
 //#region: 
 // C

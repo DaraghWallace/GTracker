@@ -1,7 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { user } from "../Helpers/customTypes";
 import UserInForm from "./Forms/UserInForm";
-import { getRandomQuote } from "../Helpers/seeds";
+// import { getRandomQuote } from "../Helpers/seeds";
 
 import '../CSS/Header.css'
 
@@ -15,7 +15,7 @@ type Props = {
 
 export default function Header({ currentUser, setCurrentUser, loadUserData, /*pageStatus,*/ handleSignOut }: Props) {
   const [userInFormOpen, setUserInFormOpen] = useState(false);
-  const  bar = getRandomQuote()
+  // const  bar = getRandomQuote()
 
   return (
     <div className="Header">
@@ -33,10 +33,10 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, /*pa
         {currentUser && <button onClick={handleSignOut}>sign out</button>}
       </div>
 
-      <div className="h_bar">
+      {/* <div className="h_bar">
         <div>"{bar.quote}"</div>
         <div>- {bar.author}</div>        
-      </div>
+      </div> */}
     </div>
   )
 }

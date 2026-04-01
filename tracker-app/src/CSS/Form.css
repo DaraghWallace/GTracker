@@ -20,6 +20,17 @@
   padding-bottom: 15px;
 }
 
+.F_inset_feildCont{
+  background-color: rgb(92, 92, 92);
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;  
+  padding: 10px;
+}
+
 .f_fc_Column{
   display: flex;
   flex-direction: column;
@@ -36,4 +47,11 @@
 
 .thin_input{
   width: 50%;
+}
+
+.f_fc_exercises{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;  
 }
