@@ -7,10 +7,11 @@ import Body from './Components/Body';
 import type { user, session, exercise, sessionExercise } from "./Helpers/customTypes";
 
 import { getUserAttributes, logout } from './Helpers/amplify';
-import { getExercises, getSessions, getSessionExerciseBySession, /*getToken*/ } from './Helpers/APIfunctions';
+// import { getExercises, getSessions, getSessionExerciseBySession, /*getToken*/ } from './Helpers/APIfunctions';
 // import {seedExercises, getRandomQuote} from './Helpers/seeds'
 
 import './CSS/App.css';
+import { fetchFromTable } from './Helpers/APIfunctions';
 
 export default function App() {
   // const [securityToken, setSecurityToken] = useState("");
@@ -22,21 +23,15 @@ export default function App() {
   // const bar = getRandomQuote()
 
   async function loadUserData(userId: string) {
-    setPageState("loading")
-    const sessions = await getSessions(userId);
-    const allSets = await Promise.all(
-      sessions.map((session: session) => getSessionExerciseBySession(session.sessionId))
-    );
-    const allExercises = await getExercises();
+    setExercises(await fetchFromTable(userId, "exercises"))
+    setSessionData(await fetchFromTable(userId, "sessions"))
+    if (sessionData) {
+      const seshEx = await fetchFromTable(userId, "sets")
+      setSessionExercises(seshEx)
+    }
 
-    fullSet(allExercises,sessions,allSets ) 
+    // fullSet(allExercises,sessions,allSets ) 
     setPageState("ready")
-  }
-
-  async function fullSet(allExercises: exercise[], sessions: session[], allSessionExercises: sessionExercise[]) {
-    setExercises(allExercises);
-    setSessionData([...sessions].sort((a, b) => new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime()));
-    setSessionExercises(allSessionExercises.flat());
   }
 
   async function handleSignOut() {
@@ -61,14 +56,20 @@ export default function App() {
           };
 
           setCurrentUser(user);
-          await loadUserData(attrs.userId as string);
+          setExercises(await fetchFromTable(user.userId, "exercises"))
+          setSessionData(await fetchFromTable(user.userId, "sessions"))
+          if (sessionData) {
+            const seshEx = await fetchFromTable(user.userId, "sets")
+            setSessionExercises(seshEx)
+          }
+
+          // fullSet(allExercises,sessions,allSets ) 
+          setPageState("ready")
         });
       }
     }).catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-
   
   return (
     <div className="App">

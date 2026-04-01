@@ -109,20 +109,3 @@ function displayReps(numOfSets: number, setArr: string[], setSetArr: Dispatch<Se
     <NseSetFormEle key={i} index = {i} setArr={setArr} setSetArr={setSetArr} />
   ));
 }
-  // return Array.from({ length: reps }, (_, i) => (
-  //   <div key={i} className="f_fc_Row">
-  //     <div>Set {i + 1}: <input
-  //         className="thin_input"
-  //         type="number"
-  //         placeholder= {`weight (kg)`}
-  //       /> 
-  //     </div>
-
-  //     <div>Reps: <input
-  //         className="thin_input"
-  //         type="number"
-  //         placeholder= "#"
-  //       /> 
-  //     </div>
-  //   </div>
-  // ));

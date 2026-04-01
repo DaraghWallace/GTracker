@@ -10,11 +10,27 @@ export async function getToken(): Promise<string> {
   return session.tokens?.idToken?.toString() ?? "";
 }
 
-//#region: 
-// C
-// R
-// U
-// D
+//#region: Lil Helpers
+export async function fetchFromTable(userId: string, table:string) {
+    switch (table) {
+        case "sessions":{ // fetchFromTable(userId, "sessions")
+            console.log("Getting Sessions");
+            return getSessions(userId)
+        }case "sets":{ // fetchFromTable(userId, "sets")
+            console.log("Getting Sets");
+            const sessions = await getSessions(userId)
+            const sessionExercises = await Promise.all(
+                sessions.map((session: session) => getSessionExerciseBySession(session.sessionId))
+            )
+            return sessionExercises.flat()
+        }case "exercises":{ // fetchFromTable(userId, "exercises")
+            console.log("Getting Exercises");
+            return getExercises()
+        }
+        default:
+            break;
+    }
+}
 //#endregion
 
 //#region: Sessions
