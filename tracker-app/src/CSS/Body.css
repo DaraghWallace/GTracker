@@ -1,8 +1,8 @@
 .sessions{
   display: flex;
-  flex-direction: row;
-  overflow-y: hidden;
-  direction: ltr;
+  flex-direction: column;
+  /* overflow-y: hidden;
+  direction: ltr; */
 }
 
 .session_ele{
@@ -57,4 +57,5 @@
 .middle_column{
   display: flex;
   justify-content: center;
+  justify-content: space-between;
 }

@@ -1,17 +1,17 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import type { session } from "../../Helpers/customTypes";
-import { createSession } from "../../Helpers/APIfunctions";
+import { createSession, fetchFromTable } from "../../Helpers/APIfunctions";
 
 import '../../CSS/Form.css'
 
 type Props = {
   userId: string;
-  loadUserData: (userId: string) => Promise<void>;
   setNewSessionFormOpen: Dispatch<SetStateAction<boolean>>
+  setSessionData: React.Dispatch<React.SetStateAction<session[]>>;
 }
 
-export default function NewSessionForm({ userId, loadUserData, setNewSessionFormOpen }: Props) {
+export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessionData }: Props) {
   const [date, setDate] = useState("");
   const [focus, setFocus] = useState("");
   const [notes, setNotes] = useState("");
@@ -31,7 +31,9 @@ export default function NewSessionForm({ userId, loadUserData, setNewSessionForm
     try {
       await createSession(newSession);
       setMessage("Session created!");
-      loadUserData(userId)
+      const data = await fetchFromTable(userId, "sessions");
+      console.log(data);
+      setSessionData(data);
       setNewSessionFormOpen(false)
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
@@ -50,7 +52,6 @@ export default function NewSessionForm({ userId, loadUserData, setNewSessionForm
             <button onClick={handleSubmit}>Create session</button>
             <button onClick={() => setNewSessionFormOpen(false)}>Cancel</button>
           </div>       
-          
         </div>
       </div>
 

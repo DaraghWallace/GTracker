@@ -14,17 +14,19 @@ export async function getToken(): Promise<string> {
 export async function fetchFromTable(userId: string, table:string) {
     switch (table) {
         case "sessions":{ // fetchFromTable(userId, "sessions")
-            console.log("Getting Sessions");
-            return getSessions(userId)
+            // console.log("Getting Sessions");
+            return getSessions(userId).then(sessions => 
+                sessions.sort((a: session, b: session) => new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime())
+            );
         }case "sets":{ // fetchFromTable(userId, "sets")
-            console.log("Getting Sets");
+            // console.log("Getting Sets");
             const sessions = await getSessions(userId)
             const sessionExercises = await Promise.all(
                 sessions.map((session: session) => getSessionExerciseBySession(session.sessionId))
             )
             return sessionExercises.flat()
         }case "exercises":{ // fetchFromTable(userId, "exercises")
-            console.log("Getting Exercises");
+            // console.log("Getting Exercises");
             return getExercises()
         }
         default:

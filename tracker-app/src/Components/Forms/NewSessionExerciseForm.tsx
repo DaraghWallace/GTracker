@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { sessionExercise, exercise } from "../../Helpers/customTypes";
-import { createSessionExercise } from "../../Helpers/APIfunctions";
+import { createSessionExercise, fetchFromTable } from "../../Helpers/APIfunctions";
 
 import '../../CSS/Form.css'
 import NseSetFormEle from "../Elements/NseFormSetEle";
@@ -8,13 +8,13 @@ import NseSetFormEle from "../Elements/NseFormSetEle";
 type Props = {
   sessionId: string;
   exercises: exercise[];
-  loadUserData: (userId: string) => Promise<void>;
+  setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
   userId: string
   setNewSetFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
 
-export default function NewSessionExerciseForm({ sessionId, exercises, loadUserData, userId, setNewSetFormOpen }: Props) {
+export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, userId, setNewSetFormOpen }: Props) {
   // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
   const [numOfSets, setNumOfSets] = useState(Number);
@@ -50,7 +50,8 @@ export default function NewSessionExerciseForm({ sessionId, exercises, loadUserD
       await createSessionExercise(newSessionExercise);
       setMessage("Set created!");
       setNewSetFormOpen(false)
-      loadUserData(userId)
+      const data = await fetchFromTable(userId, "sets")
+      setSessionExercises(data)
       
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");

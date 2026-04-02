@@ -2,40 +2,56 @@ import { useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 
 import type { exercise, session, sessionExercise } from "../../Helpers/customTypes";
-import NewSetForm from "../Forms/NewSessionExerciseForm";
+import { deleteSession, deleteSessionExercise, fetchFromTable } from "../../Helpers/APIfunctions";
+import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 
 import '../../CSS/Body.css'
-import { deleteSession, deleteSessionExercise } from "../../Helpers/APIfunctions";
+import '../../CSS/Form.css'
+
 
 
 type Props = {
   session: session;  
+  setSessionData: React.Dispatch<React.SetStateAction<session[]>>;
   exercises: exercise[];  
   sessionExercises: sessionExercise[];
-  loadUserData: (userId: string) => Promise<void>;
+  setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
   userId: string;
 }
 
-export default function SessionEle({session, exercises, sessionExercises, loadUserData, userId}: Props) {
+export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, userId}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
+  const [delSeshConfirmOpen, setDelSeshConfirmOpen] = useState(false);
+  const [delSetVisible, setDelSetVisible] = useState(false);
   
   return (
     <div className="session_ele">
+      {delSeshConfirmOpen && <div className="Form"> 
+          <div className="F_feildCont">
+            <div>Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
+            <div className="f_fc_Row">
+              <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId)}>Yes</button>
+              <button onClick={()=> setDelSeshConfirmOpen(false)}>No</button>                 
+            </div>
+          </div>
+      </div>}
+
       <div className="s_e_header">
         <div onClick={()=> console.log(session)}>{session.focus} {displayDate(session.dateDone)}</div>
-        <button onClick={()=>handleDeleteSession(session.sessionId, loadUserData, userId)}>Del</button>
+        <button onClick={()=> setDelSeshConfirmOpen(true)}>Del</button>
       </div>
 
       <div className="middle_column">
         {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}>Add exercise</button>}
         {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}>Cancel</button>}
+        {!newSetFormOpen && <button onClick={()=> setDelSetVisible(!delSetVisible)}>Deletes sets</button>}
       </div>
       {newSetFormOpen && 
         <div className="F_inset_feildCont">
-          <NewSetForm 
+          <NewSessionExerciseForm 
             sessionId = {session?.sessionId} 
             exercises = {exercises}
-            loadUserData = {loadUserData}
+            setSessionExercises={setSessionExercises}
             userId = {userId}
             setNewSetFormOpen = {setNewSetFormOpen}
           />
@@ -44,11 +60,13 @@ export default function SessionEle({session, exercises, sessionExercises, loadUs
       {sessionExercises.filter(set => set.sessionId === session.sessionId).map(sessionExercise => {
         const setEx = getExercise(sessionExercise.exerciseId, exercises);
         
+
+        
         return (
           <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
             <div className="s_e_header">
               <div onClick={()=> console.log(sessionExercise)}>{setEx?.name}:</div>
-              <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, loadUserData, userId)}>Del</button>
+              {delSetVisible && <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, setSessionExercises, userId)}>Del</button>}
             </div>
             <div className="s_e_s_weights">
               {displaySet(sessionExercise.sets).map(set=>{return (
@@ -79,12 +97,14 @@ function displaySet(sets: string): SetObj[] {
   });
 }
 
-async function handleDeleteSession(sessionId:string, loadUserData: (userId: string) => Promise<void>, userId: string ){
+async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, userId: string ){
   await deleteSession(sessionId)
-  loadUserData(userId)
+  const data = await fetchFromTable(userId, "sessions")
+  setSessionData(data)
 }
 
-async function handleDeleteSessionExercise(sessionExerciseId:string, loadUserData: (userId: string) => Promise<void>, userId: string ){
+async function handleDeleteSessionExercise(sessionExerciseId:string, setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>, userId: string ){
   await deleteSessionExercise(sessionExerciseId)
-  loadUserData(userId)
+  const data = await fetchFromTable(userId, "sets")
+  setSessionExercises(data)
 }
