@@ -19,15 +19,21 @@ export async function fetchFromTable(userId: string, table:string) {
                 sessions.sort((a: session, b: session) => new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime())
             );
         }case "sets":{ // fetchFromTable(userId, "sets")
-            // console.log("Getting Sets");
-            const sessions = await getSessions(userId)
-            const sessionExercises = await Promise.all(
-                sessions.map((session: session) => getSessionExerciseBySession(session.sessionId))
-            )
-            return sessionExercises.flat()
+            const sessions = await getSessions(userId);
+            const results: sessionExercise[] = [];
+            
+            for (const session of sessions) {
+                const exercises = await getSessionExerciseBySession(session.sessionId);
+                if (exercises) results.push(...exercises);
+            }
+            
+            return results;
         }case "exercises":{ // fetchFromTable(userId, "exercises")
             // console.log("Getting Exercises");
-            return getExercises()
+            
+            return getExercises().then(exercises => 
+                exercises.sort((a:exercise, b:exercise) => Number(a.exerciseId) - Number(b.exerciseId))
+            );
         }
         default:
             break;
@@ -191,18 +197,18 @@ export async function getSessionExerciseBySession(sessionId:string) {
     const authSession = await fetchAuthSession();
     const token = authSession.tokens?.idToken?.toString();
 
-    const response = await fetch(url, {
-        method: "GET",
-        headers: {
-        "Authorization": token ?? "",
-        },
-    });
-
-    
-
-    const text = await response.text();
-    
-    return JSON.parse(text);
+    try {
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+            "Authorization": token ?? "",
+            },
+        });
+        const text = await response.text();
+        return JSON.parse(text);        
+    } catch (error) {
+        console.error(error);
+    }
 }
 // U
 // D

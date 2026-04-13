@@ -59,3 +59,39 @@
   justify-content: center;
   justify-content: space-between;
 }
+
+.progression_grid {
+  background-color: rgb(61, 61, 61);
+
+
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;  /* for horizontal scrolling of columns */
+  overflow-y: auto;  /* for vertical scrolling of rows */
+  height: auto; 
+  width: 100%;
+}
+
+.p_g_EX_col{
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+  padding-right: 2px;
+}
+
+.p_g_col{
+  display: flex;
+  flex-direction: column;
+}
+.p_g_row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  min-width: max-content;
+}
+
+.p_g_cell{
+  border: 1px solid rgb(187, 221, 255);
+  text-align: center;
+  min-width: 100px;
+}

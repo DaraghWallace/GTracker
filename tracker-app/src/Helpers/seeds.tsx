@@ -27,68 +27,101 @@ const exercises = [
 ];
 
 const sessions = [
-  { "sessionId": "1", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-03", "focus": "Pull", "notes": "seeded" },
-  { "sessionId": "2", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-05", "focus": "Push", "notes": "seeded" },
-  { "sessionId": "3", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-07", "focus": "Legs", "notes": "seeded" },
-  { "sessionId": "4", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-09", "focus": "Pull", "notes": "seeded" },
-  { "sessionId": "5", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-11", "focus": "Push", "notes": "seeded" },
-  { "sessionId": "6", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-13", "focus": "Legs", "notes": "seeded" },
-  { "sessionId": "7", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-15", "focus": "Pull", "notes": "seeded" },
-  { "sessionId": "8", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-17", "focus": "Push", "notes": "seeded" },
-  { "sessionId": "9", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-19", "focus": "Legs", "notes": "seeded" },
-  { "sessionId": "10", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-21", "focus": "Full Body", "notes": "seeded" },
+  // January
+  { "sessionId": "ses11", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-02", "focus": "Pull", "notes": "seeded" },
+  { "sessionId": "ses12", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-04", "focus": "Push", "notes": "seeded" },
+  { "sessionId": "ses13", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-06", "focus": "Legs", "notes": "seeded" },
+  { "sessionId": "ses14", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-08", "focus": "Pull", "notes": "seeded" },
+  { "sessionId": "ses15", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-10", "focus": "Push", "notes": "seeded" },
+  // February
+  { "sessionId": "ses24", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-02", "focus": "Pull", "notes": "seeded" },
+  { "sessionId": "ses25", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-04", "focus": "Push", "notes": "seeded" },
+  { "sessionId": "ses26", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-06", "focus": "Legs", "notes": "seeded" },
+  { "sessionId": "ses27", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-09", "focus": "Pull", "notes": "seeded" },
+  { "sessionId": "ses28", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-11", "focus": "Push", "notes": "seeded" },
+  // March
+  { "sessionId": "ses01", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-03", "focus": "Pull", "notes": "seeded" },
+  { "sessionId": "ses02", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-05", "focus": "Push", "notes": "seeded" },
+  { "sessionId": "ses03", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-07", "focus": "Legs", "notes": "seeded" },
+  { "sessionId": "ses04", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-09", "focus": "Pull", "notes": "seeded" },
+  { "sessionId": "ses05", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-11", "focus": "Push", "notes": "seeded" },
 ];
 
 const sessionsExercises = [
-  // Session 1 - Pull
-  { "sessionExerciseId": "1",  "exerciseId": "11", "sessionId": "1", "sets": "0x8,0x7,0x6",          "toFailure": false },
-  { "sessionExerciseId": "2",  "exerciseId": "1",  "sessionId": "1", "sets": "20x12,22x10,24x8",         "toFailure": false },
-  { "sessionExerciseId": "3",  "exerciseId": "13", "sessionId": "1", "sets": "50x12,55x10,60x8",         "toFailure": false },
+  // Session ses11 - Pull
+  { "sessionExerciseId": "set31", "exerciseId": "11", "sessionId": "ses11", "sets": "0x6,0x5,0x5",        "toFailure": false },
+  { "sessionExerciseId": "set32", "exerciseId": "1",  "sessionId": "ses11", "sets": "16x12,18x10,20x8",   "toFailure": false },
+  { "sessionExerciseId": "set33", "exerciseId": "13", "sessionId": "ses11", "sets": "42x12,46x10,50x8",   "toFailure": false },
 
-  // Session 2 - Push
-  { "sessionExerciseId": "4",  "exerciseId": "5",  "sessionId": "2", "sets": "60x10,70x8,75x6",          "toFailure": false },
-  { "sessionExerciseId": "5",  "exerciseId": "8",  "sessionId": "2", "sets": "40x10,45x8,50x6",          "toFailure": false },
-  { "sessionExerciseId": "6",  "exerciseId": "3",  "sessionId": "2", "sets": "25x12,30x10,32x8",         "toFailure": false },
+  // Session ses12 - Push
+  { "sessionExerciseId": "set34", "exerciseId": "5",  "sessionId": "ses12", "sets": "50x10,55x8,60x6",    "toFailure": false },
+  { "sessionExerciseId": "set35", "exerciseId": "8",  "sessionId": "ses12", "sets": "32x10,36x8,40x6",    "toFailure": false },
+  { "sessionExerciseId": "set36", "exerciseId": "3",  "sessionId": "ses12", "sets": "20x12,22x10,25x8",   "toFailure": false },
 
-  // Session 3 - Legs
-  { "sessionExerciseId": "7",  "exerciseId": "16", "sessionId": "3", "sets": "80x10,90x8,100x6",         "toFailure": false },
-  { "sessionExerciseId": "8",  "exerciseId": "18", "sessionId": "3", "sets": "60x10,70x8,75x8",          "toFailure": false },
-  { "sessionExerciseId": "9",  "exerciseId": "20", "sessionId": "3", "sets": "40x15,45x12,50x10",        "toFailure": false },
+  // Session ses13 - Legs
+  { "sessionExerciseId": "set37", "exerciseId": "16", "sessionId": "ses13", "sets": "60x10,70x8,80x6",    "toFailure": false },
+  { "sessionExerciseId": "set38", "exerciseId": "18", "sessionId": "ses13", "sets": "50x10,55x8,60x8",    "toFailure": false },
+  { "sessionExerciseId": "set39", "exerciseId": "20", "sessionId": "ses13", "sets": "30x15,35x12,40x10",  "toFailure": false },
 
-  // Session 4 - Pull
-  { "sessionExerciseId": "10", "exerciseId": "12", "sessionId": "4", "sets": "60x10,70x8,80x6",          "toFailure": false },
-  { "sessionExerciseId": "11", "exerciseId": "2",  "sessionId": "4", "sets": "16x12,18x10,20x8",         "toFailure": false },
-  { "sessionExerciseId": "12", "exerciseId": "15", "sessionId": "4", "sets": "100x6,110x5,120x4",        "toFailure": false },
+  // Session ses14 - Pull
+  { "sessionExerciseId": "set40", "exerciseId": "12", "sessionId": "ses14", "sets": "50x10,55x8,60x6",    "toFailure": false },
+  { "sessionExerciseId": "set41", "exerciseId": "2",  "sessionId": "ses14", "sets": "12x12,14x10,16x8",   "toFailure": false },
+  { "sessionExerciseId": "set42", "exerciseId": "15", "sessionId": "ses14", "sets": "80x6,90x5,100x4",    "toFailure": false },
 
-  // Session 5 - Push
-  { "sessionExerciseId": "13", "exerciseId": "6",  "sessionId": "5", "sets": "50x10,55x8,60x6",          "toFailure": false },
-  { "sessionExerciseId": "14", "exerciseId": "9",  "sessionId": "5", "sets": "10x15,12x12,14x10",        "toFailure": true  },
-  { "sessionExerciseId": "15", "exerciseId": "4",  "sessionId": "5", "sets": "20x12,25x10,27x8",         "toFailure": false },
+  // Session ses15 - Push
+  { "sessionExerciseId": "set43", "exerciseId": "6",  "sessionId": "ses15", "sets": "40x10,45x8,50x6",    "toFailure": false },
+  { "sessionExerciseId": "set44", "exerciseId": "9",  "sessionId": "ses15", "sets": "8x15,10x12,12x10",   "toFailure": true  },
+  { "sessionExerciseId": "set45", "exerciseId": "4",  "sessionId": "ses15", "sets": "16x12,18x10,20x8",   "toFailure": false },
 
-  // Session 6 - Legs
-  { "sessionExerciseId": "16", "exerciseId": "17", "sessionId": "6", "sets": "120x12,140x10,160x8",      "toFailure": false },
-  { "sessionExerciseId": "17", "exerciseId": "19", "sessionId": "6", "sets": "40x12,45x10,50x8",         "toFailure": false },
-  { "sessionExerciseId": "18", "exerciseId": "16", "sessionId": "6", "sets": "85x10,95x8,105x6",         "toFailure": false },
+  // Session ses24 - Pull
+  { "sessionExerciseId": "set70", "exerciseId": "12", "sessionId": "ses24", "sets": "54x10,60x8,66x6",    "toFailure": false },
+  { "sessionExerciseId": "set71", "exerciseId": "2",  "sessionId": "ses24", "sets": "14x12,16x10,18x8",   "toFailure": false },
+  { "sessionExerciseId": "set72", "exerciseId": "15", "sessionId": "ses24", "sets": "88x6,98x5,108x4",    "toFailure": false },
 
-  // Session 7 - Pull
-  { "sessionExerciseId": "19", "exerciseId": "14", "sessionId": "7", "sets": "50x12,55x10,60x8",         "toFailure": false },
-  { "sessionExerciseId": "20", "exerciseId": "10", "sessionId": "7", "sets": "15x15,17x12,20x10",        "toFailure": true  },
-  { "sessionExerciseId": "21", "exerciseId": "11", "sessionId": "7", "sets": "0x9,0x8,0x7",           "toFailure": false },
+  // Session ses25 - Push
+  { "sessionExerciseId": "set73", "exerciseId": "6",  "sessionId": "ses25", "sets": "44x10,48x8,52x6",    "toFailure": false },
+  { "sessionExerciseId": "set74", "exerciseId": "9",  "sessionId": "ses25", "sets": "9x15,11x12,13x10",   "toFailure": true  },
+  { "sessionExerciseId": "set75", "exerciseId": "4",  "sessionId": "ses25", "sets": "18x12,22x10,24x8",   "toFailure": false },
 
-  // Session 8 - Push
-  { "sessionExerciseId": "22", "exerciseId": "5",  "sessionId": "8", "sets": "65x10,72x8,77x6",          "toFailure": false },
-  { "sessionExerciseId": "23", "exerciseId": "7",  "sessionId": "8", "sets": "15x15,17x12,20x10",        "toFailure": true  },
-  { "sessionExerciseId": "24", "exerciseId": "8",  "sessionId": "8", "sets": "42x10,47x8,52x6",          "toFailure": false },
+  // Session ses26 - Legs
+  { "sessionExerciseId": "set76", "exerciseId": "17", "sessionId": "ses26", "sets": "108x12,128x10,148x8", "toFailure": false },
+  { "sessionExerciseId": "set77", "exerciseId": "19", "sessionId": "ses26", "sets": "34x12,38x10,44x8",   "toFailure": false },
+  { "sessionExerciseId": "set78", "exerciseId": "16", "sessionId": "ses26", "sets": "74x10,84x8,94x6",    "toFailure": false },
 
-  // Session 9 - Legs
-  { "sessionExerciseId": "25", "exerciseId": "16", "sessionId": "9", "sets": "90x10,100x8,110x6",        "toFailure": false },
-  { "sessionExerciseId": "26", "exerciseId": "18", "sessionId": "9", "sets": "65x10,72x8,78x8",          "toFailure": false },
-  { "sessionExerciseId": "27", "exerciseId": "20", "sessionId": "9", "sets": "45x15,50x12,55x10",        "toFailure": false },
+  // Session ses27 - Pull
+  { "sessionExerciseId": "set79", "exerciseId": "14", "sessionId": "ses27", "sets": "46x12,50x10,54x8",   "toFailure": false },
+  { "sessionExerciseId": "set80", "exerciseId": "10", "sessionId": "ses27", "sets": "13x15,15x12,18x10",  "toFailure": true  },
+  { "sessionExerciseId": "set81", "exerciseId": "11", "sessionId": "ses27", "sets": "0x8,0x7,0x7",        "toFailure": false },
 
-  // Session 10 - Full Body
-  { "sessionExerciseId": "28", "exerciseId": "5",  "sessionId": "10", "sets": "67x10,74x8,79x6",         "toFailure": false },
-  { "sessionExerciseId": "29", "exerciseId": "16", "sessionId": "10", "sets": "92x10,102x8,112x6",       "toFailure": false },
-  { "sessionExerciseId": "30", "exerciseId": "12", "sessionId": "10", "sets": "65x10,72x8,82x6",         "toFailure": false },
+  // Session ses28 - Push
+  { "sessionExerciseId": "set82", "exerciseId": "5",  "sessionId": "ses28", "sets": "60x10,67x8,72x6",    "toFailure": false },
+  { "sessionExerciseId": "set83", "exerciseId": "7",  "sessionId": "ses28", "sets": "13x15,15x12,18x10",  "toFailure": true  },
+  { "sessionExerciseId": "set84", "exerciseId": "8",  "sessionId": "ses28", "sets": "38x10,43x8,48x6",    "toFailure": false },
+
+  // Session ses01 - Pull
+  { "sessionExerciseId": "set01", "exerciseId": "11", "sessionId": "ses01", "sets": "0x8,0x7,0x6",        "toFailure": false },
+  { "sessionExerciseId": "set02", "exerciseId": "1",  "sessionId": "ses01", "sets": "20x12,22x10,24x8",   "toFailure": false },
+  { "sessionExerciseId": "set03", "exerciseId": "13", "sessionId": "ses01", "sets": "50x12,55x10,60x8",   "toFailure": false },
+
+  // Session ses02 - Push
+  { "sessionExerciseId": "set04", "exerciseId": "5",  "sessionId": "ses02", "sets": "60x10,70x8,75x6",    "toFailure": false },
+  { "sessionExerciseId": "set05", "exerciseId": "8",  "sessionId": "ses02", "sets": "40x10,45x8,50x6",    "toFailure": false },
+  { "sessionExerciseId": "set06", "exerciseId": "3",  "sessionId": "ses02", "sets": "25x12,30x10,32x8",   "toFailure": false },
+
+  // Session ses03 - Legs
+  { "sessionExerciseId": "set07", "exerciseId": "16", "sessionId": "ses03", "sets": "80x10,90x8,100x6",   "toFailure": false },
+  { "sessionExerciseId": "set08", "exerciseId": "18", "sessionId": "ses03", "sets": "60x10,70x8,75x8",    "toFailure": false },
+  { "sessionExerciseId": "set09", "exerciseId": "20", "sessionId": "ses03", "sets": "40x15,45x12,50x10",  "toFailure": false },
+
+  // Session ses04 - Pull
+  { "sessionExerciseId": "set10", "exerciseId": "12", "sessionId": "ses04", "sets": "60x10,70x8,80x6",    "toFailure": false },
+  { "sessionExerciseId": "set11", "exerciseId": "2",  "sessionId": "ses04", "sets": "16x12,18x10,20x8",   "toFailure": false },
+  { "sessionExerciseId": "set12", "exerciseId": "15", "sessionId": "ses04", "sets": "100x6,110x5,120x4",  "toFailure": false },
+
+  // Session ses05 - Push
+  { "sessionExerciseId": "set13", "exerciseId": "6",  "sessionId": "ses05", "sets": "50x10,55x8,60x6",    "toFailure": false },
+  { "sessionExerciseId": "set14", "exerciseId": "9",  "sessionId": "ses05", "sets": "10x15,12x12,14x10",  "toFailure": true  },
+  { "sessionExerciseId": "set15", "exerciseId": "4",  "sessionId": "ses05", "sets": "20x12,25x10,27x8",   "toFailure": false },
 ];
 
 export async function seedExercises() {
