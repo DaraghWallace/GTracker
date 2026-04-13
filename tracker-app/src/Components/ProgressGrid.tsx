@@ -19,14 +19,12 @@ function organiseProgress(sessionData: session[], sessionExercises: sessionExerc
         const setsArr = sessionExercise.sets.split(",").map(set => Number(set.split("x")[0]));
         const topSet = Math.max(...setsArr)
         sessionCol[sessionExercise.exerciseId] = topSet;
-      }else{
+      } else if (!(sessionExercise.exerciseId in sessionCol)) {
         sessionCol[sessionExercise.exerciseId] = "-";
       }
     });    
 
     sessionColArr.push(sessionCol);
-
-    
   });
 
   return sessionColArr.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -34,7 +32,7 @@ function organiseProgress(sessionData: session[], sessionExercises: sessionExerc
 
 export default function ProgressGrid({exercises, sessionData, sessionExercises}: Props){
   const displayArr = organiseProgress(sessionData, sessionExercises);
-  console.log(displayArr);
+  // console.log(displayArr);
   
   return (
     <div className="progression_grid">

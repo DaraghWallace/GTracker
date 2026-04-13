@@ -12,7 +12,7 @@ import { getUserAttributes, logout } from './Helpers/amplify';
 
 import './CSS/App.css';
 import { fetchFromTable } from './Helpers/APIfunctions';
-import { /*seedExercises,*/ seedSessions, seedSessionsExercises } from './Helpers/seeds';
+import { /*seedExercises, seedSessions, seedSessionsExercises*/ } from './Helpers/seeds';
 
 export default function App() {
   // const [securityToken, setSecurityToken] = useState("");
@@ -21,6 +21,7 @@ export default function App() {
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
+  const [page, setPage] = useState("progress");
   // const bar = getRandomQuote()
 
   async function loadUserData(userId: string) {
@@ -74,14 +75,15 @@ export default function App() {
   return (
     <div className="App">
       {/* <button onClick={seedExercises}>seedExercises</button> */}
-      <button onClick={seedSessions}>seedSessions</button>
-      <button onClick={seedSessionsExercises}>seedSessionsExercises</button>
+      {/* <button onClick={seedSessions}>seedSessions</button> */}
+      {/* <button onClick={seedSessionsExercises}>seedSessionsExercises</button> */}
       <div className="app-section">
         <Header
           currentUser = {currentUser}
           setCurrentUser = {setCurrentUser}
           loadUserData = {loadUserData}
           handleSignOut = {handleSignOut}
+          setPage = {setPage}
         />        
       </div>
       
@@ -101,6 +103,7 @@ export default function App() {
             exercises={exercises}
             sessionExercises={sessionExercises}
             setSessionExercises={setSessionExercises}
+            page={page}
           />
         )}
       </div>

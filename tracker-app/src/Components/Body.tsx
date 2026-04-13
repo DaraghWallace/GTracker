@@ -16,12 +16,15 @@ type Props = {
   exercises: exercise[];
   sessionExercises: sessionExercise[];
   setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
+  page:string
 }
 
-export default function Body({currentUser, sessionData, setSessionData, exercises, sessionExercises, setSessionExercises}: Props){
+export default function Body({currentUser, sessionData, setSessionData, exercises, sessionExercises, setSessionExercises, page}: Props){
   
-  const [page, setPage] = useState("progress");
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
+
+  const [gridFilter, setGridFilter] = useState("month");
+
   // const [newExerciseFormOpen, setNewExerciseFormOpen] = useState(false);
   switch (page) {
     case "sessions":
@@ -54,7 +57,17 @@ export default function Body({currentUser, sessionData, setSessionData, exercise
         </div>
       )      
     case "progress":
-      return <ProgressGrid exercises={exercises} sessionData={sessionData} sessionExercises={sessionExercises}/>
+      return (<div>
+        <div>Filter: 
+          <select onChange={(e) => setGridFilter(e.target.value)}>
+            <option value="">Session, Month or Year?</option>
+            <option value="Session">Session</option>
+            <option value="Month">Month</option>
+            <option value="Year">Year</option>
+          </select>
+        </div>
+        <ProgressGrid exercises={exercises} sessionData={sessionData} sessionExercises={sessionExercises}/>
+      </div>)
     default:
       break;
   }
