@@ -66,7 +66,7 @@ export default function Body({currentUser, sessionData, setSessionData, exercise
             <option value="Year">Year</option>
           </select>
         </div>
-        <ProgressGrid exercises={exercises} sessionData={sessionData} sessionExercises={sessionExercises}/>
+        <ProgressGrid exercises={exercises} sessionData={sessionData} sessionExercises={sessionExercises} gridFilter={gridFilter}/>
       </div>)
     default:
       break;
