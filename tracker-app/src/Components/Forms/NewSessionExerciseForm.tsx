@@ -66,28 +66,34 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
           {selectedExercise && <button onClick={()=>setSelectedExercise(null)}>Change</button>}
         </div>
 
-        {!selectedExercise && 
+        {!selectedExercise && (
           <div className="f_fc_exercises">
-            {exercises.map((exercise) => (
-              <button key={exercise.exerciseId} onClick={()=>setSelectedExercise(exercise)}>
-                {exercise.name}
-              </button>
-            ))}          
-          </div>        
-        }
+            {[...new Set(exercises.map(e => e.group))].map(group => (
+              <div className="f_fc_e_groups" key={group}>
+                <div>{group}</div>
+                <div className="f_fc_e_g_buttons">
+                  {exercises.filter(e => e.group === group).map(exercise => (
+                    <button className="f_fc_e_g_b_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>
+                      {exercise.name}
+                    </button>
+                  ))}                  
+                </div>
 
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
+      <div>
+        Sets: {numOfSets} 
+        <button onClick={()=>setNumOfSets(numOfSets+1)}>+</button>
+        {numOfSets >= 1 && <button onClick={()=>setNumOfSets(numOfSets-1)}>-</button>}
+      </div>
       <div className="f_fc_Row">Weight | Reps | Done?</div>
       {displayReps(numOfSets,setArr, setSetArr)}
 
-      <input
-        type="number"
-        placeholder="Reps"
-        value={numOfSets}
-        onChange={e => setNumOfSets(Number(e.target.value))}
-        min={1}
-      />
+
 
 
       <label>

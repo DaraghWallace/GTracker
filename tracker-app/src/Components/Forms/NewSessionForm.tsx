@@ -14,6 +14,7 @@ type Props = {
 export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessionData }: Props) {
   const [date, setDate] = useState("");
   const [focus, setFocus] = useState("");
+  const [userWeight, setUserWeight] = useState(0);
   const [notes, setNotes] = useState("");
   const [message, setMessage] = useState("");
 
@@ -24,6 +25,7 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
       sessionId: uuidv4(),
       userId,
       dateDone: date,
+      userWeight: userWeight,
       focus: focus || null,
       notes: notes || null,
     };
@@ -45,7 +47,8 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
       <div className="F_feildCont">
         <div className="f_fc_Column">
           <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-          <input placeholder="Focus (optional)" value={focus} onChange={e => setFocus(e.target.value)} />
+          <input placeholder="Focus / Title (optional)" value={focus} onChange={e => setFocus(e.target.value)} />
+          <div>Weight: <input type="Number" value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} /></div>
           <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
           {message && <p>{message}</p>}   
           <div>

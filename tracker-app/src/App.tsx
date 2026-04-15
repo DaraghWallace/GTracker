@@ -8,11 +8,12 @@ import type { user, session, exercise, sessionExercise } from "./Helpers/customT
 
 import { getUserAttributes, logout } from './Helpers/amplify';
 // import { getExercises, getSessions, getSessionExerciseBySession, /*getToken*/ } from './Helpers/APIfunctions';
+
 // import {seedExercises, getRandomQuote} from './Helpers/seeds'
 
 import './CSS/App.css';
 import { fetchFromTable } from './Helpers/APIfunctions';
-import { /*seedExercises, seedSessions, seedSessionsExercises*/ } from './Helpers/seeds';
+// import { seedSessions } from './Helpers/seeds';
 
 export default function App() {
   // const [securityToken, setSecurityToken] = useState("");
@@ -21,7 +22,7 @@ export default function App() {
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
-  const [page, setPage] = useState("progress");
+  const [page, setPage] = useState("sessions");
   // const bar = getRandomQuote()
 
   async function loadUserData(userId: string) {

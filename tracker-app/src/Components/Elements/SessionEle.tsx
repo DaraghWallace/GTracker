@@ -21,6 +21,7 @@ type Props = {
 
 export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, userId}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
+  const [editSession, setEditSession] = useState(false);
   const [delSeshConfirmOpen, setDelSeshConfirmOpen] = useState(false);
   const [delSetVisible, setDelSetVisible] = useState(false);
   
@@ -38,14 +39,23 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
 
       <div className="s_e_header">
         <div onClick={()=> console.log(session)}>{session.focus} {displayDate(session.dateDone)}</div>
-        <button onClick={()=> setDelSeshConfirmOpen(true)}>Del</button>
+        {editSession &&
+          <div>
+            <button onClick={()=> setDelSeshConfirmOpen(true)}>Del</button>
+            <button onClick={()=> setEditSession(false)}>Cancel</button>          
+          </div>
+        }  
+        {!editSession &&<button onClick={()=> setEditSession(true)}>Edit</button>}
       </div>
+      
+      {editSession &&
+        <div className="middle_column">
+          {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}>Add exercise</button>}
+          {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}>Cancel</button>}
+          {!newSetFormOpen && <button onClick={()=> setDelSetVisible(!delSetVisible)}>Deletes sets</button>}
+        </div>      
+      }
 
-      <div className="middle_column">
-        {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}>Add exercise</button>}
-        {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}>Cancel</button>}
-        {!newSetFormOpen && <button onClick={()=> setDelSetVisible(!delSetVisible)}>Deletes sets</button>}
-      </div>
       {newSetFormOpen && 
         <div className="F_inset_feildCont">
           <NewSessionExerciseForm 

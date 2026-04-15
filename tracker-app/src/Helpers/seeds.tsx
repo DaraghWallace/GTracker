@@ -28,23 +28,23 @@ const exercises = [
 
 const sessions = [
   // January
-  { "sessionId": "ses11", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-02", "focus": "Pull", "notes": "seeded" },
-  { "sessionId": "ses12", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-04", "focus": "Push", "notes": "seeded" },
-  { "sessionId": "ses13", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-06", "focus": "Legs", "notes": "seeded" },
-  { "sessionId": "ses14", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-08", "focus": "Pull", "notes": "seeded" },
-  { "sessionId": "ses15", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-10", "focus": "Push", "notes": "seeded" },
+  { "sessionId": "ses11", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-02", "focus": "Pull", "notes": "seeded", "userWeight": 82.0 },
+  { "sessionId": "ses12", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-04", "focus": "Push", "notes": "seeded", "userWeight": 81.8 },
+  { "sessionId": "ses13", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-06", "focus": "Legs", "notes": "seeded", "userWeight": 82.2 },
+  { "sessionId": "ses14", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-08", "focus": "Pull", "notes": "seeded", "userWeight": 81.5 },
+  { "sessionId": "ses15", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-01-10", "focus": "Push", "notes": "seeded", "userWeight": 81.7 },
   // February
-  { "sessionId": "ses24", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-02", "focus": "Pull", "notes": "seeded" },
-  { "sessionId": "ses25", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-04", "focus": "Push", "notes": "seeded" },
-  { "sessionId": "ses26", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-06", "focus": "Legs", "notes": "seeded" },
-  { "sessionId": "ses27", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-09", "focus": "Pull", "notes": "seeded" },
-  { "sessionId": "ses28", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-11", "focus": "Push", "notes": "seeded" },
+  { "sessionId": "ses24", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-02", "focus": "Pull", "notes": "seeded", "userWeight": 81.2 },
+  { "sessionId": "ses25", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-04", "focus": "Push", "notes": "seeded", "userWeight": 80.9 },
+  { "sessionId": "ses26", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-06", "focus": "Legs", "notes": "seeded", "userWeight": 81.1 },
+  { "sessionId": "ses27", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-09", "focus": "Pull", "notes": "seeded", "userWeight": 80.6 },
+  { "sessionId": "ses28", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-02-11", "focus": "Push", "notes": "seeded", "userWeight": 80.8 },
   // March
-  { "sessionId": "ses01", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-03", "focus": "Pull", "notes": "seeded" },
-  { "sessionId": "ses02", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-05", "focus": "Push", "notes": "seeded" },
-  { "sessionId": "ses03", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-07", "focus": "Legs", "notes": "seeded" },
-  { "sessionId": "ses04", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-09", "focus": "Pull", "notes": "seeded" },
-  { "sessionId": "ses05", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-11", "focus": "Push", "notes": "seeded" },
+  { "sessionId": "ses01", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-03", "focus": "Pull", "notes": "seeded", "userWeight": 80.3 },
+  { "sessionId": "ses02", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-05", "focus": "Push", "notes": "seeded", "userWeight": 80.5 },
+  { "sessionId": "ses03", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-07", "focus": "Legs", "notes": "seeded", "userWeight": 80.1 },
+  { "sessionId": "ses04", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-09", "focus": "Pull", "notes": "seeded", "userWeight": 79.8 },
+  { "sessionId": "ses05", "userId": "f9ce44a8-c091-7016-2d52-e469a07ea283", "dateDone": "2026-03-11", "focus": "Push", "notes": "seeded", "userWeight": 80.0 },
 ];
 
 const sessionsExercises = [

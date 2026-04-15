@@ -12,6 +12,7 @@ export type user = {
 export type session = {
   sessionId: string // PK
   userId: string
+  userWeight: number
   dateDone: string
   focus: string | null
   notes: string | null

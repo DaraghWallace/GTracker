@@ -12,7 +12,6 @@ type Props = {
 
 type sessionCol = {"date": string, [exerciseId: string]: string | number}
 
-
 export default function ProgressGrid({exercises, sessionData, sessionExercises, gridFilter}: Props){
   const displayArr = useMemo(() => {
     switch (gridFilter) {
@@ -29,24 +28,40 @@ export default function ProgressGrid({exercises, sessionData, sessionExercises, 
   // console.log(displayArr);
   
   return (
-    <div className="progression_grid">
-      <div className="p_g_EX_col">
-        <div  className="p_g_cell">Exercises</div>
-        {exercises.map((exercise) => (
-          <div className="p_g_cell" key={exercise.exerciseId}>{exercise.name}</div>
-        ))}
-      </div>
-      <div className="p_g_row">
-        {displayArr.map((column) => (
-          <div className="p_g_col" key={column.date}>
-            <div  className="p_g_cell">{column.date}</div>
-            {Object.entries(column)
-              .filter(([key]) => key !== "date" && key !== "sessionId")
-              .map(([key, value]) => (
-                <div className="p_g_cell" key={key}>{value}</div>
-              ))}
+    <div>
+      <div className="progression_grid">
+          <div className="p_g_col">
+            <div  className="p_g_cell">Date</div>
+            <div  className="p_g_cell">Weight</div>
           </div>
-        ))}        
+          {displayArr.map((column) => (
+            <div className="p_g_col" key={column.date}>
+              <div  className="p_g_cell">{column.date}</div>
+              <div  className="p_g_cell">{column.weight}</div>
+            </div>
+          ))} 
+      </div>
+      <br/>
+      <div className="progression_grid">
+        <div className="p_g_EX_col">
+          <div  className="p_g_cell">Exercises</div>
+          {exercises.map((exercise) => (
+            <div className="p_g_cell" key={exercise.exerciseId}>{exercise.name}</div>
+          ))}
+
+        </div>
+        <div className="p_g_row">
+          {displayArr.map((column) => (
+            <div className="p_g_col" key={column.date}>
+              <div  className="p_g_cell">{column.date}</div>
+              {Object.entries(column)
+                .filter(([key]) => key !== "date" && key !== "sessionId" && key !== "weight")
+                .map(([key, value]) => (
+                  <div className="p_g_cell" key={key}>{value}</div>
+                ))}
+            </div>
+          ))}        
+        </div>
       </div>
     </div>
   );
@@ -55,7 +70,10 @@ export default function ProgressGrid({exercises, sessionData, sessionExercises, 
 function organiseProgressByDay(sessionData: session[], sessionExercises: sessionExercise[]): sessionCol[] {
   const sessionColArr: sessionCol[] = []
   sessionData.forEach(session => {
-    const sessionCol: sessionCol = {"date": session.dateDone}
+    const sessionCol: sessionCol = {"date": session.dateDone, "weight": session.userWeight}
+    if (!sessionCol.weight) {
+      sessionCol.weight = 0
+    }
     sessionExercises.forEach(sessionExercise => {
       if (sessionExercise.sessionId === session.sessionId){
         const setsArr = sessionExercise.sets.split(",").map(set => Number(set.split("x")[0]));
