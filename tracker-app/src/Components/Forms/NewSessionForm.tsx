@@ -57,7 +57,6 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
           </div>       
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { v4 as uuidv4 } from 'uuid';
+import { useState, type Dispatch, type SetStateAction } from "react";
+
+import SessionExerciseEle from "./SessionExerciseEle"
 
 import type { exercise, session, sessionExercise } from "../../Helpers/customTypes";
-import { deleteSession, deleteSessionExercise, fetchFromTable } from "../../Helpers/APIfunctions";
+import { deleteSession, fetchFromTable } from "../../Helpers/APIfunctions";
 import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 
+import "../../CSS/App.css"
 import '../../CSS/Body.css'
 import '../../CSS/Form.css'
 
@@ -21,10 +23,15 @@ type Props = {
 
 export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, userId}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
+
   const [editSession, setEditSession] = useState(false);
   const [delSeshConfirmOpen, setDelSeshConfirmOpen] = useState(false);
-  const [delSetVisible, setDelSetVisible] = useState(false);
-  
+  const [newFocus, setNewFocus] = useState(session.focus);
+  const [newDateDone, setNewDateDone] = useState(session.dateDone);
+  const [newUserWeight, setNewUserWeight] = useState(session.userWeight);
+
+  const [editSetVisible, setEditSetVisible] = useState(false);
+
   return (
     <div className="session_ele">
       {delSeshConfirmOpen && <div className="Form"> 
@@ -38,11 +45,27 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
       </div>}
 
       <div className="s_e_header">
-        <div onClick={()=> console.log(session)}>{session.focus} {displayDate(session.dateDone)}</div>
+        {editSession? 
+          <div>
+            <input placeholder={session.focus || "Focus"} size={9} value={newFocus || ""}
+              onChange={(e) => setNewFocus(e.target.value)}
+            />-
+            <input placeholder={session.dateDone} type="date" value={newDateDone}
+              onChange={(e) => setNewDateDone(e.target.value)}
+            />- 
+            <input placeholder={session.dateDone} type="number" value={newUserWeight}
+              onChange={(e) => setNewUserWeight(Number(e.target.value))}
+            />kgs       
+          </div>
+          :
+          <div onClick={()=> console.log(session)}>{session.focus} {displayDate(session.dateDone) + ` (${session.userWeight}kg)`}</div>      
+        }
+
         {editSession &&
           <div>
-            <button onClick={()=> setDelSeshConfirmOpen(true)}>Del</button>
-            <button onClick={()=> setEditSession(false)}>Cancel</button>          
+            <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession)}>S</button>
+            <button onClick={()=> setDelSeshConfirmOpen(true)}>D</button>
+            <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}}>C</button>          
           </div>
         }  
         {!editSession &&<button onClick={()=> setEditSession(true)}>Edit</button>}
@@ -52,7 +75,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
         <div className="middle_column">
           {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}>Add exercise</button>}
           {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}>Cancel</button>}
-          {!newSetFormOpen && <button onClick={()=> setDelSetVisible(!delSetVisible)}>Deletes sets</button>}
+          {!newSetFormOpen && <button onClick={()=> setEditSetVisible(!editSetVisible)}>Edit sets</button>}
         </div>      
       }
 
@@ -67,31 +90,30 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           />
         </div>
       }        
-      {sessionExercises.filter(set => set.sessionId === session.sessionId).map(sessionExercise => {
-        const setEx = getExercise(sessionExercise.exerciseId, exercises);
-        
-
-        
-        return (
-          <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
-            <div className="s_e_header">
-              <div onClick={()=> console.log(sessionExercise)}>{setEx?.name}:</div>
-              {delSetVisible && <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, setSessionExercises, userId)}>Del</button>}
-            </div>
-            <div className="s_e_s_weights">
-              {displaySet(sessionExercise.sets).map(set=>{return (
-                <div className="s_e_s_w_num" key={uuidv4()}>{set.weight}kg x {set.reps}</div>
-              )})}
-            </div>
-          </div>
-        );
+      {sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => {
+        return <SessionExerciseEle key={index}
+          sessionExercise = {sessionExercise}
+          exercises = {exercises}
+          editSetVisible = {editSetVisible}
+          setSessionExercises = {setSessionExercises}
+          userId={userId}
+        />
       })}
     </div>
   )
 }
 
-function getExercise(exerciseId: string, exercises: exercise[]): exercise | undefined {
-  return exercises.find(e => e.exerciseId === exerciseId);
+function handleUpdateSession(session:session, newFocus:string | null, newDateDone:string, newUserWeight:number, setEditSession: Dispatch<SetStateAction<boolean>>) {
+  const newSession: session = {
+    sessionId: session.sessionId,
+    userId: session.userId,
+    userWeight: newUserWeight,
+    dateDone: newDateDone,
+    focus: newFocus,
+    notes: session.notes, //TODO
+  }
+  console.log(newSession);
+  setEditSession(false)
 }
 
 function displayDate(date: string): string {
@@ -99,22 +121,8 @@ function displayDate(date: string): string {
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-type SetObj = { weight: number; reps: number };
-function displaySet(sets: string): SetObj[] {
-  return sets.split(',').map(weightStr => {
-    const [weight, reps] = weightStr.split('x');
-    return { weight: Number(weight), reps: Number(reps) };
-  });
-}
-
 async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, userId: string ){
   await deleteSession(sessionId)
   const data = await fetchFromTable(userId, "sessions")
   setSessionData(data)
-}
-
-async function handleDeleteSessionExercise(sessionExerciseId:string, setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>, userId: string ){
-  await deleteSessionExercise(sessionExerciseId)
-  const data = await fetchFromTable(userId, "sets")
-  setSessionExercises(data)
 }
