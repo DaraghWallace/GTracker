@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { exercise, sessionExercise } from "../../Helpers/customTypes";
-import { deleteSessionExercise, fetchFromTable } from "../../Helpers/APIfunctions";
+import { deleteSessionExercise, fetchFromTable, updateSessionExercise } from "../../Helpers/APIfunctions";
 
 import "../../CSS/App.css"
 
@@ -38,7 +38,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
           <div>
             { editSets ?
               <>
-                <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets)}}>S</button>
+                <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, userId)}}>S</button>
                 <button onClick={()=> {handleCancelEdit(setNewSets, sessionExercise, setEditSets)}}>C</button>              
               </>
               :
@@ -75,7 +75,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
   );
 }
 
-function handleUpdateSessionExercise(sessionExercise: sessionExercise, newExercise: string, newSets: string) {
+async function handleUpdateSessionExercise(sessionExercise: sessionExercise, newExercise: string, newSets: string,setEditSets: Dispatch<SetStateAction<boolean>>, setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>> ,userId:string) {
   const newSessionExercise = {
     sessionExerciseId: sessionExercise.sessionExerciseId,
     sessionId: sessionExercise.sessionId,
@@ -84,7 +84,9 @@ function handleUpdateSessionExercise(sessionExercise: sessionExercise, newExerci
     sets: newSets,
   }
 
-  console.log(newSessionExercise);
+  await updateSessionExercise(newSessionExercise)
+  await setSessionExercises(await fetchFromTable(userId, "sets"))
+  setEditSets(false)
 }
 
 async function handleUpdateSetOfReps(e: HTMLInputElement, newSets: string, setNewSets: Dispatch<SetStateAction<string>>) {
@@ -103,7 +105,7 @@ async function handleUpdateSetOfReps(e: HTMLInputElement, newSets: string, setNe
     updatedStrings.push(newString)
   });
 
-  console.log(updatedStrings.toString());
+  // console.log(updatedStrings.toString());
   setNewSets(updatedStrings.toString())
 }
 

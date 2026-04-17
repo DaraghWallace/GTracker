@@ -154,7 +154,13 @@ export class TrackerCdkStack extends cdk.Stack {
     });
     sessionTable.grantWriteData(deleteSessionFn);
 
-
+    const updateSessionFn = new NodejsFunction(this, "UpdateSessionFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/updateItem.ts",
+      environment: { TABLE_NAME: sessionTable.tableName },
+      bundling: { forceDockerBundling: false },
+    });
+    sessionTable.grantWriteData(updateSessionFn);
     //#endregion
     
     //#region: Exercises:  / dynamoDB table / C-R-u-d
@@ -232,7 +238,15 @@ export class TrackerCdkStack extends cdk.Stack {
       environment: {TABLE_NAME: sessionExerciseTable.tableName,},
       bundling: {forceDockerBundling: false,},
     });
-    sessionExerciseTable.grantReadData(getSessionExerciseBySessionFn);     
+    sessionExerciseTable.grantReadData(getSessionExerciseBySessionFn);
+    
+    const updateSessionExerciseFn = new NodejsFunction(this, "updateSessionExerciseFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/updateItem.ts",
+      environment: { TABLE_NAME: sessionExerciseTable.tableName },
+      bundling: { forceDockerBundling: false },
+    });
+    sessionExerciseTable.grantWriteData(updateSessionExerciseFn);     
 
     const deleteSessionExerciseFn = new NodejsFunction(this, "DeleteSessionExerciseFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
@@ -261,7 +275,7 @@ export class TrackerCdkStack extends cdk.Stack {
         allowMethods: apigateway.Cors.ALL_METHODS,
         allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
       },
-    });
+    });  
 
     sessions.addMethod("POST",new apigateway.LambdaIntegration(createSessionFn),{
         authorizer,
@@ -279,7 +293,14 @@ export class TrackerCdkStack extends cdk.Stack {
         authorizationType: apigateway.AuthorizationType.COGNITO,
       }
     );
-    //U
+
+        
+    sessionById.addMethod("PUT", new apigateway.LambdaIntegration(updateSessionFn),{
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
+    );    
+
     sessionById.addMethod("DELETE", new apigateway.LambdaIntegration(deleteSessionFn), {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
@@ -317,7 +338,13 @@ export class TrackerCdkStack extends cdk.Stack {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
-    //U
+
+    sessionExerciseById.addMethod("PUT", new apigateway.LambdaIntegration(updateSessionExerciseFn),{
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
+    ); 
+    
     sessionExerciseById.addMethod("DELETE", new apigateway.LambdaIntegration(deleteSessionExerciseFn), {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,

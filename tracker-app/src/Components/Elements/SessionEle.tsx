@@ -3,7 +3,7 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import SessionExerciseEle from "./SessionExerciseEle"
 
 import type { exercise, session, sessionExercise } from "../../Helpers/customTypes";
-import { deleteSession, fetchFromTable } from "../../Helpers/APIfunctions";
+import { deleteSession, fetchFromTable, updateSession } from "../../Helpers/APIfunctions";
 import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 
 import "../../CSS/App.css"
@@ -63,7 +63,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
 
         {editSession &&
           <div>
-            <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession)}>S</button>
+            <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData)}>S</button>
             <button onClick={()=> setDelSeshConfirmOpen(true)}>D</button>
             <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}}>C</button>          
           </div>
@@ -103,7 +103,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
   )
 }
 
-function handleUpdateSession(session:session, newFocus:string | null, newDateDone:string, newUserWeight:number, setEditSession: Dispatch<SetStateAction<boolean>>) {
+async function handleUpdateSession(session:session, newFocus:string | null, newDateDone:string, newUserWeight:number, setEditSession: Dispatch<SetStateAction<boolean>>, setSessionData: Dispatch<SetStateAction<session[]>>) {
   const newSession: session = {
     sessionId: session.sessionId,
     userId: session.userId,
@@ -112,8 +112,11 @@ function handleUpdateSession(session:session, newFocus:string | null, newDateDon
     focus: newFocus,
     notes: session.notes, //TODO
   }
-  console.log(newSession);
+  await updateSession(newSession)
+  const updatedData:session[] = await fetchFromTable(session.userId, "sessions")
+  setSessionData(updatedData)
   setEditSession(false)
+
 }
 
 function displayDate(date: string): string {

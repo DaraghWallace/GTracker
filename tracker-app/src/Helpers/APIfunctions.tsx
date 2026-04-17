@@ -12,6 +12,8 @@ export async function getToken(): Promise<string> {
 
 //#region: Lil Helpers
 export async function fetchFromTable(userId: string, table:string) {
+    console.log("fetchFromTable: " + table);
+    
     switch (table) {
         case "sessions":{ // fetchFromTable(userId, "sessions")
             // console.log("Getting Sessions");
@@ -90,7 +92,35 @@ export async function getSessions(userId: string) {
     
     return Array.isArray(parsed) ? parsed : parsed.Items ?? [];
 }
-// U
+// U works
+export async function updateSession(newSession: session) {
+    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions/${newSession.sessionId}`;
+    console.log(url);
+
+    try {
+        console.log("updating session...");
+
+        const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ?? "",
+            },
+            body: JSON.stringify(newSession),
+        });
+
+        const text = await response.text();
+        console.log("RAW RESPONSE:", text);
+
+        const result = JSON.parse(text);
+
+        console.log("Session Updated:", result);
+        return result;
+    } catch (error) {
+        console.error("Failed to PUT:", error);
+        throw error;
+    }
+}
 // D
 export const deleteSession = async (sessionId: string) => {
     if (!token) throw new Error("No auth token");
@@ -159,7 +189,7 @@ export async function getExercises() {
 //#endregion
 
 //#region: SessionExercise
-// C
+// C - works
 export async function createSessionExercise(newSessionExercise: sessionExercise) {
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise`;
 
@@ -191,7 +221,7 @@ export async function createSessionExercise(newSessionExercise: sessionExercise)
         throw error;
     }
 }
-// R
+// R - works
 export async function getSessionExerciseBySession(sessionId:string) {
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise?sessionId=${sessionId}`
     const authSession = await fetchAuthSession();
@@ -211,7 +241,35 @@ export async function getSessionExerciseBySession(sessionId:string) {
     }
 }
 // U
-// D
+export async function updateSessionExercise(newSessionExercise: sessionExercise) {
+    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise/${newSessionExercise.sessionExerciseId}`;;
+    console.log(url);
+
+    try {
+        console.log("updating session...");
+
+        const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ?? "",
+            },
+            body: JSON.stringify(newSessionExercise),
+        });
+
+        const text = await response.text();
+        console.log("RAW RESPONSE:", text);
+
+        const result = JSON.parse(text);
+
+        console.log("Session Updated:", result);
+        return result;
+    } catch (error) {
+        console.error("Failed to PUT:", error);
+        throw error;
+    }
+}
+// D - works
 export const deleteSessionExercise = async (sessionExerciseId: string) => {
     if (!token) throw new Error("No auth token");
     const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise/${sessionExerciseId}`, {
