@@ -1,7 +1,7 @@
 import { fetchAuthSession } from "aws-amplify/auth";
 import type { exercise, session, sessionExercise } from "./customTypes";
 
-const invokeid = "2egaivggi6"
+const invokeid = "0u3eifdn7j"
 const authSession = await fetchAuthSession();
 const token = authSession.tokens?.idToken?.toString();
 
@@ -153,16 +153,8 @@ export async function createExercise(newExercise: exercise) {
         });
 
         const text = await response.text();
-        console.log("RAW RESPONSE:", text);
-
-        let result;
-        try {
-            result = JSON.parse(text);
-        } catch {
-            result = text;
-        }
-
-        console.log(newExercise.name , " created:", result);
+        const result = JSON.parse(text);
+        return result;
     } catch (error) {
         console.error("Failed to Post:", error);
         throw error;

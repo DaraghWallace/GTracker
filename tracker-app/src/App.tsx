@@ -13,7 +13,7 @@ import { getUserAttributes, logout } from './Helpers/amplify';
 
 import './CSS/App.css';
 import { fetchFromTable } from './Helpers/APIfunctions';
-// import { seedSessions } from './Helpers/seeds';
+// import { seedSessions, seedExercises, seedSessionsExercises } from './Helpers/seeds';
 
 export default function App() {
   // const [securityToken, setSecurityToken] = useState("");
@@ -75,9 +75,9 @@ export default function App() {
   
   return (
     <div className="App">
-      {/* <button onClick={seedExercises}>seedExercises</button> */}
-      {/* <button onClick={seedSessions}>seedSessions</button> */}
-      {/* <button onClick={seedSessionsExercises}>seedSessionsExercises</button> */}
+      {/* <button onClick={seedExercises}>seedExercises</button>
+      <button onClick={seedSessions}>seedSessions</button>
+      <button onClick={seedSessionsExercises}>seedSessionsExercises</button> */}
       <div className="app-section">
         <Header
           currentUser = {currentUser}

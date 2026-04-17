@@ -7,8 +7,8 @@ import {
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: "ap-southeast-2_VUGo0kWkr",
-      userPoolClientId: "6mpvlu76jfl46s4hh8pnio6nrl",
+      userPoolId: "ap-southeast-2_HwhZ2uw9O",
+      userPoolClientId: "5it7f85g4mns63it2apsnbfbkc",
       loginWith: {
         email: true
       }

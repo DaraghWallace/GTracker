@@ -1,0 +1,72 @@
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+
+interface SessionExercisesProps {
+  api: apigateway.RestApi;
+  authorizer: apigateway.CognitoUserPoolsAuthorizer;
+}
+
+export class SessionExercises extends Construct {
+  constructor(scope: Construct, id: string, props: SessionExercisesProps) {
+    super(scope, id);
+
+    const { api, authorizer } = props;
+
+    const table = new dynamodb.Table(this, "Table", {
+      tableName: "SessionExercises",
+      partitionKey: { name: "sessionExerciseId", type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    table.addGlobalSecondaryIndex({
+      indexName: "sessionId-index",
+      partitionKey: { name: "sessionId", type: dynamodb.AttributeType.STRING },
+    });
+
+    // --- Lambdas ---
+    const createFn = this.fn("CreateFn", "lambda/functions/create.ts",               table.tableName);
+    const getFn    = this.fn("GetFn",    "lambda/functions/getBySession.ts",          table.tableName);
+    const updateFn = this.fn("UpdateFn", "lambda/functions/updateItem.ts",            table.tableName);
+    const deleteFn = this.fn("DeleteFn", "lambda/functions/deleteSessionExercise.ts", table.tableName);
+
+    table.grantWriteData(createFn);
+    table.grantReadData(getFn);
+    table.grantWriteData(updateFn);
+    table.grantWriteData(deleteFn);
+
+    // --- Routes ---
+    const sessionExercise = api.root.addResource("sessionExercise");
+    const byId            = sessionExercise.addResource("{sessionExerciseId}");
+
+    this.addMethod(sessionExercise, "POST",   createFn, authorizer);
+    this.addMethod(sessionExercise, "GET",    getFn,    authorizer);
+    this.addMethod(byId,            "PUT",    updateFn, authorizer);
+    this.addMethod(byId,            "DELETE", deleteFn, authorizer);
+  }
+
+  private fn(id: string, entry: string, tableName: string) {
+    return new NodejsFunction(this, id, {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry,
+      environment: { TABLE_NAME: tableName },
+      bundling: { forceDockerBundling: false },
+    });
+  }
+
+  private addMethod(
+    resource: apigateway.Resource,
+    method: string,
+    fn: NodejsFunction,
+    authorizer: apigateway.CognitoUserPoolsAuthorizer
+  ) {
+    resource.addMethod(method, new apigateway.LambdaIntegration(fn), {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+  }
+}
