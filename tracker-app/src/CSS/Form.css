@@ -1,88 +1,37 @@
 .Form{
-  background-color: rgba(26, 91, 124, 0.527);
-  position: fixed;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-
+  background-color: rgb(61, 61, 61);
 }
 
 .F_feildCont{
-  background-color: rgb(51, 51, 51);
-  display: flex;
-  flex-direction: column;
-
-  justify-content: center;
-  align-items: center;  
-  margin-top: 15%;
-  padding-top: 15px;
-  padding-bottom: 15px;
-}
-
-.F_inset_feildCont{
   background-color: rgb(92, 92, 92);
-
+  width: 100%;
   display: flex;
   flex-direction: column;
-
-  justify-content: center;
-  align-items: center;  
-  padding: 10px;
-}
-
-.f_fc_Column{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;  
+  align-items: center;
 }
 
 .f_fc_Row{
   display: flex;
   flex-direction: row;
-  justify-content: center;
-  align-items: center;  
+  justify-content: space-around;
 }
 
-.thin_input{
-  width: 50%;
-}
-
-.f_fc_exercises{
+.f_exercise_cont{
+  background-color: rgb(92, 92, 92);
+  border-top: 2px solid rgb(187, 221, 255);
+  border-bottom: 2px solid rgb(187, 221, 255);
   display: flex;
   flex-direction: column;
-  justify-content: left;
 }
 
-.f_fc_e_groups{
-  background-color: rgb(61, 61, 61);
-  margin-bottom: 10px;
-  padding: 5px;
-  display: flex;
-  flex-direction: column;
-  justify-content: left;
-
-}
-
-.f_fc_e_g_buttons{
-  margin-top: 5px;
-
-  display: flex;
-  flex-direction: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-.f_fc_e_g_b_button{
-  border: 0;
-  background-color: rgb(58, 190, 255);
-  margin-top: 5px;
-  margin-right: 5px;
-  margin-bottom: 3px;
-  min-width: fit-content;
-  height: 30px;
-
-  color: rgb(61, 61, 61);
-  font-size: 15px;
+.f_exercise_group{
+  font-size: 22px;
   font-weight: bold;
+  margin-left: 6px;
+}
+
+
+.f_exercise_button{
+  width: fit-content;
+  font-size: 18px;
 }

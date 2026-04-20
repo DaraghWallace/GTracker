@@ -85,6 +85,7 @@ export default function App() {
           loadUserData = {loadUserData}
           handleSignOut = {handleSignOut}
           setPage = {setPage}
+          page={page}
         />        
       </div>
       

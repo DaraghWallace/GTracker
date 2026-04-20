@@ -3,9 +3,11 @@ import SessionEle from "../Components/Elements/SessionEle"
 import type { exercise, session, sessionExercise, user } from "../Helpers/customTypes";
 import { useState/*, type Dispatch, type SetStateAction*/ } from "react";
 // import NewExerciseForm from "./Forms/NewExerciseForm";
+import ProgressGrid from "./ProgressGrid";
 
 import '../CSS/Body.css'
-import ProgressGrid from "./ProgressGrid";
+
+import { FaPlus, FaPen, FaXmark   } from "react-icons/fa6";
 
 type Props = {
   currentUser: user | null;
@@ -19,6 +21,7 @@ type Props = {
 
 export  default function Body({currentUser, sessionData, setSessionData, exercises, sessionExercises, setSessionExercises, page}: Props){
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
+  const [toggleEditing, setToggleEditing] = useState(false);
 
   // const [sessionFilter, setSessionFilter] = useState("Monthly");
   // const [sessionMonthFilter, setSessionMonthFilter] = useState(Number);
@@ -36,20 +39,27 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
           />}
           
           <div>
-            <div>
-              <button onClick={() => setNewSessionFormOpen(true)}>new session</button>
-              {/* <div>Filter: 
-                <select onChange={(e) => handleMonthFilter(setSessionFilter, e.target.value, sessionData, setDisplayData, setSessionMonthFilter)}>
-                  <option value="">All - Month</option>
-                  <option value="All">All</option>
-                  <option value="Monthly">Monthly</option>
-                </select>
-              </div>
-              {sessionFilter == "Monthly" &&
-                <div>Select Month: 
+            {!newSessionFormOpen && 
+              <div className="s_header">
+                <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
+                {toggleEditing ? 
+                  <button onClick={() => setToggleEditing(false)}><FaXmark /></button>
+                  :
+                  <button onClick={() => setToggleEditing(true)}><FaPen /></button>
+                }
+                {/* <div>Filter: 
+                  <select onChange={(e) => handleMonthFilter(setSessionFilter, e.target.value, sessionData, setDisplayData, setSessionMonthFilter)}>
+                    <option value="">All - Month</option>
+                    <option value="All">All</option>
+                    <option value="Monthly">Monthly</option>
+                  </select>
                 </div>
-              }*/}
-            </div>
+                {sessionFilter == "Monthly" &&
+                  <div>Select Month: 
+                  </div>
+                }*/}
+              </div>
+            }
 
             <div className="sessions">
               {sessionData.map((session) => (
@@ -60,6 +70,7 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
                   sessionExercises = {sessionExercises}
                   setSessionExercises={setSessionExercises}
                   userId={currentUser!.userId}
+                  toggleEditing={toggleEditing}
                 />
               ))}
             </div>

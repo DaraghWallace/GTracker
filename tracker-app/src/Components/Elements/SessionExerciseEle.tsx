@@ -4,56 +4,68 @@ import { deleteSessionExercise, fetchFromTable, updateSessionExercise } from "..
 
 import "../../CSS/App.css"
 
+import { FaPen, FaXmark, FaCheck, FaTrash } from "react-icons/fa6";
+
 type props = {
   sessionExercise: sessionExercise,
   exercises: exercise[],
   editSetVisible: boolean,
   setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>
   userId: string
+  toggleEditing:boolean
 }
 
-export default function SessionExerciseEle({sessionExercise, exercises, editSetVisible, setSessionExercises, userId}: props){
+export default function SessionExerciseEle({sessionExercise, exercises, editSetVisible, setSessionExercises, userId, toggleEditing}: props){
   const setEx = getExercise(sessionExercise.exerciseId, exercises);
   const [editSets, setEditSets] = useState(false);
   const [newExercise, setNewExercise] = useState(sessionExercise.exerciseId);
   const [newSets, setNewSets] = useState(sessionExercise.sets);
+  const [confirmDel, setConfirmDel] = useState(false);
   
 
   return (
     <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
       <div className="s_e_header">
         <div>
-          {editSets?          
-          <select value={newExercise} onChange={(e)=> setNewExercise(e.target.value)}>
-              {exercises.map((exercise)=>{
-                return <option key={exercise.exerciseId} value={exercise.exerciseId}>{exercise.name}</option>
-              })}
-            </select>
-          :
-            <div>{setEx?.name}:</div>
+          {(editSets && toggleEditing)?          
+            <select value={newExercise} onChange={(e)=> setNewExercise(e.target.value)}>
+                {exercises.map((exercise)=>{
+                  return <option key={exercise.exerciseId} value={exercise.exerciseId}>{exercise.name}</option>
+                })}
+              </select>
+            :
+              <div>{setEx?.name}:</div>
           }
         </div>
         
         {editSetVisible && 
           <div>
-            { editSets ?
+            { (editSets && toggleEditing) ?
               <>
-                <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, userId)}}>S</button>
-                <button onClick={()=> {handleCancelEdit(setNewSets, sessionExercise, setEditSets)}}>C</button>              
+                <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, userId)}}><FaCheck/></button>
+                <button onClick={()=> {handleCancelEdit(setNewSets, sessionExercise, setEditSets)}}><FaXmark/></button>              
               </>
               :
-              <button onClick={()=> setEditSets(true)}>E</button>
+              <>{!confirmDel && <button onClick={()=> setEditSets(true)}><FaPen/></button>}</>
             }
-            <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, setSessionExercises, userId)}>Del</button>
+            {confirmDel ? 
+              <div>
+                <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, setSessionExercises, userId)}><FaTrash/></button>
+                <button onClick={() => setConfirmDel(false)}><FaXmark/></button>
+              </div>
+            :
+              <button onClick={() => setConfirmDel(true)}><FaTrash/></button>
+            }
           </div>
         }
+
+
       </div>
       <div className="s_e_s_weights">
         {displaySet(sessionExercise.sets).map((set, index)=>{
-          
           return (
           <div className="s_e_s_w_num" key={index}>
-            {editSets?
+            {(editSets && toggleEditing)?
               <div>
                 <form >
                   <input type="number" data-index={index} data-key="weight" placeholder={String(set.weight)}

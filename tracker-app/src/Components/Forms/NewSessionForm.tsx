@@ -5,6 +5,8 @@ import { createSession, fetchFromTable } from "../../Helpers/APIfunctions";
 
 import '../../CSS/Form.css'
 
+import {  FaXmark, FaCheck, } from "react-icons/fa6";
+
 type Props = {
   userId: string;
   setNewSessionFormOpen: Dispatch<SetStateAction<boolean>>
@@ -45,17 +47,18 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
   return (
     <div className="Form">
       <div className="F_feildCont">
-        <div className="f_fc_Column">
+        <div className="f_fc_Row">
+          <input placeholder="Focus" value={focus} size={7} onChange={e => setFocus(e.target.value)} />
           <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-          <input placeholder="Focus / Title (optional)" value={focus} onChange={e => setFocus(e.target.value)} />
-          <div>Weight: <input type="Number" value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} /></div>
-          <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
-          {message && <p>{message}</p>}   
-          <div>
-            <button onClick={handleSubmit}>Create session</button>
-            <button onClick={() => setNewSessionFormOpen(false)}>Cancel</button>
-          </div>       
+          <div><input type="Number" value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} />Kgs</div>
         </div>
+
+        <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
+        {message && <p>{message}</p>}   
+        <div>
+          <button onClick={handleSubmit}><FaCheck/></button>
+          <button onClick={() => setNewSessionFormOpen(false)}><FaXmark/></button>
+        </div>       
       </div>
     </div>
   );

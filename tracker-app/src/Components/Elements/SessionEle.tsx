@@ -10,6 +10,7 @@ import "../../CSS/App.css"
 import '../../CSS/Body.css'
 import '../../CSS/Form.css'
 
+import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash } from "react-icons/fa6";
 
 
 type Props = {
@@ -19,9 +20,10 @@ type Props = {
   sessionExercises: sessionExercise[];
   setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
   userId: string;
+  toggleEditing:boolean;
 }
 
-export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, userId}: Props) {
+export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, userId, toggleEditing}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
 
   const [editSession, setEditSession] = useState(false);
@@ -38,16 +40,17 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           <div className="F_feildCont">
             <div>Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
             <div className="f_fc_Row">
-              <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId)}>Yes</button>
-              <button onClick={()=> setDelSeshConfirmOpen(false)}>No</button>                 
+              <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId)}><FaCheck/></button>
+              <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>                 
             </div>
           </div>
       </div>}
 
       <div className="s_e_header">
-        {editSession? 
+        
+        {(editSession && toggleEditing)? 
           <div>
-            <input placeholder={session.focus || "Focus"} size={9} value={newFocus || ""}
+            <input placeholder={session.focus || "Focus"} size={7} value={newFocus || ""}
               onChange={(e) => setNewFocus(e.target.value)}
             />-
             <input placeholder={session.dateDone} type="date" value={newDateDone}
@@ -55,29 +58,24 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
             />- 
             <input placeholder={session.dateDone} type="number" value={newUserWeight}
               onChange={(e) => setNewUserWeight(Number(e.target.value))}
-            />kgs       
+            />    
           </div>
           :
           <div onClick={()=> console.log(session)}>{session.focus} {displayDate(session.dateDone) + ` (${session.userWeight}kg)`}</div>      
         }
 
-        {editSession &&
+        {(editSession && toggleEditing) &&
           <div>
-            <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData)}>S</button>
-            <button onClick={()=> setDelSeshConfirmOpen(true)}>D</button>
-            <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}}>C</button>          
+            <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData)}><FaCheck /></button>
+            <button onClick={()=> setDelSeshConfirmOpen(true)}><FaTrash /></button>
+            <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}}><FaXmark/></button>          
           </div>
         }  
-        {!editSession &&<button onClick={()=> setEditSession(true)}>Edit</button>}
+        
+        {toggleEditing && <>{!editSession &&<button onClick={()=> setEditSession(true)}><FaPen/></button>}</>}
       </div>
       
-      {editSession &&
-        <div className="middle_column">
-          {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}>Add exercise</button>}
-          {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}>Cancel</button>}
-          {!newSetFormOpen && <button onClick={()=> setEditSetVisible(!editSetVisible)}>Edit sets</button>}
-        </div>      
-      }
+
 
       {newSetFormOpen && 
         <div className="F_inset_feildCont">
@@ -97,8 +95,21 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           editSetVisible = {editSetVisible}
           setSessionExercises = {setSessionExercises}
           userId={userId}
+          toggleEditing={toggleEditing}
         />
       })}
+
+      {(editSession && toggleEditing) &&
+        <div className="middle_column">
+          {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}><FaPlus/></button>}
+          {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}><FaXmark/></button>}
+          {editSetVisible ? 
+            <button onClick={()=> setEditSetVisible(false)}><FaXmark/></button>
+            :
+            <button onClick={()=> setEditSetVisible(true)}><FaPen/></button>
+          }            
+        </div>      
+      }
     </div>
   )
 }

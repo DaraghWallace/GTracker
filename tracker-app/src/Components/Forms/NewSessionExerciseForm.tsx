@@ -1,9 +1,10 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { sessionExercise, exercise } from "../../Helpers/customTypes";
 import { createSessionExercise, fetchFromTable } from "../../Helpers/APIfunctions";
+import NseSetFormEle from "../Elements/NseFormSetEle";
 
 import '../../CSS/Form.css'
-import NseSetFormEle from "../Elements/NseFormSetEle";
+import { FaPlus, FaPen, FaCheck, FaMinus   } from "react-icons/fa6";
 
 type Props = {
   sessionId: string;
@@ -59,42 +60,40 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
   }
 
   return (
-    <div className="f_fc_Column">
+    <div className="F_feildCont">
       <div>
-        <div>
+        <div className="f_exercise_group">
           Exercise: {selectedExercise && selectedExercise.name}
-          {selectedExercise && <button onClick={()=>setSelectedExercise(null)}>Change</button>}
+          {selectedExercise && <button onClick={()=>setSelectedExercise(null)}><FaPen/></button>}
         </div>
 
-        {!selectedExercise && (
-          <div className="f_fc_exercises">
-            {[...new Set(exercises.map(e => e.group))].map(group => (
-              <div className="f_fc_e_groups" key={group}>
-                <div>{group}</div>
-                <div className="f_fc_e_g_buttons">
-                  {exercises.filter(e => e.group === group).map(exercise => (
-                    <button className="f_fc_e_g_b_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>
-                      {exercise.name}
-                    </button>
-                  ))}                  
-                </div>
+          {!selectedExercise && (
+            <div>
+              {[...new Set(exercises.map(e => e.group))].map(group => (
+                <div className="f_exercise_cont" key={group}>
+                  <div className="f_exercise_group">{group}:</div>
+                  <div>
+                    {exercises.filter(e => e.group === group).map(exercise => (
+                      <button className="f_exercise_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>
+                        {exercise.name}
+                      </button>
+                    ))}                  
+                  </div>
 
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
+
         )}
       </div>
       
-      <div>
+      <div className="f_exercise_group">
         Sets: {numOfSets} 
-        <button onClick={()=>setNumOfSets(numOfSets+1)}>+</button>
-        {numOfSets >= 1 && <button onClick={()=>setNumOfSets(numOfSets-1)}>-</button>}
+        <button onClick={()=>setNumOfSets(numOfSets+1)}><FaPlus/></button>
+        {numOfSets >= 1 && <button onClick={()=>setNumOfSets(numOfSets-1)}><FaMinus/></button>}
       </div>
-      <div className="f_fc_Row">Weight | Reps | Done?</div>
+      <div className="f_exercise_group">Weight | Reps | Done?</div>
       {displayReps(numOfSets,setArr, setSetArr)}
-
-
-
 
       <label>
         <input
@@ -105,7 +104,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
         To failure
       </label>
 
-      <button onClick={handleSubmit}>Add set</button>
+      <button onClick={handleSubmit}><FaCheck/></button>
       {message && <p>{message}</p>}
     </div>        
   );
