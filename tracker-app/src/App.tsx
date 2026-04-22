@@ -17,7 +17,7 @@ import { fetchFromTable } from './Helpers/APIfunctions';
 
 export default function App() {
   // const [securityToken, setSecurityToken] = useState("");
-  const [pageState, setPageState] = useState("");
+  const [pageState, setPageState] = useState("loading");
   const [currentUser, setCurrentUser] = useState<user | null>(null);
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
@@ -26,6 +26,7 @@ export default function App() {
   // const bar = getRandomQuote()
 
   async function loadUserData(userId: string) {
+    setPageState("loading")
     setExercises(await fetchFromTable(userId, "exercises"))
     setSessionData(await fetchFromTable(userId, "sessions"))
     if (sessionData) {
