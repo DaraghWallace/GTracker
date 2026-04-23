@@ -7,7 +7,7 @@ import ProgressGrid from "./ProgressGrid";
 
 import '../CSS/Body.css'
 
-import { FaPlus, FaPen, FaXmark   } from "react-icons/fa6";
+import { FaPlus, FaPen, FaXmark } from "react-icons/fa6";
 
 type Props = {
   currentUser: user | null;

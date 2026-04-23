@@ -4,7 +4,7 @@ import { createSessionExercise, fetchFromTable } from "../../Helpers/APIfunction
 import NseSetFormEle from "../Elements/NseFormSetEle";
 
 import '../../CSS/Form.css'
-import { FaPlus, FaPen, FaCheck, FaMinus   } from "react-icons/fa6";
+import { FaPlus, FaPen, FaCheck, FaMinus, FaXmark  } from "react-icons/fa6";
 
 type Props = {
   sessionId: string;
@@ -103,8 +103,11 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
         />
         To failure
       </label>
+      <div>
+        <button onClick={handleSubmit} className="green_button"><FaCheck/></button>
+        <button onClick={() => setNewSetFormOpen(false)}><FaXmark/></button>
+      </div>
 
-      <button onClick={handleSubmit}><FaCheck/></button>
       {message && <p>{message}</p>}
     </div>        
   );

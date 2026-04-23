@@ -40,7 +40,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           <div className="F_feildCont">
             <div>Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
             <div className="f_fc_Row">
-              <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId)}><FaCheck/></button>
+              <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId)} className="green_button"><FaCheck/></button>
               <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>                 
             </div>
           </div>
@@ -66,16 +66,26 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
 
         {(editSession && toggleEditing) &&
           <div>
-            <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData)}><FaCheck /></button>
-            <button onClick={()=> setDelSeshConfirmOpen(true)}><FaTrash /></button>
-            <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}}><FaXmark/></button>          
+            <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData)} className="green_button"><FaCheck /></button>
+            <button onClick={()=> setDelSeshConfirmOpen(true)} className="red_button"><FaTrash /></button>
+            <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}} ><FaXmark/></button>          
           </div>
         }  
         
         {toggleEditing && <>{!editSession &&<button onClick={()=> setEditSession(true)}><FaPen/></button>}</>}
       </div>
       
-
+      {(editSession && toggleEditing) &&
+        <div className="middle_column">
+          {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)} ><FaPlus/></button>}
+          {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)} ><FaXmark/></button>}
+          {editSetVisible ? 
+            <button onClick={()=> setEditSetVisible(false)}><FaXmark/></button>
+            :
+            <button onClick={()=> setEditSetVisible(true)}><FaPen/></button>
+          }            
+        </div>      
+      }
 
       {newSetFormOpen && 
         <div className="F_inset_feildCont">
@@ -96,20 +106,11 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           setSessionExercises = {setSessionExercises}
           userId={userId}
           toggleEditing={toggleEditing}
+          editSession={editSession}
         />
       })}
 
-      {(editSession && toggleEditing) &&
-        <div className="middle_column">
-          {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}><FaPlus/></button>}
-          {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}><FaXmark/></button>}
-          {editSetVisible ? 
-            <button onClick={()=> setEditSetVisible(false)}><FaXmark/></button>
-            :
-            <button onClick={()=> setEditSetVisible(true)}><FaPen/></button>
-          }            
-        </div>      
-      }
+
     </div>
   )
 }
@@ -123,11 +124,15 @@ async function handleUpdateSession(session:session, newFocus:string | null, newD
     focus: newFocus,
     notes: session.notes, //TODO
   }
-  await updateSession(newSession)
-  const updatedData:session[] = await fetchFromTable(session.userId, "sessions")
-  setSessionData(updatedData)
-  setEditSession(false)
 
+  if(session != newSession){
+    await updateSession(newSession)
+    const updatedData:session[] = await fetchFromTable(session.userId, "sessions")
+    setSessionData(updatedData)
+    setEditSession(false)
+  }
+
+  console.log("no changes");
 }
 
 function displayDate(date: string): string {

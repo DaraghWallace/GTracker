@@ -56,7 +56,7 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
         <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
         {message && <p>{message}</p>}   
         <div>
-          <button onClick={handleSubmit}><FaCheck/></button>
+          <button onClick={handleSubmit} className="green_button"><FaCheck/></button>
           <button onClick={() => setNewSessionFormOpen(false)}><FaXmark/></button>
         </div>       
       </div>

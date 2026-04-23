@@ -13,9 +13,10 @@ type props = {
   setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>
   userId: string
   toggleEditing:boolean
+  editSession:boolean
 }
 
-export default function SessionExerciseEle({sessionExercise, exercises, editSetVisible, setSessionExercises, userId, toggleEditing}: props){
+export default function SessionExerciseEle({sessionExercise, exercises, editSetVisible, setSessionExercises, userId, toggleEditing, editSession}: props){
   const setEx = getExercise(sessionExercise.exerciseId, exercises);
   const [editSets, setEditSets] = useState(false);
   const [newExercise, setNewExercise] = useState(sessionExercise.exerciseId);
@@ -42,7 +43,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
           <div>
             { (editSets && toggleEditing) ?
               <>
-                <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, userId)}}><FaCheck/></button>
+                <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, userId)}} className="green_button"><FaCheck/></button>
                 <button onClick={()=> {handleCancelEdit(setNewSets, sessionExercise, setEditSets)}}><FaXmark/></button>              
               </>
               :
@@ -50,11 +51,11 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
             }
             {confirmDel ? 
               <div>
-                <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, setSessionExercises, userId)}><FaTrash/></button>
+                <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, setSessionExercises, userId)} className="red_button"><FaTrash/></button>
                 <button onClick={() => setConfirmDel(false)}><FaXmark/></button>
               </div>
             :
-              <button onClick={() => setConfirmDel(true)}><FaTrash/></button>
+              <button onClick={() => setConfirmDel(true)} className="red_button"><FaTrash/></button>
             }
           </div>
         }
@@ -65,7 +66,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
         {displaySet(sessionExercise.sets).map((set, index)=>{
           return (
           <div className="s_e_s_w_num" key={index}>
-            {(editSets && toggleEditing)?
+            {(editSets && toggleEditing && editSession && editSetVisible)?
               <div>
                 <form >
                   <input type="number" data-index={index} data-key="weight" placeholder={String(set.weight)}

@@ -1,8 +1,7 @@
 .sessions{
   display: flex;
   flex-direction: column;
-  /* overflow-y: hidden;
-  direction: ltr; */
+  overflow-y:scroll;
 }
 
 .s_header{
