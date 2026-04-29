@@ -5,8 +5,8 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-
   const userId = event.queryStringParameters?.userId;
+  const { startDate, endDate } = event.queryStringParameters ?? {};
 
   if (!userId) {
     return {
@@ -21,9 +21,11 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       new QueryCommand({
         TableName: process.env.TABLE_NAME,
         IndexName: "userId-index",
-        KeyConditionExpression: "userId = :uid",
+        KeyConditionExpression: "userId = :uid AND dateDone BETWEEN :start AND :end",
         ExpressionAttributeValues: {
           ":uid": userId,
+          ":start": startDate ?? `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`,
+          ":end":   endDate   ?? new Date().toISOString().split("T")[0],
         },
       })
     );

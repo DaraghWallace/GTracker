@@ -33,9 +33,10 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
     };
 
     try {
+      const date = new Date
       await createSession(newSession);
       setMessage("Session created!");
-      const data = await fetchFromTable(userId, "sessions");
+      const data = await fetchFromTable(userId, "sessions", `2024-01-01`, `${date.getFullYear()}-12-31`);
       console.log(data);
       setSessionData(data);
       setNewSessionFormOpen(false)

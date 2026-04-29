@@ -28,6 +28,7 @@ export class Sessions extends Construct {
     table.addGlobalSecondaryIndex({
       indexName: "userId-index",
       partitionKey: { name: "userId", type: dynamodb.AttributeType.STRING },
+      sortKey:      { name: "dateDone", type: dynamodb.AttributeType.STRING },
     });
 
     // --- Lambdas ---

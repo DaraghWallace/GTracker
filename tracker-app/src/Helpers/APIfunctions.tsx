@@ -1,7 +1,7 @@
 import { fetchAuthSession } from "aws-amplify/auth";
 import type { exercise, session, sessionExercise } from "./customTypes";
 
-const invokeid = "0u3eifdn7j"
+const invokeid = "8wh7ltp62l" //-----------------------------------Update after Destroy - Deploy
 const authSession = await fetchAuthSession();
 const token = authSession.tokens?.idToken?.toString();
 
@@ -11,28 +11,25 @@ export async function getToken(): Promise<string> {
 }
 
 //#region: Lil Helpers
-export async function fetchFromTable(userId: string, table:string) {
+export async function fetchFromTable(userId: string, table:string, startDate: string, endDate: string) {
     console.log("fetchFromTable: " + table);
-    
+
     switch (table) {
-        case "sessions":{ // fetchFromTable(userId, "sessions")
-            // console.log("Getting Sessions");
-            return getSessions(userId).then(sessions => 
-                sessions.sort((a: session, b: session) => new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime())
+        case "sessions": {
+            const sessions = await getSessions(userId, startDate, endDate);
+            return sessions.sort((a: session, b: session) => 
+                new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime()
             );
-        }case "sets":{ // fetchFromTable(userId, "sets")
-            const sessions = await getSessions(userId);
+        }case "sets":{
+            const sessions = await getSessions(userId, startDate, endDate);
             const results: sessionExercise[] = [];
             
             for (const session of sessions) {
                 const exercises = await getSessionExerciseBySession(session.sessionId);
                 if (exercises) results.push(...exercises);
             }
-            
             return results;
-        }case "exercises":{ // fetchFromTable(userId, "exercises")
-            // console.log("Getting Exercises");
-            
+        }case "exercises":{            
             return getExercises().then(exercises => 
                 exercises.sort((a:exercise, b:exercise) => Number(a.exerciseId) - Number(b.exerciseId))
             );
@@ -42,6 +39,7 @@ export async function fetchFromTable(userId: string, table:string) {
     }
 }
 //#endregion
+
 
 //#region: Sessions
 // C works
@@ -74,23 +72,30 @@ export async function createSession(newSession: session) {
     }
 }
 // R works
-export async function getSessions(userId: string) {
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions?userId=${userId}`;
+export async function getSessions(userId: string, startDate: string, endDate: string) {
 
-    const authSession = await fetchAuthSession();
-    const token = authSession.tokens?.idToken?.toString();
+    try {
+        const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions?userId=${userId}&startDate=${startDate}&endDate=${endDate}`;
 
-    const response = await fetch(url, {
-        method: "GET",
-        headers: {
-        "Authorization": token ?? "",
-        },
-    });
+        const authSession = await fetchAuthSession();
+        const token = authSession.tokens?.idToken?.toString();
 
-    const text = await response.text();
-    const parsed = JSON.parse(text);
-    
-    return Array.isArray(parsed) ? parsed : parsed.Items ?? [];
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": token ? `Bearer ${token}` : "",
+            },
+        });
+
+        const text = await response.text();
+        const parsed = JSON.parse(text);
+        
+        return Array.isArray(parsed) ? parsed : parsed.Items ?? [];        
+    } catch (error) {
+        console.error("FAILED to get sessions: " + error);
+        return [];
+    }
+
 }
 // U works
 export async function updateSession(newSession: session) {

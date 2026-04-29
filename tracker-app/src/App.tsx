@@ -7,9 +7,6 @@ import Body from './Components/Body';
 import type { user, session, exercise, sessionExercise } from "./Helpers/customTypes";
 
 import { getUserAttributes, logout } from './Helpers/amplify';
-// import { getExercises, getSessions, getSessionExerciseBySession, /*getToken*/ } from './Helpers/APIfunctions';
-
-// import {seedExercises, getRandomQuote} from './Helpers/seeds'
 
 import './CSS/App.css';
 import { fetchFromTable } from './Helpers/APIfunctions';
@@ -27,12 +24,12 @@ export default function App() {
 
   async function loadUserData(userId: string) {
     setPageState("loading")
-    setExercises(await fetchFromTable(userId, "exercises"))
-    setSessionData(await fetchFromTable(userId, "sessions"))
-    if (sessionData) {
-      const seshEx = await fetchFromTable(userId, "sets")
-      setSessionExercises(seshEx)
-    }
+    setExercises(await fetchFromTable(userId, "exercises","",""))
+    // setSessionData(await fetchFromTable(userId, "sessions"))
+    // if (sessionData) {
+    //   const seshEx = await fetchFromTable(userId, "sets")
+    //   setSessionExercises(seshEx)
+    // }
 
     // fullSet(allExercises,sessions,allSets ) 
     setPageState("ready")
@@ -47,6 +44,11 @@ export default function App() {
   }
 
   useEffect(() => {
+    const date = new Date
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const lastDay = new Date(year, month, 0).getDate();
+
     fetchAuthSession().then(session => {
       if (session.tokens) {
         getUserAttributes().then(async attrs => {
@@ -60,18 +62,40 @@ export default function App() {
           };
 
           setCurrentUser(user);
-          setExercises(await fetchFromTable(user.userId, "exercises"))
-          setSessionData(await fetchFromTable(user.userId, "sessions"))
-          if (sessionData) {
-            const seshEx = await fetchFromTable(user.userId, "sets")
-            setSessionExercises(seshEx)
+
+          setExercises(await fetchFromTable(user.userId, "exercises","",""))
+
+          let monthMinus = 0;
+          let result: session[] = [];
+
+          while (result.length <= 0 && monthMinus <= 12) {
+            result = await fetchFromTable(
+              user.userId,
+              "sessions",
+              `${year}-${String(month - monthMinus).padStart(2, '0')}-01`,
+              `${year}-${String(month).padStart(2, '0')}-${lastDay}`
+            );
+            if (result.length <= 0) monthMinus++;
           }
 
+          if (result.length > 0) {
+            setSessionData(result)
+            const seshEx = await fetchFromTable(
+              user.userId,
+              "sets",
+              `${year}-${String(month - monthMinus).padStart(2, '0')}-01`,
+              `${year}-${String(month - monthMinus).padStart(2, '0')}-${lastDay}`
+            );
+            setSessionExercises(seshEx);     
+          };
+
           setPageState("ready")
+
+          setSessionData(await fetchFromTable(user.userId, "sessions","2024-1-1",`${year}-${String(month - monthMinus).padStart(2, '0')}-${lastDay}`))
+          setSessionExercises(await fetchFromTable(user.userId, "sets","2024-1-1",`${year}-${String(month - monthMinus).padStart(2, '0')}-${lastDay}`))
         });
       }
     }).catch(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   return (

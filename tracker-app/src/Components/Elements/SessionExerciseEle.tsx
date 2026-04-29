@@ -89,6 +89,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
 }
 
 async function handleUpdateSessionExercise(sessionExercise: sessionExercise, newExercise: string, newSets: string,setEditSets: Dispatch<SetStateAction<boolean>>, setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>> ,userId:string) {
+  const date = new Date
   const newSessionExercise = {
     sessionExerciseId: sessionExercise.sessionExerciseId,
     sessionId: sessionExercise.sessionId,
@@ -98,7 +99,7 @@ async function handleUpdateSessionExercise(sessionExercise: sessionExercise, new
   }
 
   await updateSessionExercise(newSessionExercise)
-  await setSessionExercises(await fetchFromTable(userId, "sets"))
+  await setSessionExercises(await fetchFromTable(userId, "sets", `2024-01-01`, `${date.getFullYear()}-12-31`))
   setEditSets(false)
 }
 
@@ -140,7 +141,8 @@ function displaySet(sets: string): SetObj[] {
 }
 
 async function handleDeleteSessionExercise(sessionExerciseId:string, setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>, userId: string ){
+  const date = new Date
   await deleteSessionExercise(sessionExerciseId)
-  const data = await fetchFromTable(userId, "sets")
+  const data = await fetchFromTable(userId, "sets", `2024-01-01`, `${date.getFullYear()}-12-31`)
   setSessionExercises(data)
 }

@@ -98,24 +98,25 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           />
         </div>
       }        
-      {sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => {
-        return <SessionExerciseEle key={index}
-          sessionExercise = {sessionExercise}
-          exercises = {exercises}
-          editSetVisible = {editSetVisible}
-          setSessionExercises = {setSessionExercises}
-          userId={userId}
-          toggleEditing={toggleEditing}
-          editSession={editSession}
-        />
-      })}
-
-
+      {sessionExercises &&
+        sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => {
+          return <SessionExerciseEle key={index}
+            sessionExercise = {sessionExercise}
+            exercises = {exercises}
+            editSetVisible = {editSetVisible}
+            setSessionExercises = {setSessionExercises}
+            userId={userId}
+            toggleEditing={toggleEditing}
+            editSession={editSession}
+          />
+        })           
+      }
     </div>
   )
 }
 
 async function handleUpdateSession(session:session, newFocus:string | null, newDateDone:string, newUserWeight:number, setEditSession: Dispatch<SetStateAction<boolean>>, setSessionData: Dispatch<SetStateAction<session[]>>) {
+  const date = new Date
   const newSession: session = {
     sessionId: session.sessionId,
     userId: session.userId,
@@ -127,7 +128,9 @@ async function handleUpdateSession(session:session, newFocus:string | null, newD
 
   if(session != newSession){
     await updateSession(newSession)
-    const updatedData:session[] = await fetchFromTable(session.userId, "sessions")
+    const updatedData:session[] = await fetchFromTable(session.userId, "sessions", 
+        `2024-01-01`, `${date.getFullYear()}-12-31`
+      )
     setSessionData(updatedData)
     setEditSession(false)
   }
@@ -141,7 +144,9 @@ function displayDate(date: string): string {
 }
 
 async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, userId: string ){
+  const date = new Date
+  
   await deleteSession(sessionId)
-  const data = await fetchFromTable(userId, "sessions")
+  const data = await fetchFromTable(userId, "sessions",`2024-01-01`, `${date.getFullYear()}-12-31`)
   setSessionData(data)
 }
