@@ -43,60 +43,56 @@ export default function App() {
     setExercises([]);
   }
 
-  useEffect(() => {
-    const date = new Date
-    const year = date.getFullYear()
-    const month = date.getMonth() + 1
-    const lastDay = new Date(year, month, 0).getDate();
+useEffect(() => {
+  const date = new Date(); // ✅ fixed
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
 
-    fetchAuthSession().then(session => {
-      if (session.tokens) {
-        getUserAttributes().then(async attrs => {
-          const user = {
-            userId: attrs.userId as string,
-            email: attrs.email as string,
-            nickname: attrs.nickname as string,
-            userType: attrs.userType as string,
-            cur_weight: 0,
-            tar_weight: 0,
-          };
+  fetchAuthSession().then(session => {
+    if (!session.tokens) return;
 
-          setCurrentUser(user);
+    getUserAttributes().then(async attrs => {
+      const user = {
+        userId: attrs.userId as string,
+        email: attrs.email as string,
+        nickname: attrs.nickname as string,
+        userType: attrs.userType as string,
+        cur_weight: 0,
+        tar_weight: 0,
+      };
+      setCurrentUser(user);
+      setExercises(await fetchFromTable(user.userId, "exercises", "", ""));
 
-          setExercises(await fetchFromTable(user.userId, "exercises","",""))
+      let monthMinus = 0;        
+      let targetMonth = month - monthMinus;
+      let targetYear = year;
+      let sessionResults: session[] = [];
+      const targetLastDay = new Date(targetYear, targetMonth, 0).getDate(); // ✅ correct lastDay per month
 
-          let monthMinus = 0;
-          let result: session[] = [];
+      while (sessionResults.length === 0 && monthMinus <= 12) {
 
-          while (result.length <= 0 && monthMinus <= 12) {
-            result = await fetchFromTable(
-              user.userId,
-              "sessions",
-              `${year}-${String(month - monthMinus).padStart(2, '0')}-01`,
-              `${year}-${String(month).padStart(2, '0')}-${lastDay}`
-            );
-            if (result.length <= 0) monthMinus++;
-          }
+        while (targetMonth <= 0) { targetMonth += 12; targetYear--; }
 
-          if (result.length > 0) {
-            setSessionData(result)
-            const seshEx = await fetchFromTable(
-              user.userId,
-              "sets",
-              `${year}-${String(month - monthMinus).padStart(2, '0')}-01`,
-              `${year}-${String(month - monthMinus).padStart(2, '0')}-${lastDay}`
-            );
-            setSessionExercises(seshEx);     
-          };
-
-          setPageState("ready")
-
-          setSessionData(await fetchFromTable(user.userId, "sessions","2024-1-1",`${year}-${String(month - monthMinus).padStart(2, '0')}-${lastDay}`))
-          setSessionExercises(await fetchFromTable(user.userId, "sets","2024-1-1",`${year}-${String(month - monthMinus).padStart(2, '0')}-${lastDay}`))
-        });
+        sessionResults = await fetchFromTable(
+          user.userId,
+          "sessions",
+          `${targetYear}-${String(targetMonth).padStart(2, '0')}-01`,
+          `${year}-${String(month).padStart(2, '0')}-${targetLastDay}`
+        );
+        if (sessionResults.length === 0) monthMinus++;
       }
-    }).catch(() => {});
-  }, []);
+
+      const [allSessions, allSets] = await Promise.all([
+        fetchFromTable(user.userId, "sessions", "2024-1-1", `${year}-${String(month).padStart(2, '0')}-${targetLastDay}`),
+        fetchFromTable(user.userId, "sets", "2024-1-1", `${year}-${String(month).padStart(2, '0')}-${targetLastDay}`),
+      ]);
+      setSessionData(allSessions);
+      setSessionExercises(allSets);
+
+      setPageState("ready");
+    });
+  }).catch(() => {});
+}, []);
   
   return (
     <div className="App">

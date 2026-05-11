@@ -30,7 +30,6 @@
 .s_e_set{
   background-color: rgb(92, 92, 92);
   margin-top: 10px;
-  margin-bottom: 10px;
   padding-left: 3px;
   padding-right: 3px;
   display: flex;
@@ -70,14 +69,19 @@
 
 
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   overflow-x: auto;  /* for horizontal scrolling of columns */
   overflow-y: auto;  /* for vertical scrolling of rows */
   height: auto; 
   width: 100%;
 }
-
-.p_g_EX_col{
+.p_g_row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  min-width: max-content;
+}
+/* .p_g_EX_col{
   display: flex;
   flex-direction: column;
   min-width: max-content;
@@ -88,15 +92,11 @@
   display: flex;
   flex-direction: column;
 }
-.p_g_row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  min-width: max-content;
-}
 
+
+*/
 .p_g_cell{
   border: 1px solid rgb(187, 221, 255);
   text-align: center;
-  min-width: 100px;
-}
+  min-width: 150px;
+} 
