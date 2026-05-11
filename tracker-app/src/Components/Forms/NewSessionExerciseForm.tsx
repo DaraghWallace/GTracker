@@ -52,7 +52,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
       await createSessionExercise(newSessionExercise);
       setMessage("Set created!");
       setNewSetFormOpen(false)
-      const data = await fetchFromTable(userId, "sets", `2024-01-01`, `${date.getFullYear()}-12-31`)
+      const data = await fetchFromTable(userId, "sets", `2024-01-01`, `${date.getFullYear()}-12-31`, "")
       setSessionExercises(data)
       
     } catch (e: unknown) {

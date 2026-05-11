@@ -5,6 +5,8 @@ import { login, register, confirm , getUserAttributes} from "../../Helpers/ampli
 
 import "../../CSS/Form.css";
 
+import { FaCheck, FaXmark  } from "react-icons/fa6";
+
 type Tab = "login" | "signup" | "confirm";
 
 type Props = {  
@@ -70,8 +72,8 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
       <div className="F_feildCont">
         {tab !== "confirm" && (
           <div>
-            <button onClick={() => setTab("login")}>Sign in</button>
-            <button onClick={() => setTab("signup")}>Sign up</button>
+              <button className="wide_button" onClick={() => setTab("login")}>Sign in</button>
+              <button className="wide_button" onClick={() => setTab("signup")}>Sign up</button>
           </div>
         )}
 
@@ -80,8 +82,8 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
             <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
             <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
             <div>
-              <button onClick={handleLogin}>Sign in</button>
-              <button onClick={() => setUserInFormOpen(false)}>Cancel</button>            
+              <button className="green_button" onClick={handleLogin}><FaCheck/></button>
+              <button className="red_button" onClick={() => setUserInFormOpen(false)}><FaXmark/></button>            
             </div>  
 
           </div>
@@ -98,8 +100,8 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
               <option value="trainer">Trainer</option>
             </select>
             <div>
-              <button onClick={handleSignUp}>Create account</button>
-              <button onClick={() => setUserInFormOpen(false)}>Cancel</button>               
+              <button className="green_button" onClick={handleSignUp}><FaCheck/></button>
+              <button className="red_button" onClick={() => setUserInFormOpen(false)}><FaXmark/></button>               
             </div>
           </div>
         )}

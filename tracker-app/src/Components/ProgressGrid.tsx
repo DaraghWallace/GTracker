@@ -79,15 +79,15 @@ export default function ProgressGrid({exercises, sessionData, sessionExercises, 
 
       {strengthProgArr.map((itm => (
         <div className="p_g_row">
-          <div className="p_g_cell">{itm.exerciseName}</div>
+          <div key={itm.exerciseName} className="p_g_cell">{itm.exerciseName}</div>
           {itm.TopReps/*.filter((TpRp)=>{
             const date = new Date(TpRp.date)
             const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter
             const matchedYe = date.getFullYear() === yearFilter;
             return matchedMo && matchedYe
           })*/.map((rep => (
-            <div className="p_g_row">
-              <div key={uuidv4()} className="p_g_cell">{rep.topRep}</div>
+            <div key={rep.date} className="p_g_row">
+              <div className="p_g_cell">{rep.topRep}</div>
             </div>
           )))}
         </div>

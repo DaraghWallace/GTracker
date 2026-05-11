@@ -14,7 +14,7 @@ import { fetchFromTable } from './Helpers/APIfunctions';
 
 export default function App() {
   // const [securityToken, setSecurityToken] = useState("");
-  const [pageState, setPageState] = useState("loading");
+  const [pageState, setPageState] = useState("start");
   const [currentUser, setCurrentUser] = useState<user | null>(null);
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
@@ -23,15 +23,22 @@ export default function App() {
   // const bar = getRandomQuote()
 
   async function loadUserData(userId: string) {
-    setPageState("loading")
-    setExercises(await fetchFromTable(userId, "exercises","",""))
-    // setSessionData(await fetchFromTable(userId, "sessions"))
-    // if (sessionData) {
-    //   const seshEx = await fetchFromTable(userId, "sets")
-    //   setSessionExercises(seshEx)
-    // }
+    const date = new Date()
+    const LastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
 
-    // fullSet(allExercises,sessions,allSets ) 
+    setPageState("loading")
+    setExercises(await fetchFromTable(userId, "exercises","","",""))
+    
+    const sessions: session[] = await fetchFromTable( userId, "sessions", "2024-1-1",
+      `${date.getFullYear()}-${date.getMonth()}-${LastDay}`, ""
+    );
+    setSessionData(sessions);
+
+    const allSets: sessionExercise[] = await Promise.all(
+      sessions.map(session => fetchFromTable(userId, "set", "", "", session.sessionId))
+    );
+
+    setSessionExercises(allSets.flat())
     setPageState("ready")
   }
 
@@ -43,56 +50,23 @@ export default function App() {
     setExercises([]);
   }
 
-useEffect(() => {
-  const date = new Date(); // ✅ fixed
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-
-  fetchAuthSession().then(session => {
-    if (!session.tokens) return;
-
-    getUserAttributes().then(async attrs => {
-      const user = {
-        userId: attrs.userId as string,
-        email: attrs.email as string,
-        nickname: attrs.nickname as string,
-        userType: attrs.userType as string,
-        cur_weight: 0,
-        tar_weight: 0,
-      };
-      setCurrentUser(user);
-      setExercises(await fetchFromTable(user.userId, "exercises", "", ""));
-
-      let monthMinus = 0;        
-      let targetMonth = month - monthMinus;
-      let targetYear = year;
-      let sessionResults: session[] = [];
-      const targetLastDay = new Date(targetYear, targetMonth, 0).getDate(); // ✅ correct lastDay per month
-
-      while (sessionResults.length === 0 && monthMinus <= 12) {
-
-        while (targetMonth <= 0) { targetMonth += 12; targetYear--; }
-
-        sessionResults = await fetchFromTable(
-          user.userId,
-          "sessions",
-          `${targetYear}-${String(targetMonth).padStart(2, '0')}-01`,
-          `${year}-${String(month).padStart(2, '0')}-${targetLastDay}`
-        );
-        if (sessionResults.length === 0) monthMinus++;
-      }
-
-      const [allSessions, allSets] = await Promise.all([
-        fetchFromTable(user.userId, "sessions", "2024-1-1", `${year}-${String(month).padStart(2, '0')}-${targetLastDay}`),
-        fetchFromTable(user.userId, "sets", "2024-1-1", `${year}-${String(month).padStart(2, '0')}-${targetLastDay}`),
-      ]);
-      setSessionData(allSessions);
-      setSessionExercises(allSets);
-
-      setPageState("ready");
-    });
-  }).catch(() => {});
-}, []);
+  useEffect(() => {
+    fetchAuthSession().then(session => {
+      if (!session.tokens) return;
+      getUserAttributes().then(async attrs => {
+        const user = {
+          userId: attrs.userId as string,
+          email: attrs.email as string,
+          nickname: attrs.nickname as string,
+          userType: attrs.userType as string,
+          cur_weight: 0,
+          tar_weight: 0,
+        };
+        setCurrentUser(user);
+        await loadUserData(user.userId)
+      });
+    }).catch(() => {});
+  }, []);
   
   return (
     <div className="App">
@@ -110,26 +84,31 @@ useEffect(() => {
         />        
       </div>
       
-      <div className="app-section">
-        {pageState === "loading" ? (
-          <div>
-            Loading
-            {/*<div>{bar.quote}</div>
-            <div>{bar.author}</div>*/}
-          </div>
+      {pageState !== "start" ?(
+        <div className="app-section">
+          {pageState === "loading" ? (
+            <div>
+              Loading
+              {/*<div>{bar.quote}</div>
+              <div>{bar.author}</div>*/}
+            </div>
 
-        ) : (
-          <Body
-            currentUser={currentUser}
-            sessionData={sessionData}
-            setSessionData={setSessionData}
-            exercises={exercises}
-            sessionExercises={sessionExercises}
-            setSessionExercises={setSessionExercises}
-            page={page}
-          />
-        )}
-      </div>
+          ) : (
+            <Body
+              currentUser={currentUser}
+              sessionData={sessionData}
+              setSessionData={setSessionData}
+              exercises={exercises}
+              sessionExercises={sessionExercises}
+              setSessionExercises={setSessionExercises}
+              page={page}
+            />
+          )}
+        </div>
+      ):(
+        <div className="app-section">sign in</div>
+      )
+      }
     </div>
   )
 }

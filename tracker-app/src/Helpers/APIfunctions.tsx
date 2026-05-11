@@ -11,7 +11,7 @@ export async function getToken(): Promise<string> {
 }
 
 //#region: Lil Helpers
-export async function fetchFromTable(userId: string, table:string, startDate: string, endDate: string) {
+export async function fetchFromTable(userId: string, table:string, startDate: string, endDate: string, sessionId:string) {
     console.log("fetchFromTable: " + table);
 
     switch (table) {
@@ -29,6 +29,9 @@ export async function fetchFromTable(userId: string, table:string, startDate: st
                 if (exercises) results.push(...exercises);
             }
             return results;
+        }case "set":{
+            const result = await getSessionExerciseBySession(sessionId);
+            return result
         }case "exercises":{            
             return getExercises().then(exercises => 
                 exercises.sort((a:exercise, b:exercise) => Number(a.exerciseId) - Number(b.exerciseId))

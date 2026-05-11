@@ -32,7 +32,7 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, /*pa
       }
 
       <div className="h_top_bar">
-        <div className="h_tb_hello">Hello {currentUser?.nickname}</div>
+        <div className="h_tb_hello" onClick={()=>console.log(currentUser)}>Hello {currentUser?.nickname}</div>
         <div className="h_tb_buttons">
           {page == "sessions" ?
             <button onClick={()=> setPage("progress")}><FaChartLine /></button>
