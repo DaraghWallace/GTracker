@@ -72,8 +72,8 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
             exercises = {exercises} 
             sessionData = {displaySessions} 
             sessionExercises = {sessionExercises}
-            // monthFilter = {monthFilter}
-            // yearFilter = {yearFilter}
+            monthFilter = {monthFilter}
+            yearFilter = {yearFilter}
           />
         </div>
       )
@@ -116,11 +116,14 @@ function contentFilter(setDisplaySessions: Dispatch<SetStateAction<session[]>>, 
               <option value={12}>Dec</option>
               {page == "progress" && <option value={13}>Anual</option>}
             </select>
-            <select onChange={(e)=> setYearFilter(Number(e.target.value))}>
+            {monthFilter!=13&&
+              <select onChange={(e)=> setYearFilter(Number(e.target.value))}>
                 <option value={2026}>2026</option>
                 <option value={2025}>2025</option>
                 <option value={2024}>2024</option>
-            </select>            
+              </select>  
+            }
+                      
 
             <button onClick={() => setDisplaySessions(handleFilterData(sessionData, monthFilter, yearFilter))}><FaMagnifyingGlass  /></button>
           </div>

@@ -129,7 +129,7 @@ async function handleUpdateSession(session:session, newFocus:string | null, newD
   if(session != newSession){
     await updateSession(newSession)
     const updatedData:session[] = await fetchFromTable(session.userId, "sessions", 
-        `2024-01-01`, `${date.getFullYear()}-12-31`
+        `2024-01-01`, `${date.getFullYear()}-12-31`,""
       )
     setSessionData(updatedData)
     setEditSession(false)
@@ -147,6 +147,6 @@ async function handleDeleteSession(sessionId:string, setSessionData: React.Dispa
   const date = new Date
   
   await deleteSession(sessionId)
-  const data = await fetchFromTable(userId, "sessions",`2024-01-01`, `${date.getFullYear()}-12-31`)
+  const data = await fetchFromTable(userId, "sessions",`2024-01-01`, `${date.getFullYear()}-12-31`,"")
   setSessionData(data)
 }

@@ -29,7 +29,7 @@ export default function App() {
     setPageState("loading")
     setExercises(await fetchFromTable(userId, "exercises","","",""))
     
-    const sessions: session[] = await fetchFromTable( userId, "sessions", "2024-1-1",
+    const sessions: session[] = await fetchFromTable( userId, "sessions", "2024-1-1", 
       `${date.getFullYear()}-${date.getMonth()}-${LastDay}`, ""
     );
     setSessionData(sessions);
