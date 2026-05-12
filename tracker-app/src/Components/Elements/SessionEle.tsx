@@ -97,7 +97,8 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
               setNewSetFormOpen = {setNewSetFormOpen}
             />
           </div>
-        }        
+        }      
+          
         {sessionExercises &&
           sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => {
             return <SessionExerciseEle key={index}

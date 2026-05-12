@@ -85,7 +85,7 @@ export default function ProgressGrid({exercises, sessionData, sessionExercises, 
 
       {strengthProgArr.map((itm => (
         <div key={itm.exerciseName} className="p_g_row">
-          <div className="p_g_cell">{itm.exerciseName}</div>
+          <div className="p_g_cell" onClick={()=> console.log(itm)}>{itm.exerciseName}</div>
             {monthFilter === 13 ? 
               [...new Set(itm.TopReps.map(rep => new Date(rep.date).getFullYear()))].map(year => {
                 const best = itm.TopReps
