@@ -12,7 +12,7 @@ export async function getToken(): Promise<string> {
 
 //#region: Lil Helpers
 export async function fetchFromTable(userId: string, table:string, startDate: string, endDate: string, sessionId:string) {
-    console.log("fetchFromTable: " + table);
+    // console.log("fetchFromTable: " + table);
 
     switch (table) {
         case "sessions": {

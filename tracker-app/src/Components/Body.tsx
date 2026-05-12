@@ -25,8 +25,8 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
   const [toggleEditing, setToggleEditing] = useState(false);
 
-  const [monthFilter, setMonthFilter] = useState(0);
-  // const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
+  // const [monthFilter, setMonthFilter] = useState(0);
+  const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
 
 
@@ -99,8 +99,8 @@ function contentFilter(setDisplaySessions: Dispatch<SetStateAction<session[]>>, 
           }
 
           <div>Filter: 
-            <select onChange={(e)=> setMonthFilter(Number(e.target.value))}>
-              <option>-</option>
+            <select onChange={(e)=> setMonthFilter(Number(e.target.value))} defaultValue={monthFilter}>
+              {/* <option disabled selected hidden value={monthFilter}>{displayMonth(monthFilter)}</option> */}
               <option value={0}>All of</option>
               <option value={1}>Jan</option>
               <option value={2}>Feb</option>
