@@ -9,7 +9,7 @@ import type { user, session, exercise, sessionExercise } from "./Helpers/customT
 import { getUserAttributes, logout } from './Helpers/amplify';
 
 import './CSS/App.css';
-import { fetchFromTable } from './Helpers/APIfunctions';
+import { getExercises, getSessionExerciseBySession, getSessions } from './Helpers/APIfunctions';
 // import { seedSessions, seedExercises, seedSessionsExercises } from './Helpers/seeds';
 
 export default function App() {
@@ -27,18 +27,26 @@ export default function App() {
     const LastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
 
     setPageState("loading")
-    setExercises(await fetchFromTable(userId, "exercises","","",""))
+    setExercises(await getExercises())
     
-    const sessions: session[] = await fetchFromTable( userId, "sessions", "2024-1-1", 
-      `${date.getFullYear()}-${date.getMonth()}-${LastDay}`, ""
+    const sessions: session[] = await getSessions( userId, "2024-1-1", 
+      `${date.getFullYear()}-${date.getMonth()}-${LastDay}`,
     );
     setSessionData(sessions);
+    console.log(sessions);
 
-    const allSets: sessionExercise[] = await Promise.all(
-      sessions.map(session => fetchFromTable(userId, "set", "", "", session.sessionId))
-    );
+    //--For of: works but is slow 
+    // const allSets: sessionExercise[] = [];
+    // for (const session of sessions) {
+    //   const sets = await getSessionExerciseBySession(session.sessionId);
+    //   if (sets) allSets.push(...sets);
+    // }
+
+    const allSets = await batchRequests(sessions);
 
     setSessionExercises(allSets.flat())
+    console.log(allSets.flat());
+
     setPageState("ready")
   }
 
@@ -111,4 +119,23 @@ export default function App() {
       }
     </div>
   )
+}
+
+async function batchRequests(sessions: session[]): Promise<sessionExercise[]> {
+  const batchSize = 5
+  const results: sessionExercise[] = [];
+
+  for (let i = 0; i < sessions.length; i += batchSize) {
+    const batch = sessions.slice(i, i + batchSize);
+    const batchResults = (await Promise.all(
+      batch.map(session =>
+        getSessionExerciseBySession(session.sessionId).catch((error) => {
+          console.error(`Failed for session ${session.sessionId}:`, error);
+          return [];
+        })
+      )
+    )).flat();
+    results.push(...batchResults);
+  }
+  return results;
 }

@@ -221,24 +221,20 @@ export async function createSessionExercise(newSessionExercise: sessionExercise)
         throw error;
     }
 }
-// R - works
-export async function getSessionExerciseBySession(sessionId:string) {
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise?sessionId=${sessionId}`
-    const authSession = await fetchAuthSession();
-    const token = authSession.tokens?.idToken?.toString();
+export async function getSessionExerciseBySession(sessionId: string): Promise<sessionExercise[]> {
+  const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise?sessionId=${sessionId}`;
+  const authSession = await fetchAuthSession();
+  const token = authSession.tokens?.idToken?.toString();
 
-    try {
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-            "Authorization": token ?? "",
-            },
-        });
-        const text = await response.text();
-        return JSON.parse(text);        
-    } catch (error) {
-        console.error(error);
-    }
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": token ?? "",
+    },
+  });
+
+  const text = await response.text();
+  return JSON.parse(text);
 }
 // U
 export async function updateSessionExercise(newSessionExercise: sessionExercise) {
