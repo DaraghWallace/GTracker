@@ -11,7 +11,6 @@ type Props = {
 
 // type sessionCol = {"date": string, [exerciseId: string]: string | number}
 type weightRowItm = {"date": string, "userWeight": number}
-
 type strengthRep ={"date": string, "topRep": string}
 type strengthRowItm = {"exerciseName": string, "TopReps":strengthRep[]}
 
@@ -46,44 +45,12 @@ export default function ProgressGrid({exercises, sessionData, sessionExercises, 
 
   return(
     <div className="progression_grid">
-      <div className="p_g_row">
-        <div className="p_g_cell">{monthFilter == 13 ? "Year" : "Date"}</div>
-        {monthFilter === 13 ?
-          [...new Set(dateArr.map(date => new Date(date).getFullYear()))].map(year => (
-              <div key={year} className="p_g_cell">{year}</div>
-            ))
-          : 
-          dateArr.filter(thisDate => {
-            const date = new Date(thisDate);
-            const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-            const matchedYe = date.getFullYear() === yearFilter;
-            return matchedMo && matchedYe;
-          }).map(date => (
-            <div key={date} className="p_g_cell">{date}</div>
-          ))
-        }
-      </div>
-      <div className="p_g_row">
-        <div className="p_g_cell">Weight {monthFilter == 13 && "(avg)"}</div>
-        {monthFilter === 13 ? 
-          [...new Set(weightProgArr.map(w => new Date(w.date).getFullYear()))].map(year => {
-            const yearWeights = weightProgArr.filter(w => new Date(w.date).getFullYear() === year);
-            const avg = yearWeights.reduce((sum, w) => sum + w.userWeight, 0) / yearWeights.length;
-            return <div key={year} className="p_g_cell">{avg.toFixed(1)}</div>
-          })
-          : 
-          weightProgArr.filter(weight => {
-            const date = new Date(weight.date);
-            const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-            const matchedYe = date.getFullYear() === yearFilter;
-            return matchedMo && matchedYe;
-          }).map(weight => (
-            <div key={weight.date} className="p_g_cell">{weight.userWeight}</div>
-          ))
-        }
-      </div>
+      {dateRowDisplay(monthFilter, yearFilter, dateArr)}
+      {weightRowDisplay(monthFilter, yearFilter, weightProgArr)}
 
-      {strengthProgArr.map((itm => (
+
+
+      {/* {strengthProgArr.map((itm => (
         <div key={itm.exerciseName} className="p_g_row">
           <div className="p_g_cell" onClick={()=> console.log(itm)}>{itm.exerciseName}</div>
             {monthFilter === 13 ? 
@@ -105,7 +72,86 @@ export default function ProgressGrid({exercises, sessionData, sessionExercises, 
             }
           </div>
         )))
-      }
+      } */}
     </div>
   )
+}
+
+// type sessionCol = {"date": string, [exerciseId: string]: string | number}
+function dateRowDisplay(monthFilter:number, yearFilter:number, dateArr: string[]) {
+  switch (monthFilter) {
+    case 13:
+      return <div className="p_g_row">
+        <div className="p_g_cell">Month</div>
+        {[...new Set(dateArr
+            .filter(d => new Date(d).getFullYear() === yearFilter)
+            .map(d => new Date(d).getMonth() + 1)
+          )].sort((a, b) => a - b).map(month => (
+            <div key={month} className="p_g_cell">
+              {new Date(yearFilter, month - 1).toLocaleString('default', { month: 'short' })}
+            </div>
+          ))
+        }
+      </div>
+    case 14:
+      return <div className="p_g_row">
+        <div className="p_g_cell">Year</div>
+        {[...new Set(dateArr.map((date) => new Date(date).getFullYear()))]
+        .sort((a, b) => a - b).map(year => (
+          <div key={year} className="p_g_cell">{year}</div>
+        ))
+        }
+      </div>
+    default:
+      return <div className="p_g_row">
+        <div className="p_g_cell">Date</div>
+        {dateArr.filter(thisDate => {
+            const date = new Date(thisDate);
+            const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
+            const matchedYe = date.getFullYear() === yearFilter;
+            return matchedMo && matchedYe;
+          }).map(date => (
+            <div key={date} className="p_g_cell">{date}</div>
+          ))
+        }
+      </div>
+  }
+}
+
+function weightRowDisplay(monthFilter:number, yearFilter:number,weightProgArr: weightRowItm[]) {
+  switch (monthFilter) {
+    case 13: return <div className="p_g_row">
+      <div className="p_g_cell">Weight (avg)</div>
+      {[...new Set(weightProgArr
+        .filter(wP => new Date(wP.date).getFullYear() === yearFilter).map(wP => new Date(wP.date).getMonth() +1)
+      )].sort((a, b) => a - b).map(monthOf => {
+        const monthOfWeights = weightProgArr.filter(wP => 
+          new Date(wP.date).getMonth() + 1 === monthOf &&
+          new Date(wP.date).getFullYear() === yearFilter
+        )
+        const avgWeight = monthOfWeights.reduce((sum, wP) => sum + wP.userWeight, 0) / monthOfWeights.length
+        return <div key={monthOf} className="p_g_cell">{avgWeight.toFixed(2)}</div>
+      })}
+    </div>
+    case 14: return <div className="p_g_row">
+      <div className="p_g_cell">Weight (avg)</div>
+      {[...new Set(weightProgArr.map((weightProg) => new Date(weightProg.date).getFullYear()))].map(yearOf => {
+        const yearOfWeights = weightProgArr.filter(wP => new Date(wP.date).getFullYear() == yearOf)
+        const avgWeight = yearOfWeights.reduce((sum,wP) => sum + wP.userWeight,0) / yearOfWeights.length
+        return <div key={yearOf} className="p_g_cell">{avgWeight.toFixed(2)}</div>
+      })}
+    </div>
+    default: return <div className="p_g_row">
+      <div className="p_g_cell">Weight</div>
+      {weightProgArr.filter(weight => {
+          const date = new Date(weight.date);
+          const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
+          const matchedYe = date.getFullYear() === yearFilter;
+          return matchedMo && matchedYe;
+        }).map(weight => (
+          <div key={weight.date} className="p_g_cell">{weight.userWeight}</div>
+        ))
+      }
+    </div>
+  }
 }

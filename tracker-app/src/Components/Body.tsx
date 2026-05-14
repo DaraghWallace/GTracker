@@ -96,12 +96,7 @@ function handleDisplay(
         <div>
           <ProgressGrid
             exercises={exercises}
-            sessionData={sessionData.filter((session) => {
-              const date = new Date(session.dateDone);
-              const matchesMonth = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-              const matchesYear = date.getFullYear() === yearFilter;
-              return matchesMonth && matchesYear;
-            })}
+            sessionData={sessionData}
             sessionExercises={sessionExercises}
             monthFilter={monthFilter}
             yearFilter={yearFilter}
@@ -149,9 +144,10 @@ function contentFilter( page: string,
               <option value={10}>Oct</option>
               <option value={11}>Nov</option>
               <option value={12}>Dec</option>
-              {page == "progress" && <option value={13}>Anual</option>}
+              {page == "progress" && <option value={13}>Monthly</option>}
+              {page == "progress" && <option value={14}>Yearly</option>}
             </select>
-            {monthFilter !=13 &&
+            {monthFilter != 14 &&
               <select onChange={(e)=> setYearFilter(Number(e.target.value))} value={yearFilter}>
                 <option value={2026}>2026</option>
                 <option value={2025}>2025</option>

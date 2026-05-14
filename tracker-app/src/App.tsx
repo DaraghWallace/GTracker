@@ -19,7 +19,7 @@ export default function App() {
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
-  const [page, setPage] = useState("sessions");
+  const [page, setPage] = useState("progress");
   // const bar = getRandomQuote()
 
   async function loadUserData(userId: string) {
@@ -33,7 +33,7 @@ export default function App() {
       `${date.getFullYear()}-${date.getMonth()}-${LastDay}`,
     );
     setSessionData(sessions);
-    console.log(sessions);
+    // console.log(sessions);
 
     //--For of: works but is slow 
     // const allSets: sessionExercise[] = [];
@@ -45,7 +45,7 @@ export default function App() {
     const allSets = await batchRequests(sessions);
 
     setSessionExercises(allSets.flat())
-    console.log(allSets.flat());
+    // console.log(allSets.flat());
 
     setPageState("ready")
   }
