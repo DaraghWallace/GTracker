@@ -33,7 +33,6 @@ export default function App() {
       `${date.getFullYear()}-${date.getMonth()}-${LastDay}`,
     );
     setSessionData(sessions);
-    // console.log(sessions);
 
     //--For of: works but is slow 
     // const allSets: sessionExercise[] = [];
@@ -43,9 +42,7 @@ export default function App() {
     // }
 
     const allSets = await batchRequests(sessions);
-
     setSessionExercises(allSets.flat())
-    // console.log(allSets.flat());
 
     setPageState("ready")
   }

@@ -42,37 +42,14 @@ export default function ProgressGrid({exercises, sessionData, sessionExercises, 
 
     strengthProgArr.push({ exerciseName: exercise.name, TopReps: strengthRepArr })
   });
+  //objs.sort((a,b) => (a.last_nom > b.last_nom) ? 1 : ((b.last_nom > a.last_nom) ? -1 : 0))
+  strengthProgArr.sort((a,b) => (a.exerciseName > b.exerciseName) ? 1 : (b.exerciseName > a.exerciseName) ? -1 : 0)
 
   return(
     <div className="progression_grid">
       {dateRowDisplay(monthFilter, yearFilter, dateArr)}
       {weightRowDisplay(monthFilter, yearFilter, weightProgArr)}
-
-
-
-      {/* {strengthProgArr.map((itm => (
-        <div key={itm.exerciseName} className="p_g_row">
-          <div className="p_g_cell" onClick={()=> console.log(itm)}>{itm.exerciseName}</div>
-            {monthFilter === 13 ? 
-              [...new Set(itm.TopReps.map(rep => new Date(rep.date).getFullYear()))].map(year => {
-                const best = itm.TopReps
-                  .filter(rep => new Date(rep.date).getFullYear() === year && rep.topRep !== "-")
-                  .reduce((max, rep) => Number(rep.topRep) > Number(max) ? rep.topRep : max, "0");
-                return <div key={year} className="p_g_cell">{best === "0" ? "-" : best}</div>
-              })
-              : 
-              itm.TopReps.filter(rep => {
-                const date = new Date(rep.date);
-                const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-                const matchedYe = date.getFullYear() === yearFilter;
-                return matchedMo && matchedYe;
-              }).map(rep => (
-                <div key={rep.date} className="p_g_cell">{rep.topRep}</div>
-              ))
-            }
-          </div>
-        )))
-      } */}
+      {exerciseRowDisplay(monthFilter, yearFilter, strengthProgArr)}
     </div>
   )
 }
@@ -154,4 +131,74 @@ function weightRowDisplay(monthFilter:number, yearFilter:number,weightProgArr: w
       }
     </div>
   }
+}
+
+function exerciseRowDisplay(monthFilter:number, yearFilter:number, strengthProgArr: strengthRowItm[]) {
+  switch (monthFilter) {
+    case 13: 
+      return strengthProgArr
+      .filter(itm => itm.TopReps.some(rep => rep.topRep !== "-"))
+      .map(strengthProgItm => 
+        <div className="p_g_row" key={strengthProgItm.exerciseName}>  
+          <div className="p_g_cell">{strengthProgItm.exerciseName}</div>
+          {[...new Set(strengthProgItm.TopReps
+            .filter(item => new Date(item.date).getFullYear() === yearFilter)
+            .map(item => new Date(item.date).getMonth() + 1)
+            )].sort((a, b) => a - b).map(month => {
+              const monthReps = strengthProgItm.TopReps.filter(item =>
+                new Date(item.date).getMonth() + 1 === month &&
+                new Date(item.date).getFullYear() === yearFilter &&
+                item.topRep !== "-"
+              )
+              const best = monthReps.length > 0 
+                ? Math.max(...monthReps.map(r => Number(r.topRep)))
+                : "-"
+              return <div key={month} className="p_g_cell">{best}</div>
+            })
+          }
+        </div>
+      )
+    case 14:
+      return strengthProgArr
+        .filter(itm => itm.TopReps.some(rep => rep.topRep !== "-"))
+        .map(strengthProgItm =>
+          <div className="p_g_row" key={strengthProgItm.exerciseName}>
+            <div className="p_g_cell">{strengthProgItm.exerciseName}</div>
+            {[...new Set(strengthProgItm.TopReps.map(item => new Date(item.date).getFullYear()))]
+              .sort((a, b) => a - b)
+              .map(year => {
+                const yearReps = strengthProgItm.TopReps.filter(item =>
+                  new Date(item.date).getFullYear() === year &&
+                  item.topRep !== "-"
+                )
+                const best = yearReps.length > 0
+                  ? Math.max(...yearReps.map(r => Number(r.topRep)))
+                  : "-"
+                return <div key={year} className="p_g_cell">{best}</div>
+              })
+            }
+          </div>
+      )
+    default:
+      return strengthProgArr
+        .filter(itm => itm.TopReps.some(rep => {
+          const date = new Date(rep.date)
+          const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
+          const matchedYe = date.getFullYear() === yearFilter;
+          return matchedMo && matchedYe && rep.topRep !== "-"
+        }))
+        .map(strengthProgItm => 
+          <div className="p_g_row" key={strengthProgItm.exerciseName}> 
+            <div className="p_g_cell">{strengthProgItm.exerciseName}</div>
+            {strengthProgItm.TopReps.filter(thisRep => {
+              const date = new Date(thisRep.date)
+              const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
+              const matchedYe = date.getFullYear() === yearFilter;
+              return matchedMo && matchedYe;
+            }).map(rep =>
+              <div key={rep.date} className="p_g_cell">{rep.topRep}</div>
+            )}
+          </div>
+        )
+  }   
 }
