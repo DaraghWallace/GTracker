@@ -75,7 +75,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           {toggleEditing && <>{!editSession &&<button onClick={()=> setEditSession(true)}><FaPen/></button>}</>}
         </div>
         
-        {(editSession && toggleEditing) &&
+        { toggleEditing &&
           <div className="middle_column">
             {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)} ><FaPlus/></button>}
             {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)} ><FaXmark/></button>}

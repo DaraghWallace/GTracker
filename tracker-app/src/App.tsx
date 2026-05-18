@@ -10,6 +10,7 @@ import { getUserAttributes, logout } from './Helpers/amplify';
 
 import './CSS/App.css';
 import { getExercises, getSessionExerciseBySession, getSessions } from './Helpers/APIfunctions';
+// import { getRandomQuote } from './Helpers/seeds';
 // import { seedSessions, seedExercises, seedSessionsExercises } from './Helpers/seeds';
 
 export default function App() {
@@ -19,7 +20,7 @@ export default function App() {
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
-  const [page, setPage] = useState("progress");
+  const [page, setPage] = useState("sessions");
   // const bar = getRandomQuote()
 
   async function loadUserData(userId: string) {
@@ -94,8 +95,8 @@ export default function App() {
           {pageState === "loading" ? (
             <div>
               Loading
-              {/*<div>{bar.quote}</div>
-              <div>{bar.author}</div>*/}
+              {/* <div>{bar.quote}</div>
+              <div>{bar.author}</div> */}
             </div>
 
           ) : (
@@ -110,16 +111,15 @@ export default function App() {
             />
           )}
         </div>
-      ):(
+      ) : (
         <div className="app-section">sign in</div>
-      )
-      }
+      )}
     </div>
   )
 }
 
 async function batchRequests(sessions: session[]): Promise<sessionExercise[]> {
-  const batchSize = 5
+  const batchSize = 10
   const results: sessionExercise[] = [];
 
   for (let i = 0; i < sessions.length; i += batchSize) {

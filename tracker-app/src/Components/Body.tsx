@@ -45,8 +45,8 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
     <div>
       {currentUser && 
         handleDisplay(page,currentUser,
-          newSessionFormOpen,setNewSessionFormOpen,sessionData,setSessionData,
-          sessionExercises,setSessionExercises,exercises,toggleEditing,monthFilter,yearFilter
+          sessionData,setSessionData, sessionExercises,setSessionExercises,
+          exercises,toggleEditing,monthFilter,yearFilter
         )  
       }
     </div>
@@ -56,7 +56,6 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
 
 function handleDisplay(
   page:string, currentUser: user, 
-  newSessionFormOpen: boolean, setNewSessionFormOpen: Dispatch<SetStateAction<boolean>>,
   sessionData: session[], setSessionData: Dispatch<SetStateAction<session[]>>,
   sessionExercises: sessionExercise[], setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>,
   exercises: exercise[], toggleEditing: boolean,
@@ -65,12 +64,6 @@ function handleDisplay(
     case "sessions":
       return(
         <div>
-          {newSessionFormOpen && <NewSessionForm 
-            userId={currentUser?.userId ?? ""} 
-            setNewSessionFormOpen={setNewSessionFormOpen}
-            setSessionData={setSessionData}
-          />}
-          
           <div>
             {sessionData.filter((session) => {
               const date = new Date(session.dateDone);

@@ -51,20 +51,19 @@ export async function createSession(newSession: session) {
     console.log(newSession);
 
     try {
-        console.log("creating session...");
+        const authSession = await fetchAuthSession();
+        const token = authSession.tokens?.idToken?.toString();
 
         const response = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": token ?? "",
+                "Authorization": token ? `Bearer ${token}` : "",
             },
             body: JSON.stringify(newSession),
         });
 
         const text = await response.text();
-        console.log("RAW RESPONSE:", text);
-
         const result = JSON.parse(text);
 
         console.log("Session created:", result);

@@ -1,7 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import type { session } from "../../Helpers/customTypes";
-import { createSession, fetchFromTable } from "../../Helpers/APIfunctions";
+import { createSession, getSessions } from "../../Helpers/APIfunctions";
 
 import '../../CSS/Form.css'
 
@@ -36,7 +36,9 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
       const date = new Date
       await createSession(newSession);
       setMessage("Session created!");
-      const data = await fetchFromTable(userId, "sessions", `2024-01-01`, `${date.getFullYear()}-12-31`,"");
+      const data = await getSessions(userId,
+        `${date.getFullYear()}-01-01`, `${date.getFullYear()}-12-31`
+      );
       console.log(data);
       setSessionData(data);
       setNewSessionFormOpen(false)
