@@ -5,13 +5,16 @@ import Header from './Components/Header';
 import Body from './Components/Body';
 
 import type { user, session, exercise, sessionExercise } from "./Helpers/customTypes";
-
+import { getExercises, getSessionExerciseBySession, getSessions } from './Helpers/APIfunctions';
 import { getUserAttributes, logout } from './Helpers/amplify';
 
 import './CSS/App.css';
-import { getExercises, getSessionExerciseBySession, getSessions } from './Helpers/APIfunctions';
 // import { getRandomQuote } from './Helpers/seeds';
 // import { seedSessions, seedExercises, seedSessionsExercises } from './Helpers/seeds';
+
+import progPng from "./assets/progress.png"
+import seshPng from "./assets/sessions.png"
+import Loading from './Components/Elements/Loading';
 
 export default function App() {
   // const [securityToken, setSecurityToken] = useState("");
@@ -76,11 +79,13 @@ export default function App() {
   
   return (
     <div className="App">
+      {/* <Loading message={'Loading Message'}/> */}
+
       {/* <button onClick={seedExercises}>seedExercises</button>
       <button onClick={seedSessions}>seedSessions</button>
       <button onClick={seedSessionsExercises}>seedSessionsExercises</button> */}
-      <div className="app-section">
-        <Header
+      <div className="Header">
+        <Header 
           currentUser = {currentUser}
           setCurrentUser = {setCurrentUser}
           loadUserData = {loadUserData}
@@ -89,31 +94,28 @@ export default function App() {
           page={page}
         />        
       </div>
-      
-      {pageState !== "start" ?(
-        <div className="app-section">
-          {pageState === "loading" ? (
-            <div>
-              Loading
-              {/* <div>{bar.quote}</div>
-              <div>{bar.author}</div> */}
-            </div>
-
-          ) : (
-            <Body
-              currentUser={currentUser}
-              sessionData={sessionData}
-              setSessionData={setSessionData}
-              exercises={exercises}
-              sessionExercises={sessionExercises}
-              setSessionExercises={setSessionExercises}
-              page={page}
-            />
-          )}
+      {currentUser ?(
+        <div className="Body">
+          <Body
+            currentUser={currentUser}
+            sessionData={sessionData}
+            setSessionData={setSessionData}
+            exercises={exercises}
+            sessionExercises={sessionExercises}
+            setSessionExercises={setSessionExercises}
+            page={page}
+          />
         </div>
       ) : (
-        <div className="app-section">sign in</div>
+        <div className='Body'>
+          <div>
+            <img src = {seshPng}/>
+          </div>
+          <br/>
+          <div><img src = {progPng}/></div>
+        </div>
       )}
+      {pageState=="loading" && <Loading message={'Loading User data'}/>}
     </div>
   )
 }

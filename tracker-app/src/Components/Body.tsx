@@ -21,7 +21,7 @@ type Props = {
 
 export  default function Body({currentUser, sessionData, setSessionData, exercises, sessionExercises, setSessionExercises, page}: Props){
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
-  const [toggleEditing, setToggleEditing] = useState(false);
+  const [editSessions, setEditSessions] = useState(false);
 
   // const [monthFilter, setMonthFilter] = useState(0);
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
@@ -39,14 +39,14 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
     </div>
 
     <div>
-      {contentFilter(page, newSessionFormOpen, setNewSessionFormOpen, toggleEditing, setToggleEditing, setMonthFilter, monthFilter, setYearFilter, yearFilter)}            
+      {contentFilter(page, newSessionFormOpen, setNewSessionFormOpen, editSessions, setEditSessions, setMonthFilter, monthFilter, setYearFilter, yearFilter)}            
     </div>
 
     <div>
       {currentUser && 
         handleDisplay(page,currentUser,
           sessionData,setSessionData, sessionExercises,setSessionExercises,
-          exercises,toggleEditing,monthFilter,yearFilter
+          exercises,editSessions,monthFilter,yearFilter
         )  
       }
     </div>
@@ -58,7 +58,7 @@ function handleDisplay(
   page:string, currentUser: user, 
   sessionData: session[], setSessionData: Dispatch<SetStateAction<session[]>>,
   sessionExercises: sessionExercise[], setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>,
-  exercises: exercise[], toggleEditing: boolean,
+  exercises: exercise[], editSessions: boolean,
   monthFilter: number, yearFilter: number) {
   switch (page) {
     case "sessions":
@@ -78,7 +78,7 @@ function handleDisplay(
                 sessionExercises={sessionExercises}
                 setSessionExercises={setSessionExercises}
                 userId={currentUser!.userId}
-                toggleEditing={toggleEditing}
+                editSessions={editSessions}
               />
             ))}           
           </div>      
@@ -103,7 +103,7 @@ function handleDisplay(
 
 function contentFilter( page: string,
   newSessionFormOpen: boolean, setNewSessionFormOpen: Dispatch<SetStateAction<boolean>>, 
-  toggleEditing: boolean, setToggleEditing: Dispatch<SetStateAction<boolean>>, 
+  editSessions: boolean, setEditSessions: Dispatch<SetStateAction<boolean>>, 
   setMonthFilter: Dispatch<SetStateAction<number>>,monthFilter: number, 
   setYearFilter: Dispatch<SetStateAction<number>>, yearFilter: number) {
   return (
@@ -113,15 +113,16 @@ function contentFilter( page: string,
           {page == "sessions" &&
             <>
               <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
-              {toggleEditing ? 
-                <button onClick={() => setToggleEditing(false)}><FaXmark /></button>
+              {editSessions ? 
+                <button onClick={() => setEditSessions(false)}><FaXmark /></button>
                 :
-                <button onClick={() => setToggleEditing(true)}><FaPen /></button>
+                <button onClick={() => setEditSessions(true)}><FaPen /></button>
               }          
             </>
           }
 
-          <div>Filter: 
+          <div className="filter_dropdown">
+            <div>Filter: </div>
             <select onChange={(e)=> setMonthFilter(Number(e.target.value))} value={monthFilter}>
               {/* <option disabled selected hidden value={monthFilter}>{displayMonth(monthFilter)}</option> */}
               <option value={0}>All of</option>

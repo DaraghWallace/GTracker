@@ -11,6 +11,7 @@ import '../../CSS/Body.css'
 import '../../CSS/Form.css'
 
 import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash } from "react-icons/fa6";
+import Loading from "./Loading";
 
 
 type Props = {
@@ -20,10 +21,10 @@ type Props = {
   sessionExercises: sessionExercise[];
   setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
   userId: string;
-  toggleEditing:boolean;
+  editSessions:boolean;
 }
 
-export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, userId, toggleEditing}: Props) {
+export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, userId, editSessions}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
 
   const [editSession, setEditSession] = useState(false);
@@ -33,57 +34,54 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
   const [newUserWeight, setNewUserWeight] = useState(session.userWeight);
 
   const [editSetVisible, setEditSetVisible] = useState(false);
+
+  const [awaiting, setAwaiting] = useState(false);
+
+  
   try {
     return (
       <div className="session_ele">
-        {delSeshConfirmOpen && <div className="Form"> 
-            <div className="F_feildCont">
-              <div>Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
-              <div className="f_fc_Row">
-                <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId)} className="green_button"><FaCheck/></button>
-                <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>                 
-              </div>
-            </div>
-        </div>}
+
 
         <div className="s_e_header">
-          
-          {(editSession && toggleEditing)? 
+          {(editSessions && editSession)? 
             <div>
-              <input placeholder={session.focus || "Focus"} size={7} value={newFocus || ""}
+              <input type="text" placeholder={session.focus || "Focus"} size={7} value={newFocus || ""}
                 onChange={(e) => setNewFocus(e.target.value)}
-              />-
+              />
               <input placeholder={session.dateDone} type="date" value={newDateDone}
                 onChange={(e) => setNewDateDone(e.target.value)}
-              />- 
+              />
               <input placeholder={session.dateDone} type="number" value={newUserWeight}
                 onChange={(e) => setNewUserWeight(Number(e.target.value))}
-              />    
+              />Kgs    
             </div>
             :
-            <div onClick={()=> console.log(session)}>{session.focus} {displayDate(session.dateDone) + ` (${session.userWeight}kg)`}</div>      
+            <div /*onClick={()=> console.log(session)}*/>
+              {session.focus} {displayDate(session.dateDone) + ` (${session.userWeight}kg)`}
+              {editSessions && <>{!editSession &&<button onClick={()=> setEditSession(true)}><FaPen/></button>}</>}
+              {/* {session.notes} */}
+            </div>      
           }
 
-          {(editSession && toggleEditing) &&
+          {(editSessions && editSession) &&
             <div>
-              <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData)} className="green_button"><FaCheck /></button>
+              <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData, setAwaiting)} className="green_button"><FaCheck /></button>
               <button onClick={()=> setDelSeshConfirmOpen(true)} className="red_button"><FaTrash /></button>
               <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}} ><FaXmark/></button>          
             </div>
           }  
-          
-          {toggleEditing && <>{!editSession &&<button onClick={()=> setEditSession(true)}><FaPen/></button>}</>}
         </div>
         
-        { toggleEditing &&
+        { editSessions &&
           <div className="middle_column">
             {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)} ><FaPlus/></button>}
             {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)} ><FaXmark/></button>}
-            {editSetVisible ? 
+            {/* {editSetVisible ?  */}
               <button onClick={()=> setEditSetVisible(false)}><FaXmark/></button>
-              :
+              {/* : */}
               <button onClick={()=> setEditSetVisible(true)}><FaPen/></button>
-            }            
+            {/* }             */}
           </div>      
         }
 
@@ -93,7 +91,6 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
               sessionId = {session?.sessionId} 
               exercises = {exercises}
               setSessionExercises={setSessionExercises}
-              userId = {userId}
               setNewSetFormOpen = {setNewSetFormOpen}
             />
           </div>
@@ -107,11 +104,22 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
               editSetVisible = {editSetVisible}
               setSessionExercises = {setSessionExercises}
               userId={userId}
-              toggleEditing={toggleEditing}
+              editSessions={editSessions}
               editSession={editSession}
             />
           })           
         }
+
+        {delSeshConfirmOpen && <div className="Form"> 
+            <div className="F_feildCont">
+              <div>Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
+              <div className="f_fc_Row">
+                <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId, setAwaiting)} className="green_button"><FaCheck/></button>
+                <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>                 
+              </div>
+            </div>
+        </div>}
+        {awaiting && <Loading message = {"Submitting Request"}/>}
       </div>
     )    
   } catch (error) {
@@ -120,7 +128,10 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
 
 }
 
-async function handleUpdateSession(session:session, newFocus:string | null, newDateDone:string, newUserWeight:number, setEditSession: Dispatch<SetStateAction<boolean>>, setSessionData: Dispatch<SetStateAction<session[]>>) {
+async function handleUpdateSession(session:session, newFocus:string | null, newDateDone:string, newUserWeight:number, 
+  setEditSession: Dispatch<SetStateAction<boolean>>, setSessionData: Dispatch<SetStateAction<session[]>>,
+  setAwaiting: Dispatch<SetStateAction<boolean>>
+  ) {
   const date = new Date
   const newSession: session = {
     sessionId: session.sessionId,
@@ -132,15 +143,17 @@ async function handleUpdateSession(session:session, newFocus:string | null, newD
   }
 
   if(session != newSession){
+    setAwaiting(true)
     await updateSession(newSession)
     const updatedData:session[] = await fetchFromTable(session.userId, "sessions", 
         `2024-01-01`, `${date.getFullYear()}-12-31`,""
       )
     setSessionData(updatedData)
     setEditSession(false)
-  }
+    setAwaiting(false)
+  }else console.log("no changes");
 
-  console.log("no changes");
+  
 }
 
 function displayDate(date: string): string {
@@ -148,10 +161,12 @@ function displayDate(date: string): string {
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, userId: string ){
+async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, userId: string, setAwaiting: Dispatch<SetStateAction<boolean>> ){
   const date = new Date
+  setAwaiting(true)
   
   await deleteSession(sessionId)
   const data = await fetchFromTable(userId, "sessions",`2024-01-01`, `${date.getFullYear()}-12-31`,"")
   setSessionData(data)
+  setAwaiting(false)
 }

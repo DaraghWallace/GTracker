@@ -4,7 +4,7 @@ import { deleteSessionExercise, fetchFromTable, updateSessionExercise } from "..
 
 import "../../CSS/App.css"
 
-import { FaPen, FaXmark, FaCheck, FaTrash } from "react-icons/fa6";
+import { FaXmark, FaCheck, FaTrash, FaPen } from "react-icons/fa6";
 
 type props = {
   sessionExercise: sessionExercise,
@@ -12,11 +12,11 @@ type props = {
   editSetVisible: boolean,
   setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>
   userId: string
-  toggleEditing:boolean
+  editSessions:boolean
   editSession:boolean
 }
 
-export default function SessionExerciseEle({sessionExercise, exercises, editSetVisible, setSessionExercises, userId, toggleEditing, editSession}: props){
+export default function SessionExerciseEle({sessionExercise, exercises, editSetVisible, setSessionExercises, userId, editSessions, editSession}: props){
   const setEx = getExercise(sessionExercise.exerciseId, exercises);
   const [editSets, setEditSets] = useState(false);
   const [newExercise, setNewExercise] = useState(sessionExercise.exerciseId);
@@ -28,7 +28,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
     <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
       <div className="s_e_header">
         <div>
-          {(editSets && toggleEditing)?          
+          {(editSessions && editSession && editSets)?          
             <select value={newExercise} onChange={(e)=> setNewExercise(e.target.value)}>
                 {exercises.map((exercise)=>{
                   return <option key={exercise.exerciseId} value={exercise.exerciseId}>{exercise.name}</option>
@@ -39,15 +39,14 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
           }
         </div>
         
-        {editSetVisible && 
+        {(editSetVisible && editSessions) && 
           <div>
-            { (editSets && toggleEditing) ?
+            { (editSession && editSets) &&
               <>
                 <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, userId)}} className="green_button"><FaCheck/></button>
                 <button onClick={()=> {handleCancelEdit(setNewSets, sessionExercise, setEditSets)}}><FaXmark/></button>              
+                {!confirmDel && <button onClick={()=> setEditSets(true)}><FaPen/></button>}
               </>
-              :
-              <>{!confirmDel && <button onClick={()=> setEditSets(true)}><FaPen/></button>}</>
             }
             {confirmDel ? 
               <div>
@@ -55,28 +54,30 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
                 <button onClick={() => setConfirmDel(false)}><FaXmark/></button>
               </div>
             :
-              <button onClick={() => setConfirmDel(true)} className="red_button"><FaTrash/></button>
+              <div>
+                <button onClick={() => setConfirmDel(true)} className="red_button"><FaTrash/></button>
+                {editSets ? <button onClick={() => setEditSets(false)}><FaXmark/></button> :
+                <button onClick={() => setEditSets(true)}><FaPen/></button>}
+
+              </div>
             }
           </div>
         }
-
-
       </div>
+
       <div className="s_e_s_weights">
         {displaySet(sessionExercise.sets).map((set, index)=>{
           return (
           <div className="s_e_s_w_num" key={index}>
-            {(editSets && toggleEditing && editSession && editSetVisible)?
+            {(editSessions && editSets)?
               <div>
-                <form >
-                  <input type="number" data-index={index} data-key="weight" placeholder={String(set.weight)}
-                    onChange={(e)=>handleUpdateSetOfReps(e.target, newSets, setNewSets)}
-                  /> 
-                  x 
-                  <input type="number" data-index={index} data-key="reps" placeholder={String(set.reps)}
-                   onChange={(e)=>handleUpdateSetOfReps(e.target, newSets, setNewSets)}
-                  />                  
-                </form>
+                <input type="number" data-index={index} data-key="weight" placeholder={String(set.weight)}
+                  onChange={(e)=>handleUpdateSetOfReps(e.target, newSets, setNewSets)}
+                /> 
+                x 
+                <input type="number" data-index={index} data-key="reps" placeholder={String(set.reps)}
+                  onChange={(e)=>handleUpdateSetOfReps(e.target, newSets, setNewSets)}
+                />                  
               </div>
             :
               <div className="s_e_s_w_num" key={index}>{set.weight}kg x {set.reps}</div>

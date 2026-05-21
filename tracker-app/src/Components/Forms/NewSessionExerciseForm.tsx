@@ -1,27 +1,30 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { sessionExercise, exercise } from "../../Helpers/customTypes";
-import { createSessionExercise, fetchFromTable } from "../../Helpers/APIfunctions";
+import { createSessionExercise, getSessionExerciseBySession } from "../../Helpers/APIfunctions";
 import NseSetFormEle from "../Elements/NseFormSetEle";
 
 import '../../CSS/Form.css'
 import { FaPlus, FaPen, FaCheck, FaMinus, FaXmark  } from "react-icons/fa6";
+import Loading from "../Elements/Loading";
 
 type Props = {
   sessionId: string;
   exercises: exercise[];
   setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
-  userId: string
   setNewSetFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
 
-export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, userId, setNewSetFormOpen }: Props) {
+export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, setNewSetFormOpen }: Props) {
   // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
   const [numOfSets, setNumOfSets] = useState(Number);
   const [setArr, setSetArr] = useState<string[]>([]);
   const [toFailure, setToFailure] = useState(false);
   const [message, setMessage] = useState("");
+
+  const [awaiting, setAwaiting] = useState(false);
+
 
   // const filtered = exercises.filter(e =>
   //   e.name.toLowerCase().includes(query.toLowerCase())
@@ -31,7 +34,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
     if (!selectedExercise) return setMessage("Select an exercise.");
     if (!numOfSets) return setMessage("Enter Set(s).");
     if (!setArr) return setMessage("Enter weight(s).");
-
+    setAwaiting(true)
     // console.log(setArr);
     const setArrString  = setArr.toString()
     if (setArrString === "") return setMessage("Complete sets.");
@@ -48,15 +51,15 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
     
 
     try {
-      const date = new Date
       await createSessionExercise(newSessionExercise);
       setMessage("Set created!");
       setNewSetFormOpen(false)
-      const data = await fetchFromTable(userId, "sets", `2024-01-01`, `${date.getFullYear()}-12-31`, "")
+      const data = await getSessionExerciseBySession(sessionId)
       setSessionExercises(data)
-      
+      setAwaiting(false)
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
+      setAwaiting(false)
     }
   }
 
@@ -110,6 +113,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
       </div>
 
       {message && <p>{message}</p>}
+      {awaiting && <Loading message = {"Creating Set"}/>}
     </div>        
   );
 }
