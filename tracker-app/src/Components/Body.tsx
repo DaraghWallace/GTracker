@@ -8,6 +8,7 @@ import ProgressGrid from "./ProgressGrid";
 import '../CSS/Body.css'
 
 import { FaPlus, FaPen, FaXmark } from "react-icons/fa6";
+import DevRoom from "./DevRoom";
 
 type Props = {
   currentUser: user | null;
@@ -26,8 +27,6 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
   // const [monthFilter, setMonthFilter] = useState(0);
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
-
-
 
   return (<div>
     <div>
@@ -96,6 +95,8 @@ function handleDisplay(
           />
         </div>
       )
+    case "dev":
+      return <div><DevRoom exercises={exercises}/></div>
     default:
       break;
   }

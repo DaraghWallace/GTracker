@@ -59,9 +59,10 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
       <div className="F_feildCont">
         <div className="f_fc_Row">
           <input type="text" placeholder="Focus" value={focus} size={7} onChange={e => setFocus(e.target.value)} />
-          <input type="date" value={date} onChange={e => setDate(e.target.value)} />
           <div><input type="Number" value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} />Kgs</div>
         </div>
+        
+        <input type="date" value={date} onChange={e => setDate(e.target.value)} />
 
         <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
         {message && <p>{message}</p>}   

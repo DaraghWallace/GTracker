@@ -14,7 +14,6 @@ type Props = {
   setNewSetFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
-
 export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, setNewSetFormOpen }: Props) {
   // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
@@ -64,56 +63,54 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
   }
 
   return (
-    <div className="F_feildCont">
-      <div>
+    <div className="Form">
+      <div className="F_feildCont">
         <div className="f_exercise_group">
           Exercise: {selectedExercise && selectedExercise.name}
           {selectedExercise && <button onClick={()=>setSelectedExercise(null)}><FaPen/></button>}
         </div>
 
-          {!selectedExercise && (
-            <div>
-              {[...new Set(exercises.map(e => e.group))].map(group => (
-                <div className="f_exercise_cont" key={group}>
-                  <div className="f_exercise_group">{group}:</div>
-                  <div>
-                    {exercises.filter(e => e.group === group).map(exercise => (
-                      <button className="f_exercise_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>
-                        {exercise.name}
-                      </button>
-                    ))}                  
-                  </div>
-
+        {!selectedExercise && (
+          <div>
+            {[...new Set(exercises.map(e => e.group))].map(group => (
+              <div className="f_exercise_cont" key={group}>
+                <div className="f_exercise_group">{group}:</div>
+                <div>
+                  {exercises.filter(e => e.group === group).map(exercise => (
+                    <button className="f_exercise_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>
+                      {exercise.name}
+                    </button>
+                  ))}                  
                 </div>
-              ))}
-            </div>
-
+              </div>
+            ))}
+          </div>
         )}
-      </div>
-      
-      <div className="f_exercise_group">
-        Sets: {numOfSets} 
-        <button onClick={()=>setNumOfSets(numOfSets+1)}><FaPlus/></button>
-        {numOfSets >= 1 && <button onClick={()=>setNumOfSets(numOfSets-1)}><FaMinus/></button>}
-      </div>
-      <div className="f_exercise_group">Weight | Reps | Done?</div>
-      {displayReps(numOfSets,setArr, setSetArr)}
+        
+        <div className="f_exercise_group">
+          Sets: {numOfSets} 
+          <button onClick={()=>setNumOfSets(numOfSets+1)}><FaPlus/></button>
+          {numOfSets >= 1 && <button onClick={()=>setNumOfSets(numOfSets-1)}><FaMinus/></button>}
+        </div>
+        <div className="f_exercise_group">Weight | Reps | Done?</div>
+        {displayReps(numOfSets,setArr, setSetArr)}
 
-      <label>
-        <input
-          type="checkbox"
-          checked={toFailure}
-          onChange={e => setToFailure(e.target.checked)}
-        />
-        To failure
-      </label>
-      <div>
-        <button onClick={handleSubmit} className="green_button"><FaCheck/></button>
-        <button onClick={() => setNewSetFormOpen(false)}><FaXmark/></button>
-      </div>
+        <div className="f_fc_Row"> 
+          <div className="f_exercise_group">To failure?</div>
+          <input
+            type="checkbox"
+            checked={toFailure}
+            onChange={e => setToFailure(e.target.checked)}
+          />
+        </div>
+        <div>
+          <button onClick={handleSubmit} className="green_button"><FaCheck/></button>
+          <button onClick={() => setNewSetFormOpen(false)}><FaXmark/></button>
+        </div>
 
-      {message && <p>{message}</p>}
-      {awaiting && <Loading message = {"Creating Set"}/>}
+        {message && <p>{message}</p>}
+        {awaiting && <Loading message = {"Creating Set"}/>}
+      </div>        
     </div>        
   );
 }

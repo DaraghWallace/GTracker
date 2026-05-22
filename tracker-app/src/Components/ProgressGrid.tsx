@@ -1,5 +1,4 @@
 import type { exercise, session, sessionExercise } from "../Helpers/customTypes";
-// import '../CSS/Body.css'
 
 type Props = {
   exercises: exercise[];

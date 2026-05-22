@@ -5,7 +5,7 @@ import UserInForm from "./Forms/UserInForm";
 
 import '../CSS/Header.css'
 
-import { FaChartLine, FaDumbbell, FaArrowRightFromBracket,FaArrowRightToBracket  } from "react-icons/fa6";
+import { FaChartLine, FaDumbbell, FaArrowRightFromBracket,FaArrowRightToBracket , FaDev  } from "react-icons/fa6";
 
 type Props = {
   currentUser: user | null;
@@ -32,8 +32,14 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, /*pa
       }
 
       <div className="h_top_bar">
-        <div className="h_tb_hello" onClick={()=>console.log(currentUser)}>Hello {currentUser?.nickname}</div>
+        <div className="h_tb_hello" onClick={()=>console.log(currentUser)}>
+          {(currentUser && currentUser.userType == "developer") &&
+            <FaDev className="dev_button" onClick={()=> setPage("dev")}/>
+          }
+          Hello {currentUser?.nickname}
+        </div>
         <div className="h_tb_buttons">
+          
           {currentUser && (page == "sessions" ?
             <button onClick={()=> setPage("progress")}><FaChartLine /></button>
             :

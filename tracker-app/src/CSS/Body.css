@@ -102,5 +102,11 @@
 .p_g_cell{
   border: 1px solid rgb(187, 221, 255);
   text-align: center;
-  min-width: 150px;
+  width: 120px;
+} 
+
+.p_g_small{
+  border: 1px solid rgb(187, 221, 255);
+  text-align: center;
+  width: 50px;
 } 

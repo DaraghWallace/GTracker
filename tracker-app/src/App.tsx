@@ -80,10 +80,9 @@ export default function App() {
   return (
     <div className="App">
       {/* <Loading message={'Loading Message'}/> */}
-
-      {/* <button onClick={seedExercises}>seedExercises</button>
-      <button onClick={seedSessions}>seedSessions</button>
-      <button onClick={seedSessionsExercises}>seedSessionsExercises</button> */}
+      {/* <button onClick={seedExercises}>seedExercises</button> */}
+      {/* <button onClick={seedSessions}>seedSessions</button> */}
+      {/* <button onClick={seedSessionsExercises}>seedSessionsExercises</button> */}
       <div className="Header">
         <Header 
           currentUser = {currentUser}

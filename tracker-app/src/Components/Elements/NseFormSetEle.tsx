@@ -30,7 +30,7 @@ export default function NseSetFormEle({setArr, setSetArr}: Props) {
       <input
           className="thin_input"
           type="number"
-          placeholder="weight (kg)"
+          placeholder="kgs"
           value={weight}
           onChange={e => setWeight(e.target.value)}
         />

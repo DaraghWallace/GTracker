@@ -3,7 +3,7 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import SessionExerciseEle from "./SessionExerciseEle"
 
 import type { exercise, session, sessionExercise } from "../../Helpers/customTypes";
-import { deleteSession, fetchFromTable, updateSession } from "../../Helpers/APIfunctions";
+import { deleteSession, fetchFromTable, getSessions, updateSession } from "../../Helpers/APIfunctions";
 import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 
 import "../../CSS/App.css"
@@ -41,8 +41,6 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
   try {
     return (
       <div className="session_ele">
-
-
         <div className="s_e_header">
           {(editSessions && editSession)? 
             <div>
@@ -77,11 +75,11 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           <div className="middle_column">
             {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)} ><FaPlus/></button>}
             {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)} ><FaXmark/></button>}
-            {/* {editSetVisible ?  */}
+            {editSetVisible ? 
               <button onClick={()=> setEditSetVisible(false)}><FaXmark/></button>
-              {/* : */}
+              :
               <button onClick={()=> setEditSetVisible(true)}><FaPen/></button>
-            {/* }             */}
+            }            
           </div>      
         }
 
@@ -114,8 +112,8 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
             <div className="F_feildCont">
               <div>Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
               <div className="f_fc_Row">
-                <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId, setAwaiting)} className="green_button"><FaCheck/></button>
                 <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>                 
+                <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId, setAwaiting)} className="green_button"><FaCheck/></button>
               </div>
             </div>
         </div>}
@@ -162,11 +160,11 @@ function displayDate(date: string): string {
 }
 
 async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, userId: string, setAwaiting: Dispatch<SetStateAction<boolean>> ){
-  const date = new Date
   setAwaiting(true)
+  const date = new Date
   
   await deleteSession(sessionId)
-  const data = await fetchFromTable(userId, "sessions",`2024-01-01`, `${date.getFullYear()}-12-31`,"")
+  const data = await getSessions(userId,`2024-01-01`, `${date.getFullYear()}-12-31`,)
   setSessionData(data)
   setAwaiting(false)
 }

@@ -50,8 +50,8 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
             }
             {confirmDel ? 
               <div>
-                <button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, setSessionExercises, userId)} className="red_button"><FaTrash/></button>
                 <button onClick={() => setConfirmDel(false)}><FaXmark/></button>
+                Are you Sure<button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, setSessionExercises, userId)} className="red_button"><FaTrash/></button>
               </div>
             :
               <div>
