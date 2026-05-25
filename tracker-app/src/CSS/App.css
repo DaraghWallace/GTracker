@@ -92,6 +92,7 @@ button {
 .dev_button{
   font-size: 40px;
   color: rgb(58, 190, 255);
+  margin: 0;
 }
 
 img{

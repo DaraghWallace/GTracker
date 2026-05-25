@@ -44,7 +44,7 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
       const data = await getSessions(userId,
         `${date.getFullYear()}-01-01`, `${date.getFullYear()}-12-31`
       );
-      console.log(data);
+      // console.log(data);
       setSessionData(data);
       setNewSessionFormOpen(false)
       setPostStatus("Done")

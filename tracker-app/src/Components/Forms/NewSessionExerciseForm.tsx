@@ -71,7 +71,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
         </div>
 
         {!selectedExercise && (
-          <div>
+          <div className="f_exercises_cont">
             {[...new Set(exercises.map(e => e.group))].map(group => (
               <div className="f_exercise_cont" key={group}>
                 <div className="f_exercise_group">{group}:</div>
