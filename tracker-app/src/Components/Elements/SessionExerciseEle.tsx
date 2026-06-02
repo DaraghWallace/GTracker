@@ -1,32 +1,34 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { exercise, sessionExercise } from "../../Helpers/customTypes";
-import { deleteSessionExercise, fetchFromTable, updateSessionExercise } from "../../Helpers/APIfunctions";
+import { deleteSessionExercise, getSessionExerciseBySession, updateSessionExercise } from "../../Helpers/APIfunctions";
 
 import "../../CSS/App.css"
 
 import { FaXmark, FaCheck, FaTrash, FaPen } from "react-icons/fa6";
+import Loading from "./Loading";
 
 type props = {
+  sessionId: string,
   sessionExercise: sessionExercise,
   exercises: exercise[],
   editSetVisible: boolean,
   setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>
-  userId: string
   editSessions:boolean
   editSession:boolean
 }
 
-export default function SessionExerciseEle({sessionExercise, exercises, editSetVisible, setSessionExercises, userId, editSessions, editSession}: props){
+export default function SessionExerciseEle({sessionId, sessionExercise, exercises, editSetVisible, setSessionExercises, editSessions, editSession}: props){
   const setEx = getExercise(sessionExercise.exerciseId, exercises);
   const [editSets, setEditSets] = useState(false);
   const [newExercise, setNewExercise] = useState(sessionExercise.exerciseId);
   const [newSets, setNewSets] = useState(sessionExercise.sets);
   const [confirmDel, setConfirmDel] = useState(false);
   
+  const [awaiting, setAwaiting] = useState(false);
 
   return (
     <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
-      <div className="s_e_header">
+      <div className="s_e_e_header">
         <div>
           {(editSessions && editSession && editSets)?          
             <select value={newExercise} onChange={(e)=> setNewExercise(e.target.value)}>
@@ -43,7 +45,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
           <div>
             { (editSession && editSets) &&
               <>
-                <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, userId)}} className="green_button"><FaCheck/></button>
+                <button onClick={()=> {handleUpdateSessionExercise(sessionId, sessionExercise, newExercise, newSets, setEditSets, setSessionExercises)}} className="green_button"><FaCheck/></button>
                 <button onClick={()=> {handleCancelEdit(setNewSets, sessionExercise, setEditSets)}}><FaXmark/></button>              
                 {!confirmDel && <button onClick={()=> setEditSets(true)}><FaPen/></button>}
               </>
@@ -51,7 +53,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
             {confirmDel ? 
               <div>
                 <button onClick={() => setConfirmDel(false)}><FaXmark/></button>
-                Are you Sure<button onClick={() => handleDeleteSessionExercise(sessionExercise.sessionExerciseId, setSessionExercises, userId)} className="red_button"><FaTrash/></button>
+                Are you Sure<button onClick={() => handleDeleteSessionExercise(sessionId, sessionExercise.sessionExerciseId, setSessionExercises, setAwaiting)} className="red_button"><FaTrash/></button>
               </div>
             :
               <div>
@@ -85,22 +87,23 @@ export default function SessionExerciseEle({sessionExercise, exercises, editSetV
           </div>
         )})}
       </div>
+      {awaiting && <Loading  message = {"Message"}/>}
     </div>
   );
 }
 
-async function handleUpdateSessionExercise(sessionExercise: sessionExercise, newExercise: string, newSets: string,setEditSets: Dispatch<SetStateAction<boolean>>, setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>> ,userId:string) {
-  const date = new Date
+async function handleUpdateSessionExercise(sessionId: string,sessionExercise: sessionExercise, newExercise: string, newSets: string,setEditSets: Dispatch<SetStateAction<boolean>>, setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>) {
   const newSessionExercise = {
     sessionExerciseId: sessionExercise.sessionExerciseId,
     sessionId: sessionExercise.sessionId,
     exerciseId: newExercise,
-    toFailure: sessionExercise.toFailure,//*
+    toFailure: sessionExercise.toFailure,
     sets: newSets,
   }
 
   await updateSessionExercise(newSessionExercise)
-  await setSessionExercises(await fetchFromTable(userId, "sets", `2024-01-01`, `${date.getFullYear()}-12-31`,""))
+  const data = await getSessionExerciseBySession(sessionId)
+  setSessionExercises(data)
   setEditSets(false)
 }
 
@@ -141,9 +144,10 @@ function displaySet(sets: string): SetObj[] {
   });
 }
 
-async function handleDeleteSessionExercise(sessionExerciseId:string, setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>, userId: string ){
-  const date = new Date
+async function handleDeleteSessionExercise(sessionId:string, sessionExerciseId:string, setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>, setAwaiting:  React.Dispatch<React.SetStateAction<boolean>> ){
+  setAwaiting(true)
   await deleteSessionExercise(sessionExerciseId)
-  const data = await fetchFromTable(userId, "sets", `2024-01-01`, `${date.getFullYear()}-12-31`,"")
+  const data = await getSessionExerciseBySession(sessionId)
   setSessionExercises(data)
+  setAwaiting(false)
 }

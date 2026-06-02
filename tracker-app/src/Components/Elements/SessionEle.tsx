@@ -3,7 +3,7 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import SessionExerciseEle from "./SessionExerciseEle"
 
 import type { exercise, session, sessionExercise } from "../../Helpers/customTypes";
-import { deleteSession, fetchFromTable, getSessions, updateSession } from "../../Helpers/APIfunctions";
+import { deleteSession, getSessions, updateSession } from "../../Helpers/APIfunctions";
 import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 
 import "../../CSS/App.css"
@@ -43,7 +43,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
       <div className="session_ele">
         <div className="s_e_header">
           {(editSessions && editSession)? 
-            <div>
+            <>
               <input type="text" placeholder={session.focus || "Focus"} size={7} value={newFocus || ""}
                 onChange={(e) => setNewFocus(e.target.value)}
               />
@@ -53,18 +53,18 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
               <input placeholder={session.dateDone} type="number" value={newUserWeight}
                 onChange={(e) => setNewUserWeight(Number(e.target.value))}
               />Kgs    
-            </div>
+            </>
             :
-            <div /*onClick={()=> console.log(session)}*/>
+            < /*onClick={()=> console.log(session)}*/>
               {session.focus} {displayDate(session.dateDone) + ` (${session.userWeight}kg)`}
               {editSessions && <>{!editSession &&<button onClick={()=> setEditSession(true)}><FaPen/></button>}</>}
               {/* {session.notes} */}
-            </div>      
+            </>      
           }
 
           {(editSessions && editSession) &&
             <div>
-              <button onClick={()=>handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData, setAwaiting)} className="green_button"><FaCheck /></button>
+              <button onClick={()=> handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData, setAwaiting)} className="green_button"><FaCheck /></button>
               <button onClick={()=> setDelSeshConfirmOpen(true)} className="red_button"><FaTrash /></button>
               <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}} ><FaXmark/></button>          
             </div>
@@ -97,11 +97,11 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
         {sessionExercises &&
           sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => {
             return <SessionExerciseEle key={index}
+              sessionId = {session.sessionId}
               sessionExercise = {sessionExercise}
               exercises = {exercises}
               editSetVisible = {editSetVisible}
               setSessionExercises = {setSessionExercises}
-              userId={userId}
               editSessions={editSessions}
               editSession={editSession}
             />
@@ -143,8 +143,8 @@ async function handleUpdateSession(session:session, newFocus:string | null, newD
   if(session != newSession){
     setAwaiting(true)
     await updateSession(newSession)
-    const updatedData:session[] = await fetchFromTable(session.userId, "sessions", 
-        `2024-01-01`, `${date.getFullYear()}-12-31`,""
+    const updatedData:session[] = await getSessions(session.userId,
+        `2024-01-01`, `${date.getFullYear()}-12-31`
       )
     setSessionData(updatedData)
     setEditSession(false)

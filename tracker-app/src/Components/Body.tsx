@@ -62,26 +62,24 @@ function handleDisplay(
   switch (page) {
     case "sessions":
       return(
-        <div>
-          <div>
-            {sessionData.filter((session) => {
-              const date = new Date(session.dateDone);
-              const matchesMonth = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-              const matchesYear = date.getFullYear() === yearFilter;
-              return matchesMonth && matchesYear;
-            }).map((session) => (
-              <SessionEle key={session.sessionId}
-                session={session}
-                setSessionData={setSessionData}
-                exercises={exercises}
-                sessionExercises={sessionExercises}
-                setSessionExercises={setSessionExercises}
-                userId={currentUser!.userId}
-                editSessions={editSessions}
-              />
-            ))}           
-          </div>      
-        </div>
+        <div className="sessions">
+          {sessionData.filter((session) => {
+            const date = new Date(session.dateDone);
+            const matchesMonth = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
+            const matchesYear = date.getFullYear() === yearFilter;
+            return matchesMonth && matchesYear;
+          }).map((session) => (
+            <SessionEle key={session.sessionId}
+              session={session}
+              setSessionData={setSessionData}
+              exercises={exercises}
+              sessionExercises={sessionExercises}
+              setSessionExercises={setSessionExercises}
+              userId={currentUser!.userId}
+              editSessions={editSessions}
+            />
+          ))}           
+        </div>      
       )
     case "progress":     
       return (

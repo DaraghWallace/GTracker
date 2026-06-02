@@ -10,40 +10,6 @@ export async function getToken(): Promise<string> {
   return session.tokens?.idToken?.toString() ?? "";
 }
 
-//#region: Lil Helpers
-export async function fetchFromTable(userId: string, table:string, startDate: string, endDate: string, sessionId:string) {
-    // console.log("fetchFromTable: " + table);
-
-    switch (table) {
-        case "sessions": {
-            const sessions = await getSessions(userId, startDate, endDate);
-            return sessions.sort((a: session, b: session) => 
-                new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime()
-            );
-        }case "sets":{
-            const sessions = await getSessions(userId, startDate, endDate);
-            const results: sessionExercise[] = [];
-            
-            for (const session of sessions) {
-                const exercises = await getSessionExerciseBySession(session.sessionId);
-                if (exercises) results.push(...exercises);
-            }
-            return results;
-        }case "set":{
-            const result = await getSessionExerciseBySession(sessionId);
-            return result
-        }case "exercises":{            
-            return getExercises().then(exercises => 
-                exercises.sort((a:exercise, b:exercise) => Number(a.exerciseId) - Number(b.exerciseId))
-            );
-        }
-        default:
-            break;
-    }
-}
-//#endregion
-
-
 //#region: Sessions
 // C works
 export async function createSession(newSession: session) {

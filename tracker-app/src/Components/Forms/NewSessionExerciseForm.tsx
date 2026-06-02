@@ -33,7 +33,6 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
     if (!selectedExercise) return setMessage("Select an exercise.");
     if (!numOfSets) return setMessage("Enter Set(s).");
     if (!setArr) return setMessage("Enter weight(s).");
-    setAwaiting(true)
     // console.log(setArr);
     const setArrString  = setArr.toString()
     if (setArrString === "") return setMessage("Complete sets.");
@@ -48,6 +47,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
 
     console.log(newSessionExercise);
     
+    setAwaiting(true)
 
     try {
       await createSessionExercise(newSessionExercise);

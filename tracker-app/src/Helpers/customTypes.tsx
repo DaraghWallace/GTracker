@@ -22,8 +22,9 @@ export type exercise = {
   exerciseId: string // PK - uuid
   name: string //bar bell curl
   group: string // arms
-  muscle: string  // bicep
+  target: string  // bicep
   ppl: string // pull
+  author: string
   // demoLink: string // link to youtube vid
 }
 

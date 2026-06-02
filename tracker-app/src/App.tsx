@@ -33,9 +33,11 @@ export default function App() {
     setPageState("loading")
     setExercises(await getExercises())
     
-    const sessions: session[] = await getSessions( userId, "2024-1-1", 
+    const sessions: session[] = await getSessions( userId, "2020-1-1", 
       `${date.getFullYear()}-${date.getMonth()}-${LastDay}`,
     );
+    console.log(sessions);
+    
     setSessionData(sessions);
 
     //--For of: works but is slow 
@@ -81,7 +83,7 @@ export default function App() {
     <div className="App">
       {/* <Loading message={'Loading Message'}/> */}
       {/* <button onClick={seedExercises}>seedExercises</button> */}
-      {/* <button onClick={seedSessions}>seedSessions</button> */}
+      {/* <button onClick={seedSessions}>seedSessions</button>  */}
       {/* <button onClick={seedSessionsExercises}>seedSessionsExercises</button> */}
       <div className="Header">
         <Header 
