@@ -24,7 +24,7 @@ export type exercise = {
   group: string // arms
   target: string  // bicep
   ppl: string // pull
-  author: string
+  author: string // Dev - User name
   // demoLink: string // link to youtube vid
 }
 

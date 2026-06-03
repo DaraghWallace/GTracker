@@ -26,7 +26,7 @@ export default function DevRoom({exercises}: Props) {
           <div className="p_g_row" key={exercise.exerciseId}>
             <div className="p_g_cell">{exercise.name}</div>
             <div className="p_g_cell">{exercise.group}</div>
-            <div className="p_g_cell">{exercise.muscle}</div>
+            <div className="p_g_cell">{exercise.target}</div>
             <div className="p_g_cell">{exercise.ppl}</div>
             <div className="p_g_cell">
               <button><FaPen/></button>

@@ -10,7 +10,6 @@
     flex: 1 1 100%;
     margin: 3px;  
     overflow: scroll;
-    overflow: hidden;
   }
 
   .filter_dropdown{
@@ -137,8 +136,6 @@
     background-color: rgb(92, 92, 92);
     flex: 1 1 100%;
     margin: 3px;  
-    overflow: scroll;
-    overflow: hidden;
   }
 
   .filter_dropdown{

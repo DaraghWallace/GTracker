@@ -10,7 +10,7 @@ import { getUserAttributes, logout } from './Helpers/amplify';
 
 import './CSS/App.css';
 // import { getRandomQuote } from './Helpers/seeds';
-// import { seedSessions, seedExercises, seedSessionsExercises } from './Helpers/seeds';
+// import { seedExercises, seedSessions, seedSessionsExercises } from './Helpers/seeds';
 
 import progPng from "./assets/progress.png"
 import seshPng from "./assets/sessions.png"
