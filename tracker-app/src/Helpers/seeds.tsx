@@ -148,7 +148,6 @@ const sessionsExercises: sessionExercise[] = [
   { sessionExerciseId: "se_035", sessionId: "sess_2", exerciseId: "51", toFailure: false, sets: "80x10" },   // Leg Press
   { sessionExerciseId: "se_036", sessionId: "sess_2", exerciseId: "17", toFailure: false, sets: "0x10" },          // Calf Raises
   { sessionExerciseId: "se_037", sessionId: "sess_2", exerciseId: "67", toFailure: false, sets: "5x10" },    // Reverse Lunges
-  { sessionExerciseId: "se_038", sessionId: "sess_2", exerciseId: "23", toFailure: false, sets: "30x10" },   // Deadlift (trap bar)
   { sessionExerciseId: "se_039", sessionId: "sess_2", exerciseId: "49", toFailure: false, sets: "95x10" },   // Belly leg curls
   { sessionExerciseId: "se_040", sessionId: "sess_2", exerciseId: "56", toFailure: false, sets: "17.5x10" },
 
@@ -216,7 +215,6 @@ const sessionsExercises: sessionExercise[] = [
   { sessionExerciseId: "se_095", sessionId: "sess_6", exerciseId: "38", toFailure: false, sets: "15x10" },   // Hammer Curls
   { sessionExerciseId: "se_096", sessionId: "sess_6", exerciseId: "10", toFailure: false, sets: "15x10" },   // Seated curls
   { sessionExerciseId: "se_097", sessionId: "sess_6", exerciseId: "16", toFailure: false, sets: "27x10" },
-  { sessionExerciseId: "se_098", sessionId: "sess_6", exerciseId: "23", toFailure: false, sets: "45x10" },   // Barbell Deadlift
   { sessionExerciseId: "se_099", sessionId: "sess_6", exerciseId: "36", toFailure: false, sets: "12x10" },
   { sessionExerciseId: "se_100", sessionId: "sess_6", exerciseId: "50", toFailure: false, sets: "61x10" },
   { sessionExerciseId: "se_101", sessionId: "sess_6", exerciseId: "37", toFailure: false, sets: "75x10" },
@@ -228,7 +226,6 @@ const sessionsExercises: sessionExercise[] = [
   { sessionExerciseId: "se_105", sessionId: "sess_7", exerciseId: "81", toFailure: false, sets: "35x10" },
   { sessionExerciseId: "se_106", sessionId: "sess_7", exerciseId: "61", toFailure: false, sets: "12.5x10" },
   { sessionExerciseId: "se_107", sessionId: "sess_7", exerciseId: "71", toFailure: false, sets: "22.5x10" },
-  { sessionExerciseId: "se_108", sessionId: "sess_7", exerciseId: "23", toFailure: false, sets: "40x10" },
   { sessionExerciseId: "se_109", sessionId: "sess_7", exerciseId: "52", toFailure: false, sets: "0x10" },
 
   // ─── Mar 2025 ────────────────────────────────────────────────────────────────
@@ -258,7 +255,6 @@ const sessionsExercises: sessionExercise[] = [
   { sessionExerciseId: "se_131", sessionId: "sess_9", exerciseId: "16", toFailure: false, sets: "55x10" },
   { sessionExerciseId: "se_132", sessionId: "sess_9", exerciseId: "46", toFailure: false, sets: "56.5x10" },
   { sessionExerciseId: "se_133", sessionId: "sess_9", exerciseId: "78", toFailure: false, sets: "40x10" },   // Iso lat rows
-  { sessionExerciseId: "se_134", sessionId: "sess_9", exerciseId: "23", toFailure: false, sets: "50x10" },
   { sessionExerciseId: "se_135", sessionId: "sess_9", exerciseId: "36", toFailure: false, sets: "20x10" },
   { sessionExerciseId: "se_136", sessionId: "sess_9", exerciseId: "50", toFailure: false, sets: "70.5x10" },
   { sessionExerciseId: "se_137", sessionId: "sess_9", exerciseId: "37", toFailure: false, sets: "100x10" },
@@ -280,7 +276,6 @@ const sessionsExercises: sessionExercise[] = [
   { sessionExerciseId: "se_151", sessionId: "sess_10", exerciseId: "46", toFailure: false, sets: "59x10" },
   { sessionExerciseId: "se_152", sessionId: "sess_10", exerciseId: "78", toFailure: false, sets: "42.5x10" }, // Iso lat rows
   { sessionExerciseId: "se_153", sessionId: "sess_10", exerciseId: "71", toFailure: false, sets: "22.5x10" },
-  { sessionExerciseId: "se_154", sessionId: "sess_10", exerciseId: "23", toFailure: false, sets: "60x10" },
   { sessionExerciseId: "se_155", sessionId: "sess_10", exerciseId: "36", toFailure: false, sets: "25x10" },
   { sessionExerciseId: "se_156", sessionId: "sess_10", exerciseId: "50", toFailure: false, sets: "75x10" },
   { sessionExerciseId: "se_157", sessionId: "sess_10", exerciseId: "37", toFailure: false, sets: "80x10" },
@@ -298,7 +293,6 @@ const sessionsExercises: sessionExercise[] = [
   { sessionExerciseId: "se_167", sessionId: "sess_11", exerciseId: "10", toFailure: false, sets: "17.5x10" },
   { sessionExerciseId: "se_168", sessionId: "sess_11", exerciseId: "16", toFailure: false, sets: "66x10" },
   { sessionExerciseId: "se_169", sessionId: "sess_11", exerciseId: "46", toFailure: false, sets: "66x10" },
-  { sessionExerciseId: "se_170", sessionId: "sess_11", exerciseId: "23", toFailure: false, sets: "85x10" },
   { sessionExerciseId: "se_171", sessionId: "sess_11", exerciseId: "36", toFailure: false, sets: "25x10" },
   { sessionExerciseId: "se_172", sessionId: "sess_11", exerciseId: "17", toFailure: false, sets: "15x10" },
   { sessionExerciseId: "se_173", sessionId: "sess_11", exerciseId: "49", toFailure: false, sets: "80x10" },  // Belly leg curls
@@ -351,7 +345,6 @@ const sessionsExercises: sessionExercise[] = [
   { sessionExerciseId: "se_212", sessionId: "sess_15", exerciseId: "81", toFailure: false, sets: "31x10" },
   { sessionExerciseId: "se_213", sessionId: "sess_15", exerciseId: "16", toFailure: false, sets: "66x10" },
   { sessionExerciseId: "se_214", sessionId: "sess_15", exerciseId: "46", toFailure: false, sets: "66x10" },
-  { sessionExerciseId: "se_215", sessionId: "sess_15", exerciseId: "23", toFailure: false, sets: "110x10" },
   { sessionExerciseId: "se_216", sessionId: "sess_15", exerciseId: "50", toFailure: false, sets: "84x10" },
   { sessionExerciseId: "se_217", sessionId: "sess_15", exerciseId: "49", toFailure: false, sets: "36x10" },  // Leg curl
   { sessionExerciseId: "se_218", sessionId: "sess_15", exerciseId: "22", toFailure: false, sets: "63x10" },  // Machine crunch

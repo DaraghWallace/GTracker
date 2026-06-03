@@ -28,7 +28,7 @@ export default function SessionExerciseEle({sessionId, sessionExercise, exercise
 
   return (
     <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
-      <div className="s_e_e_header">
+      <div className="s_e_e_header" onClick={()=>console.log(sessionExercise)}>
         <div>
           {(editSessions && editSession && editSets)?          
             <select value={newExercise} onChange={(e)=> setNewExercise(e.target.value)}>

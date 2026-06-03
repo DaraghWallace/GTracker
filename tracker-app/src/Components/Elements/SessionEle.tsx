@@ -56,7 +56,8 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
             </>
             :
             < /*onClick={()=> console.log(session)}*/>
-              {session.focus} {displayDate(session.dateDone) + ` (${session.userWeight}kg)`}
+              {session.focus} {displayDate(session.dateDone)}
+              {session.userWeight > 0 && session.userWeight}
               {editSessions && <>{!editSession &&<button onClick={()=> setEditSession(true)}><FaPen/></button>}</>}
               {/* {session.notes} */}
             </>      
