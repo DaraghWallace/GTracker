@@ -3,8 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { session } from "../../Helpers/customTypes";
 import { createSession, getSessions } from "../../Helpers/APIfunctions";
 
-import '../../CSS/App.css'
-import '../../CSS/Form.css'
 
 import {  FaXmark, FaCheck, } from "react-icons/fa6";
 import Loading from "../Elements/Loading";

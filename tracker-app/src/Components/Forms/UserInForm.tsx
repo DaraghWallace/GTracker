@@ -3,8 +3,6 @@ import type { user } from "../../Helpers/customTypes";
 
 import { login, register, confirm , getUserAttributes} from "../../Helpers/amplify";
 
-import "../../CSS/App.css";
-import "../../CSS/Form.css";
 
 import { FaCheck, FaXmark  } from "react-icons/fa6";
 

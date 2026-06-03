@@ -8,7 +8,6 @@ import type { user, session, exercise, sessionExercise } from "./Helpers/customT
 import { getExercises, getSessionExerciseBySession, getSessions } from './Helpers/APIfunctions';
 import { getUserAttributes, logout } from './Helpers/amplify';
 
-import './CSS/App.css';
 // import { getRandomQuote } from './Helpers/seeds';
 // import { seedExercises, seedSessions, seedSessionsExercises } from './Helpers/seeds';
 

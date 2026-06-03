@@ -2,7 +2,6 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import type { exercise, sessionExercise } from "../../Helpers/customTypes";
 import { deleteSessionExercise, getSessionExerciseBySession, updateSessionExercise } from "../../Helpers/APIfunctions";
 
-import "../../CSS/App.css"
 
 import { FaXmark, FaCheck, FaTrash, FaPen } from "react-icons/fa6";
 import Loading from "./Loading";

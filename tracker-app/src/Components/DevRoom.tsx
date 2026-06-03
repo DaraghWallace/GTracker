@@ -1,6 +1,4 @@
 import { useState } from "react";
-import "../CSS/App.css"
-import "../CSS/Form.css"
 import NewExerciseForm from "./Forms/NewExerciseForm";
 import type { exercise } from "../Helpers/customTypes";
 

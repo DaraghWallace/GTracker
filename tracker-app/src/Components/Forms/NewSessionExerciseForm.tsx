@@ -3,7 +3,6 @@ import type { sessionExercise, exercise } from "../../Helpers/customTypes";
 import { createSessionExercise, getSessionExerciseBySession } from "../../Helpers/APIfunctions";
 import NseSetFormEle from "../Elements/NseFormSetEle";
 
-import '../../CSS/Form.css'
 import { FaPlus, FaPen, FaCheck, FaMinus, FaXmark  } from "react-icons/fa6";
 import Loading from "../Elements/Loading";
 

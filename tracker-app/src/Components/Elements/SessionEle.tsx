@@ -6,10 +6,6 @@ import type { exercise, session, sessionExercise } from "../../Helpers/customTyp
 import { deleteSession, getSessions, updateSession } from "../../Helpers/APIfunctions";
 import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 
-import "../../CSS/App.css"
-import '../../CSS/Body.css'
-import '../../CSS/Form.css'
-
 import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash } from "react-icons/fa6";
 import Loading from "./Loading";
 

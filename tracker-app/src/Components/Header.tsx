@@ -3,8 +3,6 @@ import type { user } from "../Helpers/customTypes";
 import UserInForm from "./Forms/UserInForm";
 // import { getRandomQuote } from "../Helpers/seeds";
 
-import '../CSS/Header.css'
-
 import { FaChartLine, FaDumbbell, FaArrowRightFromBracket,FaArrowRightToBracket , FaDev  } from "react-icons/fa6";
 
 type Props = {

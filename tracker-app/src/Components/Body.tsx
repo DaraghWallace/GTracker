@@ -5,8 +5,6 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 // import NewExerciseForm from "./Forms/NewExerciseForm";
 import ProgressGrid from "./ProgressGrid";
 
-import '../CSS/Body.css'
-
 import { FaPlus, FaPen, FaXmark } from "react-icons/fa6";
 import DevRoom from "./DevRoom";
 
