@@ -1,0 +1,14 @@
+.Header{
+  background-color: rgb(40, 40, 50);
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  
+  padding: 4px;
+}
+
+.h_hello{
+  font-size: 30px;
+  padding-top: 4px;
+}

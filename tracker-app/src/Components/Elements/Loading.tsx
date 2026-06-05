@@ -1,5 +1,7 @@
 import {  FaDumbbell  } from "react-icons/fa6";
 
+import "../../CSS/loading.css"
+
 //<Loading message = {"Message"}/>
 export default function Loading({ message }: { message: string }) {
   return(

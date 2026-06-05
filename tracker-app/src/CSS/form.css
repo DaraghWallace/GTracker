@@ -1,0 +1,73 @@
+.form{
+  background-color: rgba(0, 40, 50, 0.473);
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.f_panel{
+  background-color: rgb(50, 50, 60);
+  width: fit-content;
+
+  min-height: 100px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: space-between;
+
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.f_p_row{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.f_p_row_c{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.f_p_e_header{
+  font-weight: bold;
+  font-size: 23px;
+}
+
+.f_p_e_sub_header{
+  font-size: 20px;
+}
+
+.f_p_exercises{
+  max-height: 500px;
+  width: 600px;
+  overflow-y: auto;
+}
+
+.sets{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.set_field{
+  width: 30%;
+}
+
+.f_exercise_button{
+  height: 25px;
+  padding: 3px;
+  margin: 3px;
+  font-size: 18px;
+  width: fit-content;
+}

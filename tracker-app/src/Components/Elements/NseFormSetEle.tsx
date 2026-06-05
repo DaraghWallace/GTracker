@@ -1,5 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 
+import "../../CSS/form.css";
+
 type Props = {
   index: number
   setArr: string[];
@@ -26,23 +28,20 @@ export default function NseSetFormEle({setArr, setSetArr}: Props) {
   }
 
   return (
-    <div className="f_fc_Row">
-      <input
-          className="thin_input"
+    <div className="sets">
+      <input className="set_field"
           type="number"
-          placeholder="kgs"
+          placeholder="Kgs"
           value={weight}
           onChange={e => setWeight(e.target.value)}
         />
-      <input
-        className="thin_input"
+      <input className="set_field"
         type="number"
-        placeholder="# of reps"
+        placeholder="#"
         value={reps}
         onChange={e => setReps(e.target.value)}
       />
-      <input
-        className="thin_input"
+      <input className="set_field"
         type="checkbox"
         checked={completed}
         onChange={()=> completeSet()}

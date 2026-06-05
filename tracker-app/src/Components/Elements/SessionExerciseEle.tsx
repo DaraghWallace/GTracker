@@ -6,6 +6,8 @@ import { deleteSessionExercise, getSessionExerciseBySession, updateSessionExerci
 import { FaXmark, FaCheck, FaTrash, FaPen } from "react-icons/fa6";
 import Loading from "./Loading";
 
+import "../../CSS/exSeshEle.css"
+
 type props = {
   sessionId: string,
   sessionExercise: sessionExercise,
@@ -26,8 +28,8 @@ export default function SessionExerciseEle({sessionId, sessionExercise, exercise
   const [awaiting, setAwaiting] = useState(false);
 
   return (
-    <div className="s_e_set" key={sessionExercise.sessionExerciseId}>
-      <div className="s_e_e_header" onClick={()=>console.log(sessionExercise)}>
+    <div className="EsSesh" key={sessionExercise.sessionExerciseId}>
+      <div className="es_header" onClick={()=>console.log(sessionExercise)}>
         <div>
           {(editSessions && editSession && editSets)?          
             <select value={newExercise} onChange={(e)=> setNewExercise(e.target.value)}>
@@ -66,10 +68,10 @@ export default function SessionExerciseEle({sessionId, sessionExercise, exercise
         }
       </div>
 
-      <div className="s_e_s_weights">
+      <div className="es_reps">
         {displaySet(sessionExercise.sets).map((set, index)=>{
           return (
-          <div className="s_e_s_w_num" key={index}>
+          <div className="es_rep" key={index}>
             {(editSessions && editSets)?
               <div>
                 <input type="number" data-index={index} data-key="weight" placeholder={String(set.weight)}

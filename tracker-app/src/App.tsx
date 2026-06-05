@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
+import "./CSS/App.css"
+
 import Header from './Components/Header';
 import Body from './Components/Body';
 
@@ -84,30 +86,27 @@ export default function App() {
       {/* <button onClick={seedExercises}>seedExercises</button> */}
       {/* <button onClick={seedSessions}>seedSessions</button>  */}
       {/* <button onClick={seedSessionsExercises}>seedSessionsExercises</button> */}
-      <div className="Header">
-        <Header 
-          currentUser = {currentUser}
-          setCurrentUser = {setCurrentUser}
-          loadUserData = {loadUserData}
-          handleSignOut = {handleSignOut}
-          setPage = {setPage}
-          page={page}
-        />        
-      </div>
+      <Header 
+        currentUser = {currentUser}
+        setCurrentUser = {setCurrentUser}
+        loadUserData = {loadUserData}
+        handleSignOut = {handleSignOut}
+        setPage = {setPage}
+        page={page}
+      />
+
       {currentUser ?(
-        <div className="Body">
-          <Body
-            currentUser={currentUser}
-            sessionData={sessionData}
-            setSessionData={setSessionData}
-            exercises={exercises}
-            sessionExercises={sessionExercises}
-            setSessionExercises={setSessionExercises}
-            page={page}
-          />
-        </div>
+        <Body
+          currentUser={currentUser}
+          sessionData={sessionData}
+          setSessionData={setSessionData}
+          exercises={exercises}
+          sessionExercises={sessionExercises}
+          setSessionExercises={setSessionExercises}
+          page={page}
+        />
       ) : (
-        <div className='Body'>
+        <div>
           <div>
             <img src = {seshPng}/>
           </div>

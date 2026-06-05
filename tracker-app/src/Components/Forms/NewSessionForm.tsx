@@ -3,9 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import type { session } from "../../Helpers/customTypes";
 import { createSession, getSessions } from "../../Helpers/APIfunctions";
 
-
 import {  FaXmark, FaCheck, } from "react-icons/fa6";
 import Loading from "../Elements/Loading";
+
+import "../../CSS/form.css";
 
 type Props = {
   userId: string;
@@ -53,18 +54,21 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
   }
 
   return (
-    <div className="Form">
-      <div className="F_feildCont">
-        <div className="f_fc_Row">
-          <input type="text" placeholder="Focus" value={focus} size={7} onChange={e => setFocus(e.target.value)} />
+    <div className="form">
+      <div className="f_panel">
+        <div className="f_p_row">
+          <input type="text" placeholder="Focus" value={focus} size={7} onChange={e => setFocus(e.target.value)} /> - 
+          <div><input type="date" value={date} onChange={e => setDate(e.target.value)} /></div> - 
           <div><input type="Number" value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} />Kgs</div>
         </div>
         
-        <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+        
+        
 
         <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
         {message && <p>{message}</p>}   
-        <div>
+        
+        <div className="f_p_row_c">
           <button onClick={handleSubmit} className="green_button"><FaCheck/></button>
           <button onClick={() => setNewSessionFormOpen(false)}><FaXmark/></button>
         </div>          

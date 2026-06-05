@@ -5,6 +5,9 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 // import NewExerciseForm from "./Forms/NewExerciseForm";
 import ProgressGrid from "./ProgressGrid";
 
+import "../CSS/Body.css"
+import "../CSS/form.css"
+
 import { FaPlus, FaPen, FaXmark } from "react-icons/fa6";
 import DevRoom from "./DevRoom";
 
@@ -26,27 +29,33 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
 
-  return (<div>
-    <div>
-      {newSessionFormOpen && <NewSessionForm 
-        userId={currentUser?.userId ?? ""} 
-        setNewSessionFormOpen={setNewSessionFormOpen}
-        setSessionData={setSessionData}
-      />}
-    </div>
-
-    <div>
-      {contentFilter(page, newSessionFormOpen, setNewSessionFormOpen, editSessions, setEditSessions, setMonthFilter, monthFilter, setYearFilter, yearFilter)}            
-    </div>
-
-    <div>
-      {currentUser && 
-        handleDisplay(page,currentUser,
-          sessionData,setSessionData, sessionExercises,setSessionExercises,
-          exercises,editSessions,monthFilter,yearFilter
-        )  
+  return (<div className="Body">
+    <div className="b_header">
+      <div>{contentFilter(page, setMonthFilter, monthFilter, setYearFilter, yearFilter)}</div>         
+      {page == "sessions" &&
+        <div className="b_h_buttons">
+          <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
+          {editSessions ? 
+            <button onClick={() => setEditSessions(false)}><FaXmark /></button>
+            :
+            <button onClick={() => setEditSessions(true)}><FaPen /></button>
+          }          
+        </div>
       }
     </div>
+
+    {currentUser && 
+      handleDisplay(page,currentUser,
+        sessionData,setSessionData, sessionExercises,setSessionExercises,
+        exercises,editSessions,monthFilter,yearFilter
+      )  
+    }
+
+    {newSessionFormOpen && <NewSessionForm 
+      userId={currentUser?.userId ?? ""} 
+      setNewSessionFormOpen={setNewSessionFormOpen}
+      setSessionData={setSessionData}
+    />}
   </div>)
 }
 
@@ -81,15 +90,13 @@ function handleDisplay(
       )
     case "progress":     
       return (
-        <div>
-          <ProgressGrid
-            exercises={exercises}
-            sessionData={sessionData}
-            sessionExercises={sessionExercises}
-            monthFilter={monthFilter}
-            yearFilter={yearFilter}
-          />
-        </div>
+        <ProgressGrid
+          exercises={exercises}
+          sessionData={sessionData}
+          sessionExercises={sessionExercises}
+          monthFilter={monthFilter}
+          yearFilter={yearFilter}
+        />
       )
     case "dev":
       return <div><DevRoom exercises={exercises}/></div>
@@ -98,55 +105,36 @@ function handleDisplay(
   }
 }
 
-function contentFilter( page: string,
-  newSessionFormOpen: boolean, setNewSessionFormOpen: Dispatch<SetStateAction<boolean>>, 
-  editSessions: boolean, setEditSessions: Dispatch<SetStateAction<boolean>>, 
+function contentFilter( page: string,  
   setMonthFilter: Dispatch<SetStateAction<number>>,monthFilter: number, 
   setYearFilter: Dispatch<SetStateAction<number>>, yearFilter: number) {
   return (
-    <div>
-      {!newSessionFormOpen && 
-        <div className="s_header">
-          {page == "sessions" &&
-            <>
-              <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
-              {editSessions ? 
-                <button onClick={() => setEditSessions(false)}><FaXmark /></button>
-                :
-                <button onClick={() => setEditSessions(true)}><FaPen /></button>
-              }          
-            </>
-          }
-
-          <div className="filter_dropdown">
-            <div>Filter: </div>
-            <select onChange={(e)=> setMonthFilter(Number(e.target.value))} value={monthFilter}>
-              {/* <option disabled selected hidden value={monthFilter}>{displayMonth(monthFilter)}</option> */}
-              <option value={0}>All of</option>
-              <option value={1}>Jan</option>
-              <option value={2}>Feb</option>
-              <option value={3}>Mar</option>
-              <option value={4}>Apr</option>
-              <option value={5}>May</option>
-              <option value={6}>Jun</option>
-              <option value={7}>Jul</option>
-              <option value={8}>Aug</option>
-              <option value={9}>Sep</option>
-              <option value={10}>Oct</option>
-              <option value={11}>Nov</option>
-              <option value={12}>Dec</option>
-              {page == "progress" && <option value={13}>Monthly</option>}
-              {page == "progress" && <option value={14}>Yearly</option>}
-            </select>
-            {monthFilter != 14 &&
-              <select onChange={(e)=> setYearFilter(Number(e.target.value))} value={yearFilter}>
-                <option value={2026}>2026</option>
-                <option value={2025}>2025</option>
-                <option value={2024}>2024</option>
-              </select>  
-            }
-          </div>
-        </div>
+    <div className="b_h_filter">
+      <div>Filter: </div>
+      <select onChange={(e)=> setMonthFilter(Number(e.target.value))} value={monthFilter}>
+        {/* <option disabled selected hidden value={monthFilter}>{displayMonth(monthFilter)}</option> */}
+        <option value={0}>All of</option>
+        <option value={1}>Jan</option>
+        <option value={2}>Feb</option>
+        <option value={3}>Mar</option>
+        <option value={4}>Apr</option>
+        <option value={5}>May</option>
+        <option value={6}>Jun</option>
+        <option value={7}>Jul</option>
+        <option value={8}>Aug</option>
+        <option value={9}>Sep</option>
+        <option value={10}>Oct</option>
+        <option value={11}>Nov</option>
+        <option value={12}>Dec</option>
+        {page == "progress" && <option value={13}>Monthly</option>}
+        {page == "progress" && <option value={14}>Yearly</option>}
+      </select>
+      {monthFilter != 14 &&
+        <select onChange={(e)=> setYearFilter(Number(e.target.value))} value={yearFilter}>
+          <option value={2026}>2026</option>
+          <option value={2025}>2025</option>
+          <option value={2024}>2024</option>
+        </select>  
       }
     </div>
   )

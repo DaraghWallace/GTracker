@@ -1,13 +1,16 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 
 import SessionExerciseEle from "./SessionExerciseEle"
+import Loading from "./Loading";
 
 import type { exercise, session, sessionExercise } from "../../Helpers/customTypes";
 import { deleteSession, getSessions, updateSession } from "../../Helpers/APIfunctions";
 import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 
+import "../../CSS/sessionEle.css"
+import "../../CSS/form.css"
+
 import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash } from "react-icons/fa6";
-import Loading from "./Loading";
 
 
 type Props = {
@@ -36,49 +39,51 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
   
   try {
     return (
-      <div className="session_ele">
-        <div className="s_e_header">
+      <div className="Session">
+        <div className="s_header">
           {(editSessions && editSession)? 
-            <>
-              <input type="text" placeholder={session.focus || "Focus"} size={7} value={newFocus || ""}
+            <div className="s_header_form">
+              <div>Focus: <input type="text" placeholder={session.focus || ""} size={7} value={newFocus || ""}
                 onChange={(e) => setNewFocus(e.target.value)}
-              />
-              <input placeholder={session.dateDone} type="date" value={newDateDone}
+              /></div>
+              <div>Date: <input placeholder={session.dateDone} type="date" value={newDateDone}
                 onChange={(e) => setNewDateDone(e.target.value)}
-              />
-              <input placeholder={session.dateDone} type="number" value={newUserWeight}
+              /></div>
+              <div>Weight: <input placeholder={session.dateDone} type="number" value={newUserWeight}
                 onChange={(e) => setNewUserWeight(Number(e.target.value))}
-              />Kgs    
-            </>
+              />Kgs </div>   
+            </div>
             :
-            < /*onClick={()=> console.log(session)}*/>
-              {session.focus} {displayDate(session.dateDone)}
-              {session.userWeight > 0 && session.userWeight}
+            <div className="s_header_text" /*onClick={()=> console.log(session)}*/>
+              <div>{session.focus && `${session.focus}:`} {displayDate(session.dateDone)}</div>
+              <div>{session.userWeight > 0 && `${session.userWeight}Kgs`}</div>
               {editSessions && <>{!editSession &&<button onClick={()=> setEditSession(true)}><FaPen/></button>}</>}
               {/* {session.notes} */}
-            </>      
+            </div>      
           }
 
           {(editSessions && editSession) &&
-            <div>
+            <div className="s_header_buttons">
               <button onClick={()=> handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData, setAwaiting)} className="green_button"><FaCheck /></button>
               <button onClick={()=> setDelSeshConfirmOpen(true)} className="red_button"><FaTrash /></button>
               <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}} ><FaXmark/></button>          
             </div>
           }  
+
+          { editSessions &&
+            <div className="s_header_buttons">
+              {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)} ><FaPlus/></button>}
+              {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)} ><FaXmark/></button>}
+              {editSetVisible ? 
+                <button onClick={()=> setEditSetVisible(false)}><FaXmark/></button>
+                :
+                <button onClick={()=> setEditSetVisible(true)}><FaPen/></button>
+              }            
+            </div>      
+          }          
         </div>
         
-        { editSessions &&
-          <div className="middle_column">
-            {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)} ><FaPlus/></button>}
-            {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)} ><FaXmark/></button>}
-            {editSetVisible ? 
-              <button onClick={()=> setEditSetVisible(false)}><FaXmark/></button>
-              :
-              <button onClick={()=> setEditSetVisible(true)}><FaPen/></button>
-            }            
-          </div>      
-        }
+
 
         {newSetFormOpen && 
           <div className="F_inset_feildCont">
@@ -93,22 +98,24 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           
         {sessionExercises &&
           sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => {
-            return <SessionExerciseEle key={index}
-              sessionId = {session.sessionId}
-              sessionExercise = {sessionExercise}
-              exercises = {exercises}
-              editSetVisible = {editSetVisible}
-              setSessionExercises = {setSessionExercises}
-              editSessions={editSessions}
-              editSession={editSession}
-            />
+            return <div className="seshEx_container">
+              <SessionExerciseEle key={index}
+                sessionId = {session.sessionId}
+                sessionExercise = {sessionExercise}
+                exercises = {exercises}
+                editSetVisible = {editSetVisible}
+                setSessionExercises = {setSessionExercises}
+                editSessions={editSessions}
+                editSession={editSession}
+              />
+            </div>
           })           
         }
 
-        {delSeshConfirmOpen && <div className="Form"> 
-            <div className="F_feildCont">
-              <div>Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
-              <div className="f_fc_Row">
+        {delSeshConfirmOpen && <div className="form"> 
+            <div className="f_panel">
+              <div className="f_p_e_header">Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
+              <div className="f_p_row_c">
                 <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>                 
                 <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId, setAwaiting)} className="green_button"><FaCheck/></button>
               </div>
