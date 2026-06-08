@@ -94,22 +94,22 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
               setNewSetFormOpen = {setNewSetFormOpen}
             />
           </div>
-        }      
-          
+        }
+
         {sessionExercises &&
-          sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => {
-            return <div className="seshEx_container">
-              <SessionExerciseEle key={index}
-                sessionId = {session.sessionId}
-                sessionExercise = {sessionExercise}
-                exercises = {exercises}
-                editSetVisible = {editSetVisible}
-                setSessionExercises = {setSessionExercises}
-                editSessions={editSessions}
-                editSession={editSession}
-              />
-            </div>
-          })           
+          <div className="seshEx_container">  
+          {sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => ( 
+            <SessionExerciseEle key={index}
+              sessionId = {session.sessionId}
+              sessionExercise = {sessionExercise}
+              exercises = {exercises}
+              editSetVisible = {editSetVisible}
+              setSessionExercises = {setSessionExercises}
+              editSessions={editSessions}
+              editSession={editSession}
+            />
+            ))}           
+          </div>
         }
 
         {delSeshConfirmOpen && <div className="form"> 

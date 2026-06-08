@@ -2,14 +2,14 @@
   .Session{
     border: solid 1px rgb(0, 200, 255);
     width: 250px;
+    max-width: 300px;
+
     flex-grow: 4;
-
-    max-height: 500px;
-    overflow-y: auto;    
-
   }
 
   .seshEx_container{
+    max-height: 400px;
+    overflow-y: auto;  
   }
 
   .s_header{

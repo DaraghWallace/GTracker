@@ -1,18 +1,22 @@
 @media (min-width: 1000px) {
   .Body{
     background-color: rgb(40, 40, 50);
-    margin-top: 5px;
 
-    overflow-y: auto;
   }
 
   .b_header{
     background-color: rgb(60, 60, 70);
+    border-bottom: 2px solid rgb(0, 200, 255);
     padding: 4px;
 
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+  }
+
+  .b_content{
+    height: 915px;
+    overflow-y: auto;
   }
 
   .b_h_filter{
@@ -29,6 +33,7 @@
     flex-wrap: wrap;
   }
 }
+
 
 select{
   font-size: 16px;

@@ -44,18 +44,20 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
       }
     </div>
 
-    {currentUser && 
-      handleDisplay(page,currentUser,
-        sessionData,setSessionData, sessionExercises,setSessionExercises,
-        exercises,editSessions,monthFilter,yearFilter
-      )  
-    }
-
-    {newSessionFormOpen && <NewSessionForm 
-      userId={currentUser?.userId ?? ""} 
-      setNewSessionFormOpen={setNewSessionFormOpen}
-      setSessionData={setSessionData}
-    />}
+    <div className="b_content">
+      {currentUser && 
+        handleDisplay(page,currentUser,
+          sessionData,setSessionData, sessionExercises,setSessionExercises,
+          exercises,editSessions,monthFilter,yearFilter
+        )  
+      }
+    
+      {newSessionFormOpen && <NewSessionForm 
+        userId={currentUser?.userId ?? ""} 
+        setNewSessionFormOpen={setNewSessionFormOpen}
+        setSessionData={setSessionData}
+      />}
+    </div>
   </div>)
 }
 
@@ -99,7 +101,7 @@ function handleDisplay(
         />
       )
     case "dev":
-      return <div><DevRoom exercises={exercises}/></div>
+      return <DevRoom exercises={exercises}/>
     default:
       break;
   }
