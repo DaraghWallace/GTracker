@@ -32,6 +32,13 @@
   justify-content: space-between;
 }
 
+.f_p_col{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+
 .f_p_row_c{
   margin-top: 10px;
   display: flex;

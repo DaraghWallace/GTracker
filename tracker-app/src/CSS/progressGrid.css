@@ -1,17 +1,17 @@
 .Grid_container{
   overflow-x: auto;
   overflow-y: auto;
-  min-height: 80%;
 }
-
 
 .G_row{
   display: flex;
   flex-direction: row;
+  width: 100%;  
 }
 
 .G_cell{
-  border: 1px solid rgb(200, 200, 255); 
+  border: 1px solid rgb(200, 200, 255);
   padding: 1px;
-  width: 160px;
+  width: 120px;
+  flex-shrink: 0;  
 }

@@ -106,12 +106,16 @@ export default function App() {
           page={page}
         />
       ) : (
-        <div>
-          <div>
+        <div className='hello'>
+          Welcome to (insert app name), A web app tom simplify tracking sessions and progress. Sign in to get started and keep an eye out for new features and updates like:
+          <div>- Cardio tracking</div>
+          <div>- Helpful Graphs</div>
+          <div>- Trainer / client features</div>
+
+          <div className='imgs'>
             <img src = {seshPng}/>
+            <img src = {progPng}/>
           </div>
-          <br/>
-          <div><img src = {progPng}/></div>
         </div>
       )}
       {pageState=="loading" && <Loading message={'Loading User data'}/>}

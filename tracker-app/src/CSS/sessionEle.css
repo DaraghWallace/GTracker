@@ -1,6 +1,6 @@
-@media (min-width: 1000px) {
+@media (min-width: 750px) {
   .Session{
-    border: solid 1px rgb(0, 200, 255);
+    border: solid 2px rgb(0, 200, 255);
     width: 250px;
     max-width: 300px;
 
@@ -14,6 +14,7 @@
 
   .s_header{
     background-color: rgb(60, 60, 70);
+    border-bottom: solid 1px rgb(0, 200, 255);
     font-size: 20px;
     font-weight: bold;
     padding: 3px;
@@ -55,6 +56,75 @@
     background-color: rgb(40, 40, 50);
     border: 0;
     width: 60px;
+    color: rgb(240, 240, 250);
+    font-size: 18px;
+    -moz-appearance: textfield;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+@media (max-width: 750px) {
+  .Session{
+    border-top: solid 4px rgb(0, 200, 255);
+    width: 100%;
+
+    flex-grow: 4;
+  }
+
+  .seshEx_container{
+    max-height: 400px;
+    overflow-y: auto;  
+  }
+
+  .s_header{
+    background-color: rgb(60, 60, 70);
+    border-bottom: solid 1px rgb(0, 200, 255);
+    font-size: 20px;
+    font-weight: bold;
+    padding: 3px;
+  }
+
+  .s_header_form{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .s_header_text{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .s_header_buttons{
+    display: flex;
+    justify-content: center;
+  }
+
+  input[type=text] {
+    background-color: rgb(40, 40, 50);
+    border: 0;
+
+    color: rgb(240, 240, 250);
+    font-size: 18px;
+  }
+
+  input[type=date] {
+    background-color: rgb(40, 40, 50);
+    border: 0;
+
+    color: rgb(240, 240, 250);
+    font-size: 18px;
+  }
+
+  input[type=number] {
+    background-color: rgb(40, 40, 50);
+    border: 0;
+    width: 30px;
     color: rgb(240, 240, 250);
     font-size: 18px;
     -moz-appearance: textfield;

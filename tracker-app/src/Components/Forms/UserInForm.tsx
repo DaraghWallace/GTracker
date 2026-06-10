@@ -3,7 +3,7 @@ import type { user } from "../../Helpers/customTypes";
 
 import { login, register, confirm , getUserAttributes} from "../../Helpers/amplify";
 
-
+import '../../CSS/form.css'
 import { FaCheck, FaXmark  } from "react-icons/fa6";
 
 type Tab = "login" | "signup" | "confirm";
@@ -67,21 +67,21 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
   }
 
   return (
-    <div className="Form">
-      <div className="F_feildCont">
+    <div className="form">
+      <div className="f_panel">
         {tab !== "confirm" && (
-          <div>
-            <button className="wide_button" onClick={() => setTab("login")}>Sign in</button>
-            <button className="wide_button" onClick={() => setTab("signup")}>Sign up</button>
+          <div className="f_p_row_c">
+            <button className="f_exercise_button" onClick={() => setTab("login")}>Sign in</button>
+            <button className="f_exercise_button" onClick={() => setTab("signup")}>Sign up</button>
           </div>
         )}
 
         {tab === "login" && (
-          <div className="f_fc_Column">
+          <div className="f_p_col">
             <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
             <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
             
-            <div className="f_fc_Row">
+            <div className="f_p_row_c">
               <button className="green_button" onClick={handleLogin}><FaCheck/></button>
               <button className="red_button" onClick={() => setUserInFormOpen(false)}><FaXmark/></button>            
             </div>  
@@ -89,16 +89,15 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
         )}
 
         {tab === "signup" && (
-          <div className="f_fc_Column">
+          <div className="f_p_col">
             <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
             <input type="text" placeholder="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} />
             <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
             <select value={userType} onChange={e => setUserType(e.target.value)}>
-              <option value="">Select...</option>
               <option value="member">Member</option>
               <option value="trainer">Trainer</option>
             </select>
-            <div className="f_fc_Row">
+            <div className="f_p_row_c">
               <button className="green_button" onClick={handleSignUp}><FaCheck/></button>
               <button className="red_button" onClick={() => setUserInFormOpen(false)}><FaXmark/></button>               
             </div>

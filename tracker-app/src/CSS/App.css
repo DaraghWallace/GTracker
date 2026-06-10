@@ -1,12 +1,14 @@
-@media (min-width: 1000px) {
-  .App{
+@media (min-width: 750px) {
+  .App {
     background-color: rgb(0, 200, 255);
-
     position: fixed;
     left: 10%;
     right: 10%;
-
+    top: 0;   
+    bottom: 0; 
     padding: 5px;
+    display: flex; 
+    flex-direction: column;
   }
 
   button{
@@ -14,11 +16,61 @@
     border: 0;
     height: 40px;
     width: 40px;
+
+    margin-top: 5px;
     padding-top: 7px;
 
     color: rgb(40, 40, 50);
     font-size: 25px;
 
+    margin-left: 3px;
+  } 
+
+  .hello{
+    background-color: rgb(60, 60, 70);
+    padding: 10px;
+    height: 100%;
+
+    font-size: 25px;
+    overflow-y: auto;
+
+  }
+
+  .imgs{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  img{
+    width: 100%;
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 750px) {
+  .App {
+    background-color: rgb(0, 200, 255);
+    position: fixed;
+    top: 0;   
+    bottom: 0; 
+    left: 0;
+    right: 0;
+    display: flex; 
+    flex-direction: column;
+  }
+
+  button{
+    background-color: rgb(0, 200, 255);
+    border: 0;
+    height: 30px;
+    width: 30px;
+
+    margin-top: 5px;
+    padding-top: 7px;
+
+
+    color: rgb(40, 40, 50);
+    font-size: 18px;
     margin-left: 3px;
   } 
 
