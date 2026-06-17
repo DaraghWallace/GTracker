@@ -27,14 +27,14 @@ export default function App() {
   const [page, setPage] = useState("sessions");
   // const bar = getRandomQuote()
 
-  async function loadUserData(userId: string) {
+  async function loadUserData() {
     const date = new Date()
     const LastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
 
     setPageState("loading")
     setExercises(await getExercises())
     
-    const sessions: session[] = await getSessions( userId, "2020-1-1", 
+    const sessions: session[] = await getSessions( "2020-1-1", 
       `${date.getFullYear()}-${date.getMonth()}-${LastDay}`,
     );
     console.log(sessions);
@@ -75,7 +75,7 @@ export default function App() {
           tar_weight: 0,
         };
         setCurrentUser(user);
-        await loadUserData(user.userId)
+        await loadUserData()
       });
     }).catch(() => {});
   }, []);

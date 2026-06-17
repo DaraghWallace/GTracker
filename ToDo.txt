@@ -1,0 +1,39 @@
+1. access control ("if I log in as another user, what can I see here or break?")
+  the Cognito authorizer only proves someone's logged in, not that the data is theirs. 
+    most handlers trust an id the client sends instead of the authenticated sub:
+
+    a. getByUser.ts:8 queries by queryStringParameters.userId → any logged-in user can read someone else's sessions by changing the userId in the URL
+    b. updateItem.ts:8-13 does a blind PutCommand of the body → you can overwrite any session, even reassign its userId
+    c. getBySession.ts and scan.ts (the sessions-all route) → same deal, scan returns everyone's stuff
+  
+  a.creat.ts          - Test
+  b.delSession.ts     - Deleted
+  c.delseshExercise   - Deleted
+  d.getBySesh         - Test
+  e.getByUser         - Test
+  f.scan              - Test
+  g.update            - Test
+  H.delete            - Test (New)
+  
+2. auth token grabbed at module load. in APIfunctions.tsx:5-6 you do await fetchAuthSession() at module scope and cache the token in a const. that token gets grabbed once when the file imports and reused by updateSession, deleteSession, etc — 
+  the token expires (~1h), functions start failing with 401s. 
+  you already wrote getToken() on line 8 — use it everywhere and drop the module-level await (it also blocks the whole module from loading).
+ 
+3. hardcoded infra ids. APIfunctions.tsx:4 and amplify.ts:10-11 have that Update after Destroy 
+  config belongs in env vars / CDK outputs, not in the code.
+ 
+4. no tests, default README. 
+  test/tracker-cdk.test.ts is the boilerplate with everything commented out and an empty test that passes. 
+  add CDK assertion test and one unit test for the per-user scoping. and a real README, what it is, how to run it, what's next, etc
+ 
+5. cleanup. leftover console.logs on every call, commented-out code (the seed buttons), 
+  and a TestData.tsx at the root with a different data model than the real one (sets: string vs ExerciseSet[]). 
+  also ProgressGrid recomputes everything every render with no useMemo, 
+  find nested in a double forEach, and sets stored as a string "10x40,8x45" that you parse mid-render. model the sets as structured data and memoize it.
+ 
+6. quick one on dependencies, you're pulling in all of AWS Amplify but as far as I can tell only using it for Cognito auth. 
+  Amplify the standard way to do Cognito in a frontend (it handles the SRP login flow + token refresh for you, which is a pain to do by hand), so 
+    this isn't wrong. but it's a heavy dependency for one feature. worth knowing the lighter option is amazon-cognito-identity-js (the library Amplify is built on) 
+      was it just for auth?
+ 
+ 

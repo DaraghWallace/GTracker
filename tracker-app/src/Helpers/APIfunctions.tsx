@@ -31,7 +31,6 @@ export async function createSession(newSession: session) {
 
         const text = await response.text();
         const result = JSON.parse(text);
-
         console.log("Session created:", result);
         return result;
     } catch (error) {
@@ -40,10 +39,10 @@ export async function createSession(newSession: session) {
     }
 }
 // R works
-export async function getSessions(userId: string, startDate: string, endDate: string) {
+export async function getSessions(startDate: string, endDate: string) {
 
     try {
-        const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions?userId=${userId}&startDate=${startDate}&endDate=${endDate}`;
+        const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions?&startDate=${startDate}&endDate=${endDate}`;
 
         const authSession = await fetchAuthSession();
         const token = authSession.tokens?.idToken?.toString();

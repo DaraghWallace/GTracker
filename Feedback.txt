@@ -1,0 +1,36 @@
+11/6
+Hi Daragh,
+ 
+Went through GTracker properly (frontend + backend) and also looked at the run of your internal projects. writing this like I would to someone already on the team. short version: really solid work, with one important thing for you to pls consider.
+ 
+Stuff you did really well
+scope + ambition. you stood up a full serverless setup on your own: CDK, Cognito, DynamoDB with GSIs, Lambdas, post-confirmation trigger. that's way more than most people submit. and I see the same pattern in your internal work: you take something that works (EA log reader) and generalize it (File Corrector for SSSR/PAT). that ability to learn and connect pieces is your biggest strength.
+good instincts. in sessions.ts you wrote private fn() and addMethod() helpers to kill the repetition, that's a real reflex, not tutorial copy-paste. scoped IAM grants (grantReadData/grantWriteData), PAY_PER_REQUEST, ConditionExpression: attribute_not_exists for idempotency in the post-confirm. you know what you're doing.
+you fixed your own bottleneck. in App.tsx:43-51 you left the sequential loop commented out and swapped it for batchRequests — batched Promise.all, per-request error handling. you felt the N+1 latency and fixed it without anyone telling you to. that's exactly what I would like to see.
+ 
+Stuff I will improve
+1. access control, this is the important one. the Cognito authorizer only proves someone's logged in, not that the data is theirs. almost all your handlers trust an id the client sends instead of the authenticated sub:
+getByUser.ts:8 queries by queryStringParameters.userId → any logged-in user can read someone else's sessions by changing the userId in the URL
+updateItem.ts:8-13 does a blind PutCommand of the body → you can overwrite any session, even reassign its userId
+getBySession.ts and scan.ts (the sessions-all route) → same deal, scan returns everyone's stuff
+ 
+the rule to lock in: identity comes from event.requestContext.authorizer.claims.sub, never from the query string or body. and here's the thing, in deleteSession.ts:13 you did it right. so you know the technique, you just applied it inconsistently because there's no shared helper. pull out a requireUserId(event) and use it everywhere, this is problem #1 iin all project where FGAC is not implemented from day 1.
+ 
+2. auth token grabbed at module load. in APIfunctions.tsx:5-6 you do await fetchAuthSession() at module scope and cache the token in a const. that token gets grabbed once when the file imports and reused by updateSession, deleteSession, etc — while other functions correctly fetch a fresh one. so when the token expires (~1h), those functions just start silently failing with 401s. you already wrote getToken() on line 8 — use it everywhere and drop the module-level await (it also blocks the whole module from loading).
+ 
+3. hardcoded infra ids. APIfunctions.tsx:4 and amplify.ts:10-11 have that Update after Destroy - Deploy comment. you clearly felt the pain of updating them by hand every redeploy, that friction is the whole signal that config belongs in env vars / CDK outputs, not in the code.
+ 
+4. no tests, default README. test/tracker-cdk.test.ts is the boilerplate with everything commented out and an empty test that passes. Pls add CDK assertion test and one unit test for the per-user scoping. and a real README,what it is, how to run it, what's next, etc
+ 
+5. cleanup. leftover console.logs on every call, commented-out code (the seed buttons), and a TestData.tsx at the root with a different data model than the real one (sets: string vs ExerciseSet[]). also ProgressGrid recomputes everything every render with no useMemo, find nested in a double forEach, and sets stored as a string "10x40,8x45" that you parse mid-render. model the sets as structured data and memoize it.
+ 
+6. quick one on dependencies, you're pulling in all of AWS Amplify but as far as I can tell only using it for Cognito auth. Amplify's a solid framework and it's honestly the standard way to do Cognito in a frontend (it handles the SRP login flow + token refresh for you, which is a pain to do by hand), so this isn't wrong. but it's a heavy dependency for one feature. worth knowing the lighter option is amazon-cognito-identity-js (the library Amplify is built on) if you ever want to trim the bundle. were you planning to use Amplify for other things (storage, api, etc.), or was it just for auth?
+ 
+Wrapping up
+The balance is clearly positive. the stuff you do well, systems thinking, learning whole stacks solo, finishing + documenting, is the hard-to-teach part. the stuff that's missing, auth scoping, config, tests, cleanup, you pick that up fast on a team with code review. the one thing I want you to really lock in is access control. not because it's complex (you already nailed it in delete) but because it's the kind of bug that's expensive in production. get in the habit of always asking yourself: "if I log in as another user, what can I see here or break?"
+ 
+I shared my feedback of this project and the other things you have contributed as part of the data team and I also informed Kevin about your wish to transition and become a dev, I will get to you when I know more form him.
+ 
+Let me know if you have further questions.
+ 
+Thanks for sharing.

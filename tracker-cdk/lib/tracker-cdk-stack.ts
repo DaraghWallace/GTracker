@@ -21,25 +21,43 @@ export class TrackerCdkStack extends cdk.Stack {
       },
     });
 
+    // Obfiscation
+    const responseTypes = [
+      apigateway.ResponseType.DEFAULT_4XX,
+      apigateway.ResponseType.DEFAULT_5XX,
+    ];
+
+    //remove headers
+    for (const responseType of responseTypes) {
+      api.addGatewayResponse(`Strip${responseType.responseType}`, {
+        type: responseType,
+        responseHeaders: {
+          'x-amzn-RequestId': "''",
+          'x-amzn-ErrorType': "''",
+          'x-amz-apigw-id': "''",
+        },
+      });
+    }
+
     //userPool, userpoolClient
     const auth = new Auth(this, 'Auth', { api });
 
-    //table, (C-R-u-d)
+    //table, (c-r-u-d)
     new UserProfiles(this, 'UserProfiles', { userPool: auth.userPool });
 
-    //table, (C-R-U-D)
+    //table, (read by User)
     new Sessions(this, 'Sessions', { 
       api, 
       authorizer: auth.authorizer 
     });
     
-    //table, Lamda(C-R-u-d)
+    //table, Lamda(c-r-u-d)
     new Exercises(this, 'Exercises', { 
       api, 
       authorizer: auth.authorizer 
     });
 
-    //table, Lamda(C-R-U-D)
+    //table, Lamda(read by session)
     new SessionExercises(this, 'SessionExercises', { 
       api, 
       authorizer: auth.authorizer 

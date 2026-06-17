@@ -6,25 +6,34 @@ const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const tableName = process.env.TABLE_NAME!;
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const claims = event.requestContext?.authorizer?.claims;
+  const callerSub = event.requestContext.authorizer?.claims?.sub;
 
-  if (!claims) {
+  if (!callerSub) {
     return {
       statusCode: 401,
+      headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ message: "Unauthorized" }),
     };
   }
 
-  const body = JSON.parse(event.body || "{}");
-  const session = {
-    ...body,
+  if (!event.body) return {
+    statusCode: 400,
+    headers: { "Access-Control-Allow-Origin": "*" },
+    body: JSON.stringify({ error: "event body missing " }),
+  }
+
+  const  { userId, ...safeBody } = JSON.parse(event.body);
+  
+  const newItem = {
+    ...safeBody,
+    userId: callerSub,
     date: new Date().toISOString(),
   };
 
   await docClient.send(
     new PutCommand({
       TableName: tableName,
-      Item: session,
+      Item: newItem,
     })
   );
 

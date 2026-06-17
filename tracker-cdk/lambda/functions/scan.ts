@@ -1,9 +1,21 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { APIGatewayProxyEvent } from "aws-lambda";
 
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "*",
+};
 
-export const handler = async () => {
+
+export const handler = async (event: APIGatewayProxyEvent)=>{
+  const callerSub = event.requestContext.authorizer?.claims?.sub;
+  
+  if (!callerSub) return { 
+    statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) 
+  };
+
   try {
     const result = await docClient.send(
       new ScanCommand({

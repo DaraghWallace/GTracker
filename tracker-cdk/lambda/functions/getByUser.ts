@@ -5,12 +5,12 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const userId = event.queryStringParameters?.userId;
+  const userId = event.requestContext.authorizer?.claims?.sub;
   const { startDate, endDate } = event.queryStringParameters ?? {};
 
   if (!userId) {
     return {
-      statusCode: 400,
+      statusCode: 401,
       headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ error: "userId is required" }),
     };
@@ -40,7 +40,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return {
       statusCode: 500,
       headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ error: String(error) }),
+      body: JSON.stringify("Internal Server Error"),
     };
   }
 };

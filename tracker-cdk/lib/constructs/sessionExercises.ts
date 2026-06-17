@@ -29,24 +29,23 @@ export class SessionExercises extends Construct {
     });
 
     // --- Lambdas ---
-    const createFn = this.fn("CreateFn", "lambda/functions/create.ts",               table.tableName);
-    const getFn    = this.fn("GetFn",    "lambda/functions/getBySession.ts",          table.tableName);
-    const updateFn = this.fn("UpdateFn", "lambda/functions/updateItem.ts",            table.tableName);
-    const deleteFn = this.fn("DeleteFn", "lambda/functions/deleteSessionExercise.ts", table.tableName);
+    const createFn = this.fn("CreateFn", "lambda/functions/generic/create.ts", table.tableName);
+    const getFn = this.fn("GetFn", "lambda/functions/getBySession.ts", table.tableName);
+    const updateFn = this.fn("UpdateFn", "lambda/functions/generic/updateItem.ts", table.tableName);
+    const deleteFn = this.fn("DeleteFn", "lambda/functions/generic/delete.ts", table.tableName);
 
     table.grantWriteData(createFn);
     table.grantReadData(getFn);
-    table.grantWriteData(updateFn);
-    table.grantWriteData(deleteFn);
+    table.grantReadWriteData(updateFn);
+    table.grantReadWriteData(deleteFn);
 
     // --- Routes ---
     const sessionExercise = api.root.addResource("sessionExercise");
-    const byId            = sessionExercise.addResource("{sessionExerciseId}");
 
     this.addMethod(sessionExercise, "POST",   createFn, authorizer);
     this.addMethod(sessionExercise, "GET",    getFn,    authorizer);
-    this.addMethod(byId,            "PUT",    updateFn, authorizer);
-    this.addMethod(byId,            "DELETE", deleteFn, authorizer);
+    this.addMethod(sessionExercise, "PUT",    updateFn, authorizer);
+    this.addMethod(sessionExercise, "DELETE", deleteFn, authorizer);
   }
 
   private fn(id: string, entry: string, tableName: string) {

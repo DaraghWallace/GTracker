@@ -32,28 +32,28 @@ export class Sessions extends Construct {
     });
 
     // --- Lambdas ---
-    const createFn = this.fn("CreateFn", "lambda/functions/create.ts", table.tableName);
+    const createFn = this.fn("CreateFn", "lambda/functions/generic/create.ts", table.tableName);
     const getFn    = this.fn("GetFn",    "lambda/functions/getByUser.ts", table.tableName);
-    const scanFn   = this.fn("ScanFn",   "lambda/functions/scan.ts", table.tableName);
-    const updateFn = this.fn("UpdateFn", "lambda/functions/updateItem.ts", table.tableName);
-    const deleteFn = this.fn("DeleteFn", "lambda/functions/deleteSession.ts", table.tableName);
+    // const scanFn   = this.fn("ScanFn",   "lambda/functions/scan.ts", table.tableName); Remove
+    const updateFn = this.fn("UpdateFn", "lambda/functions/generic/updateItem.ts", table.tableName);
+    // const deleteFn = this.fn("DeleteFn", "lambda/functions/deleteSession.ts", table.tableName); Remove
+    const deleteFn = this.fn("DeleteFn", "lambda/functions/generic/delete.ts", table.tableName);
 
     table.grantWriteData(createFn);
     table.grantReadData(getFn);
-    table.grantReadData(scanFn);
+    // table.grantReadData(scanFn);
     table.grantWriteData(updateFn);
     table.grantWriteData(deleteFn);
 
     // --- Routes ---
     const sessions    = api.root.addResource("sessions");
-    const allSessions = api.root.addResource("sessions-all");
-    const byId        = sessions.addResource("{sessionId}");
+    // const allSessions = api.root.addResource("sessions-all");
 
     this.addMethod(sessions,    "POST",   createFn, authorizer);
     this.addMethod(sessions,    "GET",    getFn,    authorizer);
-    this.addMethod(allSessions, "GET",    scanFn,   authorizer);
-    this.addMethod(byId,        "PUT",    updateFn, authorizer);
-    this.addMethod(byId,        "DELETE", deleteFn, authorizer);
+    // this.addMethod(allSessions, "GET",    scanFn,   authorizer);
+    this.addMethod(sessions,        "PUT",    updateFn, authorizer);
+    this.addMethod(sessions,        "DELETE", deleteFn, authorizer);
   }
 
   private fn(id: string, entry: string, tableName: string) {

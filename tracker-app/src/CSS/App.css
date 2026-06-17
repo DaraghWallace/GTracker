@@ -5,7 +5,7 @@
     left: 10%;
     right: 10%;
     top: 0;   
-    bottom: 0; 
+    bottom: 0;  
     padding: 5px;
     display: flex; 
     flex-direction: column;
@@ -26,16 +26,14 @@
     margin-left: 3px;
   } 
 
-  .hello{
+  .hello {
     background-color: rgb(60, 60, 70);
     padding: 10px;
-    height: 100%;
-
     font-size: 25px;
     overflow-y: auto;
-
+    height: 100%;        /* keep this */
+    box-sizing: border-box;  /* padding doesn't cause overflow */
   }
-
   .imgs{
     display: flex;
     flex-direction: column;
