@@ -1,12 +1,15 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  QueryCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
 
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const sessionId = event.queryStringParameters?.sessionId;
-  const callerSub = event.requestContext.authorizer?.claims?.sub;
+  const callerSub = event.requestContext.authorizer?.claims?.sub 
 
   if (!sessionId) {
     return {
@@ -16,12 +19,28 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
   }
 
-  const thisSession = await docClient.send(new GetCommand({
-    TableName: process.env.TABLE_NAME,
-    Key: { sessionId }
-  }));
+  if (!callerSub) {
+    return {
+      statusCode: 401,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "Unauthorized" }),
+    };
+  }
 
-  if (!thisSession.Item) {
+  const sessionResult = await docClient.send(
+    new QueryCommand({
+      TableName: process.env.OTHER_TABLE,
+      KeyConditionExpression: "sessionId = :sid",
+      ExpressionAttributeValues: {
+        ":sid": sessionId,
+      },
+      Limit: 1,
+    })
+  );
+
+  const session = sessionResult.Items?.[0];
+
+  if (!session) {
     return {
       statusCode: 404,
       headers: { "Access-Control-Allow-Origin": "*" },
@@ -29,7 +48,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
   }
 
-  if (thisSession.Item.userId !== callerSub) {
+  if (session.userId !== callerSub) {
     return {
       statusCode: 403,
       headers: { "Access-Control-Allow-Origin": "*" },
@@ -37,16 +56,20 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
   }
 
-  const result = await docClient.send(new QueryCommand({
-    TableName: process.env.TABLE_NAME,
-    IndexName: "sessionId-index",
-    KeyConditionExpression: "sessionId = :sid",
-    ExpressionAttributeValues: { ":sid": sessionId },
-  }));
+  const result = await docClient.send(
+    new QueryCommand({
+      TableName: process.env.TABLE_NAME,
+      IndexName: "sessionId-index",
+      KeyConditionExpression: "sessionId = :sid",
+      ExpressionAttributeValues: {
+        ":sid": sessionId,
+      },
+    })
+  );
 
   return {
     statusCode: 200,
     headers: { "Access-Control-Allow-Origin": "*" },
-    body: JSON.stringify(result.Items),
+    body: JSON.stringify(result.Items ?? []),
   };
 };

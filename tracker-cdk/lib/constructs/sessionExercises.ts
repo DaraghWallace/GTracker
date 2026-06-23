@@ -8,13 +8,14 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 interface SessionExercisesProps {
   api: apigateway.RestApi;
   authorizer: apigateway.CognitoUserPoolsAuthorizer;
+  sessionsTable: dynamodb.Table;
 }
 
 export class SessionExercises extends Construct {
   constructor(scope: Construct, id: string, props: SessionExercisesProps) {
     super(scope, id);
 
-    const { api, authorizer } = props;
+    const { api, authorizer , sessionsTable} = props;
 
     const table = new dynamodb.Table(this, "Table", {
       tableName: "SessionExercises",
@@ -30,12 +31,13 @@ export class SessionExercises extends Construct {
 
     // --- Lambdas ---
     const createFn = this.fn("CreateFn", "lambda/functions/generic/create.ts", table.tableName);
-    const getFn = this.fn("GetFn", "lambda/functions/getBySession.ts", table.tableName);
+    const getFn =    this.fn("GetFn", "lambda/functions/getBySession.ts", table.tableName, props.sessionsTable.tableName);
     const updateFn = this.fn("UpdateFn", "lambda/functions/generic/updateItem.ts", table.tableName);
     const deleteFn = this.fn("DeleteFn", "lambda/functions/generic/delete.ts", table.tableName);
 
     table.grantWriteData(createFn);
     table.grantReadData(getFn);
+    props.sessionsTable.grantReadData(getFn);
     table.grantReadWriteData(updateFn);
     table.grantReadWriteData(deleteFn);
 
@@ -48,11 +50,14 @@ export class SessionExercises extends Construct {
     this.addMethod(sessionExercise, "DELETE", deleteFn, authorizer);
   }
 
-  private fn(id: string, entry: string, tableName: string) {
+  private fn(id: string, entry: string, tableName: string, otherTableName?: string) {
     return new NodejsFunction(this, id, {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry,
-      environment: { TABLE_NAME: tableName },
+      environment: { 
+        TABLE_NAME: tableName, 
+        ...(otherTableName ? { OTHER_TABLE: otherTableName } : {})
+      },
       bundling: { forceDockerBundling: false },
     });
   }

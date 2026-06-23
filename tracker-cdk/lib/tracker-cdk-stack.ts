@@ -46,7 +46,7 @@ export class TrackerCdkStack extends cdk.Stack {
     new UserProfiles(this, 'UserProfiles', { userPool: auth.userPool });
 
     //table, (read by User)
-    new Sessions(this, 'Sessions', { 
+    const sessions = new Sessions(this, 'Sessions', { 
       api, 
       authorizer: auth.authorizer 
     });
@@ -60,7 +60,8 @@ export class TrackerCdkStack extends cdk.Stack {
     //table, Lamda(read by session)
     new SessionExercises(this, 'SessionExercises', { 
       api, 
-      authorizer: auth.authorizer 
+      authorizer: auth.authorizer,
+      sessionsTable: sessions.table
     });
 
     new cdk.CfnOutput(this, "ApiUrl", { value: api.url });
