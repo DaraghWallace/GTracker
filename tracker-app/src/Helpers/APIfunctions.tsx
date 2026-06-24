@@ -2,8 +2,8 @@ import { fetchAuthSession } from "aws-amplify/auth";
 import type { exercise, session, sessionExercise } from "./customTypes";
 
 const invokeid = "8wh7ltp62l" //-----------------------------------Update after Destroy - Deploy
-const authSession = await fetchAuthSession();
-const token = authSession.tokens?.idToken?.toString();
+// const authSession = await fetchAuthSession();
+// const token = authSession.tokens?.idToken?.toString();
 
 export async function getToken(): Promise<string> {
   const session = await fetchAuthSession();
@@ -13,13 +13,11 @@ export async function getToken(): Promise<string> {
 //#region: Sessions
 // C works
 export async function createSession(newSession: session) {
+    const token = await getToken()
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions`;
     console.log(newSession);
 
     try {
-        const authSession = await fetchAuthSession();
-        const token = authSession.tokens?.idToken?.toString();
-
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -40,13 +38,10 @@ export async function createSession(newSession: session) {
 }
 // R works
 export async function getSessions(startDate: string, endDate: string) {
+    const token = await getToken()
 
     try {
         const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions?&startDate=${startDate}&endDate=${endDate}`;
-
-        const authSession = await fetchAuthSession();
-        const token = authSession.tokens?.idToken?.toString();
-
         const response = await fetch(url, {
             method: "GET",
             headers: {
@@ -66,6 +61,7 @@ export async function getSessions(startDate: string, endDate: string) {
 }
 // U works
 export async function updateSession(newSession: session) {
+    const token = await getToken()
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions/${newSession.sessionId}`;
     console.log(url);
 
@@ -95,6 +91,7 @@ export async function updateSession(newSession: session) {
 }
 // D
 export const deleteSession = async (sessionId: string) => {
+    const token = await getToken()
     if (!token) throw new Error("No auth token");
     const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions/${sessionId}`, {
     method: "DELETE",
@@ -113,6 +110,7 @@ export const deleteSession = async (sessionId: string) => {
 //#region: Exercises
 // C - works
 export async function createExercise(newExercise: exercise) {
+    const token = await getToken()
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`;
     try {
         const response = await fetch(url, {
@@ -134,16 +132,15 @@ export async function createExercise(newExercise: exercise) {
 }
 // R - works
 export async function getExercises() {
-  const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`
-  const authSession = await fetchAuthSession();
-  const token = authSession.tokens?.idToken?.toString();
+    const token = await getToken()
+    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Authorization": token ?? "",
-    },
-  });
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+        "Authorization": token ?? "",
+        },
+    });
 
   const text = await response.text();
   return JSON.parse(text);
@@ -155,6 +152,7 @@ export async function getExercises() {
 //#region: SessionExercise
 // C - works
 export async function createSessionExercise(newSessionExercise: sessionExercise) {
+    const token = await getToken()
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise`;
 
     try {
@@ -185,23 +183,24 @@ export async function createSessionExercise(newSessionExercise: sessionExercise)
         throw error;
     }
 }
+// R - works
 export async function getSessionExerciseBySession(sessionId: string): Promise<sessionExercise[]> {
-  const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise?sessionId=${sessionId}`;
-  const authSession = await fetchAuthSession();
-  const token = authSession.tokens?.idToken?.toString();
+    const token = await getToken()
+    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise?sessionId=${sessionId}`;
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Authorization": token ?? "",
-    },
-  });
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+        "Authorization": token ?? "",
+        },
+    });
 
-  const text = await response.text();
-  return JSON.parse(text);
+    const text = await response.text();
+    return JSON.parse(text);
 }
 // U
 export async function updateSessionExercise(newSessionExercise: sessionExercise) {
+    const token = await getToken()
     const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise/${newSessionExercise.sessionExerciseId}`;;
     console.log(url);
 
@@ -231,16 +230,18 @@ export async function updateSessionExercise(newSessionExercise: sessionExercise)
 }
 // D - works
 export const deleteSessionExercise = async (sessionExerciseId: string) => {
+    const token = await getToken()
+    
     if (!token) throw new Error("No auth token");
     const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise/${sessionExerciseId}`, {
-    method: "DELETE",
-    headers: {
-      "Authorization": token ?? "",
-    },
-  });
+        method: "DELETE",
+        headers: {
+        "Authorization": token,
+        },
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to delete Session Exercise");
-  } else console.log("Session Exercise Deleted");
+    if (!response.ok) {
+        throw new Error("Failed to delete Session Exercise");
+    } else console.log("Session Exercise Deleted");
 };
 //#endregion

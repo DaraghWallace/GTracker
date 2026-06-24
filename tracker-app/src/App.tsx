@@ -18,7 +18,6 @@ import seshPng from "./assets/sessions.png"
 import Loading from './Components/Elements/Loading';
 
 export default function App() {
-  // const [securityToken, setSecurityToken] = useState("");
   const [pageState, setPageState] = useState("start");
   const [currentUser, setCurrentUser] = useState<user | null>(null);
   const [sessionData, setSessionData] = useState<session[]>([]);
@@ -40,13 +39,6 @@ export default function App() {
     console.log(sessions);
     
     setSessionData(sessions);
-
-    //--For of: works but is slow 
-    // const allSets: sessionExercise[] = [];
-    // for (const session of sessions) {
-    //   const sets = await getSessionExerciseBySession(session.sessionId);
-    //   if (sets) allSets.push(...sets);
-    // }
 
     const allSets = await batchRequests(sessions);
     setSessionExercises(allSets.flat())

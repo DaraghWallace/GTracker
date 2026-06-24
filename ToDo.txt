@@ -1,4 +1,4 @@
-1. access control ("if I log in as another user, what can I see here or break?")
+1.(NEEDS TESTING) access control ("if I log in as another user, what can I see here or break?") 
   the Cognito authorizer only proves someone's logged in, not that the data is theirs. 
     most handlers trust an id the client sends instead of the authenticated sub:
 
@@ -6,19 +6,22 @@
     b. updateItem.ts:8-13 does a blind PutCommand of the body → you can overwrite any session, even reassign its userId
     c. getBySession.ts and scan.ts (the sessions-all route) → same deal, scan returns everyone's stuff
   
-  a.creat.ts          - Test
+  a.create.ts         - Test
   b.delSession.ts     - Deleted
   c.delseshExercise   - Deleted
-  d.getBySesh         - Test
-  e.getByUser         - Test
-  f.scan              - Test
-  g.update            - Test
-  H.delete            - Test (New)
+  d.getBySesh.ts      - WORKING
+  e.getByUser.ts      - WORKING
+  f.scan.ts           - Test
+  g.update.ts         - Test
+  H.delete.ts         - Test (New)
   
-2. auth token grabbed at module load. in APIfunctions.tsx:5-6 you do await fetchAuthSession() at module scope and cache the token in a const. that token gets grabbed once when the file imports and reused by updateSession, deleteSession, etc — 
+2.(NEEDS TESTING) auth token grabbed at module load. in APIfunctions.tsx:5-6 you do await fetchAuthSession() at module scope and cache the token in a const. that token gets grabbed once when the file imports and reused by updateSession, deleteSession, etc — 
   the token expires (~1h), functions start failing with 401s. 
   you already wrote getToken() on line 8 — use it everywhere and drop the module-level await (it also blocks the whole module from loading).
- 
+    exercices - c-R-u-d
+    sessions - c-R-u-d
+    exerciceSessions - c-R-u-d
+
 3. hardcoded infra ids. APIfunctions.tsx:4 and amplify.ts:10-11 have that Update after Destroy 
   config belongs in env vars / CDK outputs, not in the code.
  
