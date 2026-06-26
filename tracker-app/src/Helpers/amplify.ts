@@ -4,11 +4,14 @@ import {
   fetchAuthSession, 
 } from "aws-amplify/auth";
 
+const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID;
+const USER_POOL_CLIENT_ID = import.meta.env.VITE_USER_POOL_CLIENT_ID;
+console.log("DEBUG", USER_POOL_ID, USER_POOL_CLIENT_ID);
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: "ap-southeast-2_2l3yOH2jg",//-----------------------------------Update after Destroy - Deploy
-      userPoolClientId: "6riqepp8b8vsmtjpjidainu3bq",//-----------------------------------Update after Destroy - Deploy
+      userPoolId: USER_POOL_ID,
+      userPoolClientId: USER_POOL_CLIENT_ID,
       loginWith: {
         email: true
       }

@@ -21,6 +21,8 @@ export class TrackerCdkStack extends cdk.Stack {
       },
     });
 
+
+
     // Obfiscation
     const responseTypes = [
       apigateway.ResponseType.DEFAULT_4XX,
@@ -42,10 +44,14 @@ export class TrackerCdkStack extends cdk.Stack {
     //userPool, userpoolClient
     const auth = new Auth(this, 'Auth', { api });
 
-    //table, (c-r-u-d)
+    new cdk.CfnOutput(this, "ApiUrl", { value: api.url });
+    new cdk.CfnOutput(this, "UserPoolId", { value: auth.userPool.userPoolId });
+    new cdk.CfnOutput(this, "UserPoolClientId", { value: auth.userPoolClient.userPoolClientId });
+
+    //table,
     new UserProfiles(this, 'UserProfiles', { userPool: auth.userPool });
 
-    //table, (read by User)
+    //table, (c-r-u-d)
     const sessions = new Sessions(this, 'Sessions', { 
       api, 
       authorizer: auth.authorizer 
@@ -63,7 +69,5 @@ export class TrackerCdkStack extends cdk.Stack {
       authorizer: auth.authorizer,
       sessionsTable: sessions.table
     });
-
-    new cdk.CfnOutput(this, "ApiUrl", { value: api.url });
   }
 }

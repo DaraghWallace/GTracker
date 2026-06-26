@@ -99,7 +99,7 @@ export default function App() {
         />
       ) : (
         <div className='hello'>
-          Welcome to (insert app name), A web app tom simplify tracking sessions and progress. Sign in to get started and keep an eye out for new features and updates like:
+          Welcome to My Gym tracking App, A web app to simplify tracking sessions and progress. Sign in to get started and keep an eye out for new features and updates like:
           <div>- Cardio tracking</div>
           <div>- Helpful Graphs</div>
           <div>- Trainer / client features</div>

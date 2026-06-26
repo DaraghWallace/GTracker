@@ -1,9 +1,7 @@
 import { fetchAuthSession } from "aws-amplify/auth";
 import type { exercise, session, sessionExercise } from "./customTypes";
 
-const invokeid = "8wh7ltp62l" //-----------------------------------Update after Destroy - Deploy
-// const authSession = await fetchAuthSession();
-// const token = authSession.tokens?.idToken?.toString();
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function getToken(): Promise<string> {
   const session = await fetchAuthSession();
@@ -14,7 +12,7 @@ export async function getToken(): Promise<string> {
 // C works
 export async function createSession(newSession: session) {
     const token = await getToken()
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions`;
+    const url = `${API_URL}sessions`;
     console.log(newSession);
 
     try {
@@ -41,7 +39,7 @@ export async function getSessions(startDate: string, endDate: string) {
     const token = await getToken()
 
     try {
-        const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions?&startDate=${startDate}&endDate=${endDate}`;
+        const url = `${API_URL}sessions?&startDate=${startDate}&endDate=${endDate}`;
         const response = await fetch(url, {
             method: "GET",
             headers: {
@@ -62,7 +60,7 @@ export async function getSessions(startDate: string, endDate: string) {
 // U works
 export async function updateSession(newSession: session) {
     const token = await getToken()
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions/${newSession.sessionId}`;
+    const url = `${API_URL}sessions/${newSession.sessionId}`;
     console.log(url);
 
     try {
@@ -93,7 +91,7 @@ export async function updateSession(newSession: session) {
 export const deleteSession = async (sessionId: string) => {
     const token = await getToken()
     if (!token) throw new Error("No auth token");
-    const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessions/${sessionId}`, {
+    const response = await fetch(`${API_URL}sessions/${sessionId}`, {
     method: "DELETE",
     headers: {
       "Authorization": token ?? "",
@@ -111,7 +109,7 @@ export const deleteSession = async (sessionId: string) => {
 // C - works
 export async function createExercise(newExercise: exercise) {
     const token = await getToken()
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`;
+    const url = `${API_URL}/exercises`;
     try {
         const response = await fetch(url, {
             method: "POST",
@@ -133,7 +131,7 @@ export async function createExercise(newExercise: exercise) {
 // R - works
 export async function getExercises() {
     const token = await getToken()
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/exercises`
+    const url = `${API_URL}exercises`;
 
     const response = await fetch(url, {
         method: "GET",
@@ -153,7 +151,7 @@ export async function getExercises() {
 // C - works
 export async function createSessionExercise(newSessionExercise: sessionExercise) {
     const token = await getToken()
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise`;
+    const url = `${API_URL}sessionExercise`;
 
     try {
         console.log("creating SessionExercise...");
@@ -186,7 +184,7 @@ export async function createSessionExercise(newSessionExercise: sessionExercise)
 // R - works
 export async function getSessionExerciseBySession(sessionId: string): Promise<sessionExercise[]> {
     const token = await getToken()
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise?sessionId=${sessionId}`;
+    const url = `${API_URL}sessionExercise?sessionId=${sessionId}`;
 
     const response = await fetch(url, {
         method: "GET",
@@ -201,7 +199,7 @@ export async function getSessionExerciseBySession(sessionId: string): Promise<se
 // U
 export async function updateSessionExercise(newSessionExercise: sessionExercise) {
     const token = await getToken()
-    const url = `https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise/${newSessionExercise.sessionExerciseId}`;;
+    const url = `${API_URL}sessionExercise/${newSessionExercise.sessionExerciseId}`;
     console.log(url);
 
     try {
@@ -233,7 +231,7 @@ export const deleteSessionExercise = async (sessionExerciseId: string) => {
     const token = await getToken()
     
     if (!token) throw new Error("No auth token");
-    const response = await fetch(`https://${invokeid}.execute-api.ap-southeast-2.amazonaws.com/prod/sessionExercise/${sessionExerciseId}`, {
+    const response = await fetch(`${API_URL}sessionExercise/${sessionExerciseId}`, {
         method: "DELETE",
         headers: {
         "Authorization": token,

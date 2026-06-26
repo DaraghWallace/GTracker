@@ -11,6 +11,7 @@ interface AuthProps {
 export class Auth extends Construct {
   public readonly userPool: UserPool;
   public readonly authorizer: apigateway.CognitoUserPoolsAuthorizer;
+  public readonly userPoolClient: UserPoolClient;
 
   constructor(scope: Construct, id: string, props: AuthProps) {
     super(scope, id);
@@ -33,7 +34,7 @@ export class Auth extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const userpoolClient = new UserPoolClient(this, 'UserPoolClient', {
+    this.userPoolClient = new UserPoolClient(this, 'UserPoolClient', {
       userPool: this.userPool,
       generateSecret: false,
       authFlows: {
@@ -54,7 +55,7 @@ export class Auth extends Construct {
     new CfnUserPoolGroup(this, 'AdminsGroup',   { groupName: 'admins',   userPoolId: userPId });
 
     new cdk.CfnOutput(this, 'UserPoolId',     { value: userPId });
-    new cdk.CfnOutput(this, 'UserPoolClientId', { value: userpoolClient.userPoolClientId });
+    new cdk.CfnOutput(this, 'UserPoolClientId', { value: this.userPoolClient.userPoolClientId });
 
     this.authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'GymAuthorizer', {
       cognitoUserPools: [this.userPool],
