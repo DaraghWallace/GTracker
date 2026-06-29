@@ -36,7 +36,7 @@
  
 6. quick one on dependencies, you're pulling in all of AWS Amplify but as far as I can tell only using it for Cognito auth. 
   Amplify the standard way to do Cognito in a frontend (it handles the SRP login flow + token refresh for you, which is a pain to do by hand), so 
-    this isn't wrong. but it's a heavy dependency for one feature. worth knowing the lighter option is amazon-cognito-identity-js (the library Amplify is built on) 
-      was it just for auth?
+  this isn't wrong. but it's a heavy dependency for one feature. worth knowing the lighter option is amazon-cognito-identity-js (the library Amplify is built on) 
+  was it just for auth?
  
  
