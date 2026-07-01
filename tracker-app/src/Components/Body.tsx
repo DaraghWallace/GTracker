@@ -25,7 +25,6 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
   const [editSessions, setEditSessions] = useState(false);
 
-  // const [monthFilter, setMonthFilter] = useState(0);
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
 

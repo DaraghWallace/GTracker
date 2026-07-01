@@ -6,7 +6,7 @@ import {
 
 const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID;
 const USER_POOL_CLIENT_ID = import.meta.env.VITE_USER_POOL_CLIENT_ID;
-console.log("DEBUG", USER_POOL_ID, USER_POOL_CLIENT_ID);
+
 Amplify.configure({
   Auth: {
     Cognito: {
@@ -59,8 +59,6 @@ export async function logout(){await signOut();}
 export async function getUserAttributes() {
   const session = await fetchAuthSession();
   const payload = session.tokens?.idToken?.payload;
-  // console.log("payload", payload);
-  //access payload = const payload = session.tokens?.idToken?.payload;
   return {
     userId: payload?.sub,
     email: payload?.email,

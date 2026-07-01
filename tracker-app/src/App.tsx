@@ -10,12 +10,26 @@ import type { user, session, exercise, sessionExercise } from "./Helpers/customT
 import { getExercises, getSessionExerciseBySession, getSessions } from './Helpers/APIfunctions';
 import { getUserAttributes, logout } from './Helpers/amplify';
 
-// import { getRandomQuote } from './Helpers/seeds';
-// import { seedExercises, seedSessions, seedSessionsExercises } from './Helpers/seeds';
 
 import progPng from "./assets/progress.png"
 import seshPng from "./assets/sessions.png"
 import Loading from './Components/Elements/Loading';
+
+/*
+  loadUserData: Funtion that runs scripts from "Helpers/APIfunctions" to get data to be displayed
+  handleSignOut: Removes user credentilas and data from session
+  useEffect
+    fetchAuthSession: Build user info and signs the in, here to maintian login if theyve used the sight before
+      getUserAttributes
+      setCurrentUser
+
+  batchRequests: fetches data 10 at a time to for performance
+
+  Display
+    App
+      Header: Handles sign in and page select
+      Body: Priamary content display + add content   
+*/
 
 export default function App() {
   const [pageState, setPageState] = useState("start");
@@ -24,7 +38,6 @@ export default function App() {
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
   const [page, setPage] = useState("sessions");
-  // const bar = getRandomQuote()
 
   async function loadUserData() {
     const date = new Date()
@@ -36,7 +49,6 @@ export default function App() {
     const sessions: session[] = await getSessions( "2020-1-1", 
       `${date.getFullYear()}-${date.getMonth()}-${LastDay}`,
     );
-    console.log(sessions);
     
     setSessionData(sessions);
 
@@ -74,10 +86,6 @@ export default function App() {
   
   return (
     <div className="App">
-      {/* <Loading message={'Loading Message'}/> */}
-      {/* <button onClick={seedExercises}>seedExercises</button> */}
-      {/* <button onClick={seedSessions}>seedSessions</button>  */}
-      {/* <button onClick={seedSessionsExercises}>seedSessionsExercises</button> */}
       <Header 
         currentUser = {currentUser}
         setCurrentUser = {setCurrentUser}

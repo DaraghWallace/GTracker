@@ -18,17 +18,25 @@
 2.(NEEDS TESTING) auth token grabbed at module load. in APIfunctions.tsx:5-6 you do await fetchAuthSession() at module scope and cache the token in a const. that token gets grabbed once when the file imports and reused by updateSession, deleteSession, etc — 
   the token expires (~1h), functions start failing with 401s. 
   you already wrote getToken() on line 8 — use it everywhere and drop the module-level await (it also blocks the whole module from loading).
-    exercices - c-R-u-d
-    sessions - c-R-u-d
-    exerciceSessions - c-R-u-d
 
-3. hardcoded infra ids. APIfunctions.tsx:4 and amplify.ts:10-11 have that Update after Destroy 
+
+3.(DONE) hardcoded infra ids. APIfunctions.tsx:4 and amplify.ts:10-11 have that Update after Destroy 
   config belongs in env vars / CDK outputs, not in the code.
  
 4. no tests, default README. 
   test/tracker-cdk.test.ts is the boilerplate with everything commented out and an empty test that passes. 
   add CDK assertion test and one unit test for the per-user scoping. and a real README, what it is, how to run it, what's next, etc
- 
+    Generic tests
+      - create
+      - delete
+      - update
+    Sessions tests
+      - getByUser
+    ecercises tests
+      - scan
+    exerciseSession tests
+      - getBySesh
+
 5. cleanup. leftover console.logs on every call, commented-out code (the seed buttons), 
   and a TestData.tsx at the root with a different data model than the real one (sets: string vs ExerciseSet[]). 
   also ProgressGrid recomputes everything every render with no useMemo, 

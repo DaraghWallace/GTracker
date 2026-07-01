@@ -23,23 +23,23 @@ export class TrackerCdkStack extends cdk.Stack {
 
 
 
-    // Obfiscation
-    const responseTypes = [
-      apigateway.ResponseType.DEFAULT_4XX,
-      apigateway.ResponseType.DEFAULT_5XX,
-    ];
+    // // Obfiscation
+    // const responseTypes = [
+    //   apigateway.ResponseType.DEFAULT_4XX,
+    //   apigateway.ResponseType.DEFAULT_5XX,
+    // ];
 
-    //remove headers
-    for (const responseType of responseTypes) {
-      api.addGatewayResponse(`Strip${responseType.responseType}`, {
-        type: responseType,
-        responseHeaders: {
-          'x-amzn-RequestId': "''",
-          'x-amzn-ErrorType': "''",
-          'x-amz-apigw-id': "''",
-        },
-      });
-    }
+    // //remove headers
+    // for (const responseType of responseTypes) {
+    //   api.addGatewayResponse(`Strip${responseType.responseType}`, {
+    //     type: responseType,
+    //     responseHeaders: {
+    //       'x-amzn-RequestId': "''",
+    //       'x-amzn-ErrorType': "''",
+    //       'x-amz-apigw-id': "''",
+    //     },
+    //   });
+    // }
 
     //userPool, userpoolClient
     const auth = new Auth(this, 'Auth', { api });
@@ -52,16 +52,19 @@ export class TrackerCdkStack extends cdk.Stack {
     new UserProfiles(this, 'UserProfiles', { userPool: auth.userPool });
 
     //table, (c-r-u-d)
+    console.log('Before Sessions');
     const sessions = new Sessions(this, 'Sessions', { 
       api, 
       authorizer: auth.authorizer 
     });
-    
+    console.log('After Sessions');
     //table, Lamda(c-r-u-d)
+    console.log('Before Exercises');
     new Exercises(this, 'Exercises', { 
       api, 
       authorizer: auth.authorizer 
     });
+    console.log('After Exercises');
 
     //table, Lamda(read by session)
     new SessionExercises(this, 'SessionExercises', { 

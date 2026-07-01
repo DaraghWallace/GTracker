@@ -14,6 +14,13 @@ type Props = {
   setUserInFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
+/*
+  UserInForm:
+    handleLogin: after login clears assign send request for data
+    handleSignUp: runs amplify create account function
+    handleConfirm: confirms signup
+*/
+
 export default function UserInForm({ setCurrentUser, loadUserData , setUserInFormOpen}: Props) {
   const [tab, setTab] = useState<Tab>("login");
   const [email, setEmail] = useState("");
@@ -28,7 +35,6 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
     try {
       await login(email, password);
       const attrs = await getUserAttributes();
-      console.log("attrs", attrs);
       setCurrentUser({
         userId: attrs.userId as string,
         email: attrs.email as string,
@@ -39,7 +45,6 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
         // clients: []
       });
       loadUserData(attrs.userId as string)
-      console.log("userId", attrs.userId);  
       setUserInFormOpen(false)
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");

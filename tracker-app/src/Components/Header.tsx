@@ -1,25 +1,26 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { user } from "../Helpers/customTypes";
 import UserInForm from "./Forms/UserInForm";
-// import { getRandomQuote } from "../Helpers/seeds";
 
 import "../CSS/Header.css"
 
 import { FaChartLine, FaDumbbell, FaArrowRightFromBracket,FaArrowRightToBracket , FaFrog   } from "react-icons/fa6";
 
+/*
+  Handles sign in and page select
+*/
+
 type Props = {
   currentUser: user | null;
   setCurrentUser: Dispatch<SetStateAction<user | null>>;
   loadUserData: (userId: string) => Promise<void>;
-  // pageStatus: string,
   handleSignOut: () => Promise<void>;
   setPage: Dispatch<SetStateAction<string>>
   page: string
 }
 
-export default function Header({ currentUser, setCurrentUser, loadUserData, /*pageStatus,*/ handleSignOut, setPage, page }: Props) {
+export default function Header({ currentUser, setCurrentUser, loadUserData,handleSignOut, setPage, page }: Props) {
   const [userInFormOpen, setUserInFormOpen] = useState(false);
-  // const  bar = getRandomQuote()
 
   return (
     <div className="Header">
@@ -31,8 +32,8 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, /*pa
         />
       }
 
-      <div className="h_hello" onClick={()=>console.log(currentUser)}>
-        Hello {currentUser?.nickname}
+      <div className="h_hello">
+        Hey {currentUser?.nickname}
       </div>
 
       <div className="h_buttons">
@@ -51,11 +52,6 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, /*pa
           <button onClick={() => setUserInFormOpen(true)}><FaArrowRightToBracket /></button>
         }          
       </div>
-
-      {/* <div className="h_bar">
-        <div>"{bar.quote}"</div>
-        <div>- {bar.author}</div>        
-      </div> */}
     </div>
   )
 }

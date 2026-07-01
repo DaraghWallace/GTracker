@@ -9,6 +9,14 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const pk = event.queryStringParameters?.PK;
   const callerSub = event.requestContext.authorizer?.claims?.sub;
 
+  if (!callerSub) {
+    return {
+      statusCode: 401,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "Unauthorized" }),
+    };
+  }
+
   if (!pk) {
     return {
       statusCode: 400,
@@ -16,12 +24,20 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       body: JSON.stringify({ error: "Item Not specified" }),
     };
   }
-  
+
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "event body missing" }),
+    };
+  }
+
   const thisItem = await docClient.send(new GetCommand({
     TableName: process.env.TABLE_NAME,
     Key: { PK: pk }
   }));
-  
+
   if (!thisItem.Item) {
     return {
       statusCode: 404,
@@ -36,12 +52,6 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ error: "Forbidden" }),
     };
-  }
-  
-  if (!event.body) return {
-    statusCode: 400,
-    headers: { "Access-Control-Allow-Origin": "*" },
-    body: JSON.stringify({ error: "event body missing " }),
   }
 
   const { userId, ...safeBody } = JSON.parse(event.body);
