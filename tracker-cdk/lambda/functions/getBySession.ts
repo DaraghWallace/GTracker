@@ -11,6 +11,15 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const sessionId = event.queryStringParameters?.sessionId;
   const callerSub = event.requestContext.authorizer?.claims?.sub 
 
+  if (!callerSub) {
+    return {
+      statusCode: 401,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "Unauthorized" }),
+    };
+  }
+
+
   if (!sessionId) {
     return {
       statusCode: 400,
@@ -19,13 +28,6 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
   }
 
-  if (!callerSub) {
-    return {
-      statusCode: 401,
-      headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ error: "Unauthorized" }),
-    };
-  }
 
   const sessionResult = await docClient.send(
     new QueryCommand({

@@ -37,12 +37,12 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
   };
 });
 
-test('rejects update when caller does not own the item', async () => {
+test('rejects update when caller does not own the item (403)', async () => {
   const response = await handler(fakeEvent as any);
   expect(response.statusCode).toBe(403);
 });
 
-test('allows update when caller owns the item', async () => {
+test('allows update when caller owns the item (200)', async () => {
   const legitimateEvent = {
     queryStringParameters: { PK: "item_1" },
     requestContext: {

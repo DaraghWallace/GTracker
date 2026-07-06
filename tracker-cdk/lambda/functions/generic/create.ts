@@ -22,8 +22,18 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     body: JSON.stringify({ error: "event body missing " }),
   }
 
-  const  { userId, ...safeBody } = JSON.parse(event.body);
-  
+  let safeBody;
+  try {
+    const { userId, ...rest } = JSON.parse(event.body);
+    safeBody = rest;
+  } catch {
+    return {
+      statusCode: 400,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "Invalid JSON in request body" }),
+    };
+  }
+
   const newItem = {
     ...safeBody,
     userId: callerSub,
