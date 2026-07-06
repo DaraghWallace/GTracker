@@ -1,73 +1,99 @@
-# React + TypeScript + Vite
+# GTracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack web application for tracking individual gym sessions. Users can log workouts, record exercises and sets, and review their training history over time.
 
-Currently, two official plugins are available:
+Built as a portfolio project demonstrating end-to-end AWS serverless architecture, infrastructure-as-code, and secure API design.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Architecture
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+React (Vite) → API Gateway → Lambda → DynamoDB
+                    ↑
+              Cognito Authorizer
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Frontend:** React + TypeScript, bootstrapped with Vite. Auth handled via AWS Amplify (Cognito).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**Backend:** Serverless REST API built with AWS CDK. Each resource (Sessions, Exercises, SessionExercises) has its own DynamoDB table and Lambda functions wired to API Gateway routes.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Auth:** Amazon Cognito User Pool with a per-route Cognito authorizer on every API Gateway method. Lambda handlers verify ownership on every read/write using the verified `sub` claim from the JWT — not client-supplied IDs.
+
+---
+
+## Project Structure
+
 ```
+GTracker/
+├── tracker-cdk/          # CDK infrastructure (Lambda, API Gateway, DynamoDB, Cognito)
+│   ├── bin/              # CDK app entry point
+│   ├── lib/              # Stack and constructs
+│   │   └── constructs/   # Auth, Sessions, Exercises, SessionExercises, UserProfiles
+│   ├── lambda/           # Lambda handler source
+│   │   └── functions/
+│   │       └── generic/  # Shared create, update, delete handlers
+│   └── test/             # CDK and unit tests
+└── tracker-app/          # React frontend
+    └── src/
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 22+
+- AWS CLI configured with appropriate credentials
+- AWS CDK installed globally: `npm install -g aws-cdk`
+
+### Deploy the backend
+
+```bash
+cd tracker-cdk
+npm install
+cdk bootstrap   # first time only
+cdk deploy --outputs-file ../tracker-app/src/cdk-outputs.json
+```
+
+After deploying, sync the CDK outputs to your frontend environment:
+
+```bash
+npx ts-node scripts/sync-env.ts
+```
+
+This generates `tracker-app/.env` with the API URL and Cognito IDs from the deployment.
+
+### Run the frontend
+
+```bash
+cd tracker-app
+npm install
+npm run dev
+```
+
+### Run tests
+
+```bash
+cd tracker-cdk
+npm test
+```
+
+---
+
+## Security
+
+- Every API Gateway route requires a valid Cognito JWT
+- Lambda handlers extract the caller's identity from the verified token (`requestContext.authorizer.claims.sub`), never from client-supplied parameters
+- Write operations (update, delete) fetch the existing item and verify ownership before acting
+- Client-supplied `userId` fields are stripped from request bodies and replaced with the verified identity
+
+---
+
+## What's Next
+
+- **Cardio tracking** — log cardio sessions alongside weight training
+- **Coach/client relationships** — trainers can view and track their clients' sessions, with role-based access control via Cognito groups
+- **Progressive overload insights** — surface trends across sessions (volume, weight, frequency)
+- **Mobile experience** — responsive improvements and potential React Native port
