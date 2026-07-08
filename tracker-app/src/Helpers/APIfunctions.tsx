@@ -61,7 +61,6 @@ export async function getSessions(startDate: string, endDate: string) {
 export async function updateSession(newSession: session) {
     const token = await getToken()
     const url = `${API_URL}sessions/${newSession.sessionId}`;
-    console.log(url);
 
     try {
         console.log("updating session...");
@@ -70,7 +69,7 @@ export async function updateSession(newSession: session) {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": token ?? "",
+                "Authorization": token ? `Bearer ${token}` : "",
             },
             body: JSON.stringify(newSession),
         });
@@ -94,12 +93,14 @@ export const deleteSession = async (sessionId: string) => {
     const response = await fetch(`${API_URL}sessions/${sessionId}`, {
     method: "DELETE",
     headers: {
-      "Authorization": token ?? "",
+        "Authorization": token ? `Bearer ${token}` : "",
     },
   });
 
   if (!response.ok) {
+    console.log(response.body);
     throw new Error("Failed to delete session");
+    
   } else console.log("Session Deleted");
 };
 

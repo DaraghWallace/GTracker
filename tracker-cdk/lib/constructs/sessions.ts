@@ -40,16 +40,17 @@ export class Sessions extends Construct {
 
     this.table.grantWriteData(createFn);
     this.table.grantReadData(getFn);
-    this.table.grantWriteData(updateFn);
+    this.table.grantReadWriteData(updateFn);
     this.table.grantWriteData(deleteFn);
 
     // --- Routes ---
-    const sessions    = api.root.addResource("sessions");
+    const sessions = api.root.addResource("sessions");
+    const sessionById = sessions.addResource("{sessionId}");
 
     this.addMethod(sessions,    "POST",   createFn, authorizer);
     this.addMethod(sessions,    "GET",    getFn,    authorizer);
-    this.addMethod(sessions,        "PUT",    updateFn, authorizer);
-    this.addMethod(sessions,        "DELETE", deleteFn, authorizer);
+    this.addMethod(sessionById, "PUT",    updateFn, authorizer);
+    this.addMethod(sessionById, "DELETE", deleteFn, authorizer);
   }
 
   private fn(id: string, entry: string, tableName: string) {

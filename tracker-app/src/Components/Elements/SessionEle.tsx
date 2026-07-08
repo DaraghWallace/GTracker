@@ -134,7 +134,6 @@ async function handleUpdateSession(session:session, newFocus:string | null, newD
   setEditSession: Dispatch<SetStateAction<boolean>>, setSessionData: Dispatch<SetStateAction<session[]>>,
   setAwaiting: Dispatch<SetStateAction<boolean>>
   ) {
-  const date = new Date
   const newSession: session = {
     sessionId: session.sessionId,
     userId: session.userId,
@@ -147,9 +146,13 @@ async function handleUpdateSession(session:session, newFocus:string | null, newD
   if(session != newSession){
     setAwaiting(true)
     await updateSession(newSession)
-    const updatedData:session[] = await getSessions(session.userId,
-        `2024-01-01`, `${date.getFullYear()}-12-31`
-      )
+
+    const date = new Date()
+    const LastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
+    const updatedData:session[] = await getSessions(
+      `${date.getFullYear()}-01-01`,
+      `${date.getFullYear()}-12-${LastDay}`
+    )
     setSessionData(updatedData)
     setEditSession(false)
     setAwaiting(false)
@@ -168,7 +171,7 @@ async function handleDeleteSession(sessionId:string, setSessionData: React.Dispa
   const date = new Date
   
   await deleteSession(sessionId)
-  const data = await getSessions(userId,`2024-01-01`, `${date.getFullYear()}-12-31`,)
+  const data = await getSessions('01/01/2024', `${date.getFullYear()}-12-31`,)
   setSessionData(data)
   setAwaiting(false)
 }

@@ -2,7 +2,6 @@ import NewSessionForm from "./Forms/NewSessionForm"
 import SessionEle from "../Components/Elements/SessionEle"
 import type { exercise, session, sessionExercise, user } from "../Helpers/customTypes";
 import { useState, type Dispatch, type SetStateAction } from "react";
-// import NewExerciseForm from "./Forms/NewExerciseForm";
 import ProgressGrid from "./ProgressGrid";
 
 import "../CSS/Body.css"
@@ -29,19 +28,23 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
 
   return (<div className="Body">
-    <div className="b_header">
-      <div>{contentFilter(page, setMonthFilter, monthFilter, setYearFilter, yearFilter)}</div>         
-      {page == "sessions" &&
-        <div className="b_h_buttons">
-          <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
-          {editSessions ? 
-            <button onClick={() => setEditSessions(false)}><FaXmark /></button>
-            :
-            <button onClick={() => setEditSessions(true)}><FaPen /></button>
-          }          
-        </div>
-      }
-    </div>
+    {page != "dev" && 
+      <div className="b_header">
+        <div>{contentFilter(page, setMonthFilter, monthFilter, setYearFilter, yearFilter)}</div>         
+        {page == "sessions" &&
+          <div className="b_h_buttons">
+            <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
+            {editSessions ? 
+              <button onClick={() => setEditSessions(false)}><FaXmark /></button>
+              :
+              <button onClick={() => setEditSessions(true)}><FaPen /></button>
+            }          
+          </div>
+        }
+      </div>    
+    }
+
+
 
     <div className="b_content">
       {currentUser && 
@@ -100,7 +103,7 @@ function handleDisplay(
         />
       )
     case "dev":
-      return <DevRoom exercises={exercises}/>
+      return <DevRoom user={currentUser} exercises={exercises}/>
     default:
       break;
   }

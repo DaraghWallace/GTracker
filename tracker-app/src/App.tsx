@@ -46,8 +46,8 @@ export default function App() {
     setPageState("loading")
     setExercises(await getExercises())
     
-    const sessions: session[] = await getSessions( "2020-1-1", 
-      `${date.getFullYear()}-${date.getMonth()}-${LastDay}`,
+    const sessions: session[] = await getSessions( "2024-01-01", 
+      `${date.getFullYear()}-${date.getMonth() + 1}-${LastDay}`,
     );
     
     setSessionData(sessions);

@@ -19,11 +19,10 @@
   the token expires (~1h), functions start failing with 401s. 
   you already wrote getToken() on line 8 — use it everywhere and drop the module-level await (it also blocks the whole module from loading).
 
-
 3.(DONE) hardcoded infra ids. APIfunctions.tsx:4 and amplify.ts:10-11 have that Update after Destroy 
   config belongs in env vars / CDK outputs, not in the code.
  
-4. no tests, default README. 
+4.(DONE) no tests, default README. 
   test/tracker-cdk.test.ts is the boilerplate with everything commented out and an empty test that passes. 
   add CDK assertion test and one unit test for the per-user scoping. and a real README, what it is, how to run it, what's next, etc
     Generic tests
@@ -42,7 +41,7 @@
   also ProgressGrid recomputes everything every render with no useMemo, 
   find nested in a double forEach, and sets stored as a string "10x40,8x45" that you parse mid-render. model the sets as structured data and memoize it.
  
-6. quick one on dependencies, you're pulling in all of AWS Amplify but as far as I can tell only using it for Cognito auth. 
+6. pulling in all of AWS Amplify for Cognito auth. 
   Amplify the standard way to do Cognito in a frontend (it handles the SRP login flow + token refresh for you, which is a pain to do by hand), so 
   this isn't wrong. but it's a heavy dependency for one feature. worth knowing the lighter option is amazon-cognito-identity-js (the library Amplify is built on) 
   was it just for auth?

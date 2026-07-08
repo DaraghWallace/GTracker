@@ -1,14 +1,15 @@
 import { useState } from "react";
 import NewExerciseForm from "./Forms/NewExerciseForm";
-import type { exercise } from "../Helpers/customTypes";
+import type { exercise, user } from "../Helpers/customTypes";
 
 import { FaPlus, FaPen, FaTrash } from "react-icons/fa6";
 
 type Props = {
+  user: user;
   exercises: exercise[];
 }
 
-export default function DevRoom({exercises}: Props) {
+export default function DevRoom({user, exercises}: Props) {
   const [newExercise, setNewExercise] = useState(false);
   const [display, setDisplay] = useState("exercises");
   
@@ -18,15 +19,15 @@ export default function DevRoom({exercises}: Props) {
     {display != "users" && <button onClick={() => setDisplay("users")}>U</button>}
     
     {display == "exercises" && <div>
-      <button onClick={() => setNewExercise(true)}><FaPlus /></button>
-      <div className="progression_grid">
+      <button onClick={() => setNewExercise(true)}><FaPlus /></button> 
+      <div className="Grid_container">
         {exercises.map((exercise)=>(
-          <div className="p_g_row" key={exercise.exerciseId}>
-            <div className="p_g_cell">{exercise.name}</div>
-            <div className="p_g_cell">{exercise.group}</div>
-            <div className="p_g_cell">{exercise.target}</div>
-            <div className="p_g_cell">{exercise.ppl}</div>
-            <div className="p_g_cell">
+          <div className="G_row" key={exercise.exerciseId}>
+            <div className="G_cell_big">{exercise.name}</div>
+            <div className="G_cell">{exercise.group}</div>
+            <div className="G_cell">{exercise.target}</div>
+            <div className="G_cell_small">{exercise.ppl}</div>
+            <div className="G_cell_small">
               <button><FaPen/></button>
               <button><FaTrash/></button>
             </div>
@@ -41,6 +42,6 @@ export default function DevRoom({exercises}: Props) {
 
 
 
-    {newExercise && <NewExerciseForm exercises={exercises} setNewExercise={setNewExercise}/>}
+    {newExercise && <NewExerciseForm user={user} setNewExercise={setNewExercise}/>}
   </div>
 }

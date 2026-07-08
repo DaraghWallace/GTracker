@@ -40,7 +40,7 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
       const date = new Date
       await createSession(newSession);
       setMessage("Session created!");
-      const data = await getSessions(userId,
+      const data = await getSessions(
         `${date.getFullYear()}-01-01`, `${date.getFullYear()}-12-31`
       );
       // console.log(data);
