@@ -41,7 +41,7 @@ export class Sessions extends Construct {
     this.table.grantWriteData(createFn);
     this.table.grantReadData(getFn);
     this.table.grantReadWriteData(updateFn);
-    this.table.grantWriteData(deleteFn);
+    this.table.grantReadWriteData(deleteFn);
 
     // --- Routes ---
     const sessions = api.root.addResource("sessions");

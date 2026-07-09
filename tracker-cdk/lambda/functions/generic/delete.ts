@@ -10,20 +10,34 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const pk = event.queryStringParameters?.PK;
   const callerSub = event.requestContext.authorizer?.claims?.sub;
+  let key = undefined
+  switch (process.env.TABLE_NAME) {
+    case "Sessions":
+      key = { sessionId: event.pathParameters?.sessionId, userId: callerSub }
+      break;
+    case "SessionExercises":
+      key = { sessionExerciseId: event.pathParameters?.sessionExerciseId }
+      break;
+    case "Exercises":
+      key = { exerciseId: event.pathParameters?.exerciseId, userId: callerSub }
+      break;
+    default:
+      break;
+  }
+
 
   if (!callerSub) return { 
     statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) 
   };
   
-  if (!pk) return { 
+  if (!key) return { 
     statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Item not specified" }) 
   };
 
   const existing = await docClient.send(new GetCommand({
     TableName: process.env.TABLE_NAME,
-    Key: { PK: pk }
+     Key: key
   }));
 
   if (!existing.Item) {
@@ -34,17 +48,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
   }
 
-  if (existing.Item.userId !== callerSub) {
-    return {
-      statusCode: 403,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: "Forbidden" }),
-    };
-  }
-
   await docClient.send(new DeleteCommand({
     TableName: process.env.TABLE_NAME,
-    Key: { PK: pk }
+     Key: key
   }));
 
   return { 

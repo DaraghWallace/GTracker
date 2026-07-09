@@ -90,6 +90,7 @@ export async function updateSession(newSession: session) {
 export const deleteSession = async (sessionId: string) => {
     const token = await getToken()
     if (!token) throw new Error("No auth token");
+    
     const response = await fetch(`${API_URL}sessions/${sessionId}`, {
     method: "DELETE",
     headers: {
@@ -98,9 +99,8 @@ export const deleteSession = async (sessionId: string) => {
   });
 
   if (!response.ok) {
-    console.log(response.body);
+    console.log(response.json());
     throw new Error("Failed to delete session");
-    
   } else console.log("Session Deleted");
 };
 
@@ -149,10 +149,10 @@ export async function getExercises() {
 //#endregion
 
 //#region: SessionExercise
-// C - works
+// C
 export async function createSessionExercise(newSessionExercise: sessionExercise) {
     const token = await getToken()
-    const url = `${API_URL}sessionExercise`;
+    const url = `${API_URL}sessionExercises`;
 
     try {
         console.log("creating SessionExercise...");
@@ -161,7 +161,7 @@ export async function createSessionExercise(newSessionExercise: sessionExercise)
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": token ?? "",
+                "Authorization": token ? `Bearer ${token}` : "",
             },
             body: JSON.stringify(newSessionExercise),
         });
@@ -182,25 +182,27 @@ export async function createSessionExercise(newSessionExercise: sessionExercise)
         throw error;
     }
 }
-// R - works
+
+// R
 export async function getSessionExerciseBySession(sessionId: string): Promise<sessionExercise[]> {
     const token = await getToken()
-    const url = `${API_URL}sessionExercise?sessionId=${sessionId}`;
+    const url = `${API_URL}sessionExercises?sessionId=${sessionId}`;
 
     const response = await fetch(url, {
         method: "GET",
         headers: {
-        "Authorization": token ?? "",
+            "Authorization": token ? `Bearer ${token}` : "",
         },
     });
 
     const text = await response.text();
     return JSON.parse(text);
 }
+
 // U
 export async function updateSessionExercise(newSessionExercise: sessionExercise) {
     const token = await getToken()
-    const url = `${API_URL}sessionExercise/${newSessionExercise.sessionExerciseId}`;
+    const url = `${API_URL}sessionExercises/${newSessionExercise.sessionExerciseId}`;
     console.log(url);
 
     try {
@@ -210,7 +212,7 @@ export async function updateSessionExercise(newSessionExercise: sessionExercise)
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": token ?? "",
+                "Authorization": token ? `Bearer ${token}` : "",
             },
             body: JSON.stringify(newSessionExercise),
         });
@@ -227,15 +229,16 @@ export async function updateSessionExercise(newSessionExercise: sessionExercise)
         throw error;
     }
 }
-// D - works
+
+// D
 export const deleteSessionExercise = async (sessionExerciseId: string) => {
     const token = await getToken()
-    
+
     if (!token) throw new Error("No auth token");
-    const response = await fetch(`${API_URL}sessionExercise/${sessionExerciseId}`, {
+    const response = await fetch(`${API_URL}sessionExercises/${sessionExerciseId}`, {
         method: "DELETE",
         headers: {
-        "Authorization": token,
+            "Authorization": `Bearer ${token}`,
         },
     });
 

@@ -14,8 +14,7 @@ interface SessionExercisesProps {
 export class SessionExercises extends Construct {
   constructor(scope: Construct, id: string, props: SessionExercisesProps) {
     super(scope, id);
-
-    const { api, authorizer , sessionsTable} = props;
+    const { api, authorizer, sessionsTable } = props;
 
     const table = new dynamodb.Table(this, "Table", {
       tableName: "SessionExercises",
@@ -31,32 +30,33 @@ export class SessionExercises extends Construct {
 
     // --- Lambdas ---
     const createFn = this.fn("CreateFn", "lambda/functions/generic/create.ts", table.tableName);
-    const getFn =    this.fn("GetFn", "lambda/functions/getBySession.ts", table.tableName, props.sessionsTable.tableName);
+    const getFn    = this.fn("GetFn", "lambda/functions/getBySession.ts", table.tableName, sessionsTable.tableName);
     const updateFn = this.fn("UpdateFn", "lambda/functions/generic/updateItem.ts", table.tableName);
     const deleteFn = this.fn("DeleteFn", "lambda/functions/generic/delete.ts", table.tableName);
 
     table.grantWriteData(createFn);
     table.grantReadData(getFn);
-    props.sessionsTable.grantReadData(getFn);
+    sessionsTable.grantReadData(getFn);
     table.grantReadWriteData(updateFn);
     table.grantReadWriteData(deleteFn);
 
     // --- Routes ---
-    const sessionExercise = api.root.addResource("sessionExercise");
+    const sessionExercises = api.root.addResource("sessionExercises");
+    const sessionExerciseById = sessionExercises.addResource("{sessionExerciseId}");
 
-    this.addMethod(sessionExercise, "POST",   createFn, authorizer);
-    this.addMethod(sessionExercise, "GET",    getFn,    authorizer);
-    this.addMethod(sessionExercise, "PUT",    updateFn, authorizer);
-    this.addMethod(sessionExercise, "DELETE", deleteFn, authorizer);
+    this.addMethod(sessionExercises,    "POST",   createFn, authorizer);
+    this.addMethod(sessionExercises,    "GET",    getFn,    authorizer);
+    this.addMethod(sessionExerciseById, "PUT",    updateFn, authorizer);
+    this.addMethod(sessionExerciseById, "DELETE", deleteFn, authorizer);
   }
 
   private fn(id: string, entry: string, tableName: string, otherTableName?: string) {
     return new NodejsFunction(this, id, {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry,
-      environment: { 
-        TABLE_NAME: tableName, 
-        ...(otherTableName ? { OTHER_TABLE: otherTableName } : {})
+      environment: {
+        TABLE_NAME: tableName,
+        ...(otherTableName ? { OTHER_TABLE: otherTableName } : {}),
       },
       bundling: { forceDockerBundling: false },
     });

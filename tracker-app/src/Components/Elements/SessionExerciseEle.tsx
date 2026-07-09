@@ -29,7 +29,7 @@ export default function SessionExerciseEle({sessionId, sessionExercise, exercise
 
   return (
     <div className="EsSesh" key={sessionExercise.sessionExerciseId}>
-      <div className="es_header" onClick={()=>console.log(sessionExercise)}>
+      <div className="es_header">
         <div>
           {(editSessions && editSession && editSets)?          
             <select value={newExercise} onChange={(e)=> setNewExercise(e.target.value)}>
