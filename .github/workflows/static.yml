@@ -17,3 +17,5 @@ jobs:
           path: tracker
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          path: tracker-app
