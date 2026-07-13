@@ -90,13 +90,16 @@ export async function updateSession(newSession: session) {
 export const deleteSession = async (sessionId: string) => {
     const token = await getToken()
     if (!token) throw new Error("No auth token");
-    
-    const response = await fetch(`${API_URL}sessions/${sessionId}`, {
-    method: "DELETE",
-    headers: {
-        "Authorization": token ? `Bearer ${token}` : "",
-    },
-  });
+        const response = await fetch(`${API_URL}sessions/${sessionId}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": token ? `Bearer ${token}` : "",
+        },
+
+        
+    });
+
+
 
   if (!response.ok) {
     console.log(response.json());

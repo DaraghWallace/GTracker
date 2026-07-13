@@ -1,16 +1,13 @@
 import { handler } from './updateItem';
 
-const fakeExistingItem  = {userId: "TEST_USER"}
-const fakeEvent = {
-  queryStringParameters: { PK: "item_1" },
-  requestContext: {
-    authorizer: {
-      claims: {
-        sub: "ATTACKER_USER"
-      }
-    }
-  },
-  body: JSON.stringify({ someField: "updated value" })
+const fakeSession = { sessionId: "item_1", userId: "TEST_USER" };
+const fakeExercise = { exerciseId: "item_1", userId: "TEST_USER" };
+const fakeSessionExercise = { sessionExerciseId: "item_1", userId: "TEST_USER" }; // owner tracked in data, not in key
+
+const fakeTables: Record<string, { idField: string; item: Record<string, any> }> = {
+  Sessions: { idField: "sessionId", item: fakeSession },
+  Exercises: { idField: "exerciseId", item: fakeExercise },
+  SessionExercises: { idField: "sessionExerciseId", item: fakeSessionExercise },
 };
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
@@ -20,68 +17,82 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
     DynamoDBDocumentClient: {
       from: () => ({
         send: jest.fn((command) => {
+          const table = fakeTables[process.env.TABLE_NAME ?? ""];
           if (command instanceof actual.GetCommand) {
-            const key = command.input.Key?.PK;
-            if (key === "nonexistent_item") {
-              return Promise.resolve({ Item: undefined });
-            }
-            return Promise.resolve({ Item: fakeExistingItem });
+            if (!table) return Promise.resolve({ Item: undefined });
+
+            const requestedKey = command.input.Key ?? {};
+            const idMatches = requestedKey[table.idField] === table.item[table.idField];
+            
+            const keyHasUserId = "userId" in requestedKey; // Sessions/Exercises
+            const userMatches = keyHasUserId ? requestedKey.userId === table.item.userId : true; // SessionExercises
+
+            if (idMatches && userMatches) {
+              return Promise.resolve({ Item: table.item });
+            }           
           }
+
           if (command instanceof actual.PutCommand) {
             return Promise.resolve({});
           }
-          return Promise.resolve({}); // here to stop crash
+
+          return Promise.resolve({});
         })
       })
     }
   };
 });
 
-test('rejects update when caller does not own the item (403)', async () => {
-  const response = await handler(fakeEvent as any);
-  expect(response.statusCode).toBe(403);
-});
+describe.each([
+  { tableName: "Sessions", idParam: "sessionId", ownerRejectStatus: 404 },
+  { tableName: "Exercises", idParam: "exerciseId", ownerRejectStatus: 404 },
+  { tableName: "SessionExercises", idParam: "sessionExerciseId", ownerRejectStatus: 403 },
+])("update handler — $tableName", ({ tableName, idParam, ownerRejectStatus }) => {
+  beforeEach(() => {
+    process.env.TABLE_NAME = tableName;
+  });
+  
+  test('Allows update if caller owns the item (200)', async () => {
+    const response = await handler({
+      pathParameters: { [idParam]: "item_1" },
+      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
+      body: JSON.stringify({ someField: "updated value" }),
+    } as any);
+    expect(response.statusCode).toBe(200);
+  });
 
-test('allows update when caller owns the item (200)', async () => {
-  const legitimateEvent = {
-    queryStringParameters: { PK: "item_1" },
-    requestContext: {
-      authorizer: {
-        claims: {
-          sub: "TEST_USER" // same as fakeExistingItem.userId
-        }
-      }
-    },
-    body: JSON.stringify({ someField: "updated value" })
-  };
+  test('Fails for missing Body (400)', async () => {
+    const response = await handler({
+      pathParameters: { [idParam]: "item_1" },
+      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
+    } as any);
+    expect(response.statusCode).toBe(400);
+  });
 
-  const response = await handler(legitimateEvent as any);
-  expect(response.statusCode).toBe(200);
-});
+  test('Throws 400 for missing id', async () => {
+    const response = await handler({
+      pathParameters: null,
+      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
+      body: JSON.stringify({ someField: "updated value" }),
+    } as any);
+    expect(response.statusCode).toBe(400);
+  });
 
-test('returns 400 when PK is missing', async () => {
-  const response = await handler({
-    queryStringParameters: null,
-    requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
-    body: JSON.stringify({ someField: "value" })
-  } as any);
-  expect(response.statusCode).toBe(400);
-});
+  test('Throws 401 Failed to authentication', async () => {
+    const response = await handler({
+      pathParameters: { [idParam]: "item_1" },
+      requestContext: { authorizer: { claims: { sub: null } } },
+      body: JSON.stringify({ someField: "updated value" }),
+    } as any);
+    expect(response.statusCode).toBe(401);
+  });
 
-test('returns 401 when caller is not authenticated', async () => {
-  const response = await handler({
-    queryStringParameters: { PK: "item_1" },
-    requestContext: { authorizer: { claims: { sub: null } } },
-    body: JSON.stringify({ someField: "value" })
-  } as any);
-  expect(response.statusCode).toBe(401);
-});
-
-test('returns 404 when item does not exist', async () => {
-  const response = await handler({
-    queryStringParameters: { PK: "nonexistent_item" },
-    requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
-    body: JSON.stringify({ someField: "value" })
-  } as any);
-  expect(response.statusCode).toBe(404);
+  test('caller does not own the item', async () => {
+    const response = await handler({
+      pathParameters: { [idParam]: "item_1" },
+      requestContext: { authorizer: { claims: { sub: "ATTACKER_USER" } } },
+      body: JSON.stringify({ someField: "updated value" }),
+    } as any);
+    expect(response.statusCode).toBe(ownerRejectStatus);
+  });
 });

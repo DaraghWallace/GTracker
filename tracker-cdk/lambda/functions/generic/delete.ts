@@ -14,15 +14,23 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   let key = undefined
   switch (process.env.TABLE_NAME) {
     case "Sessions":
+      if(!event.pathParameters?.sessionId) {break}
       key = { sessionId: event.pathParameters?.sessionId, userId: callerSub }
       break;
     case "SessionExercises":
+      if(!event.pathParameters?.sessionExerciseId) {break}
       key = { sessionExerciseId: event.pathParameters?.sessionExerciseId }
       break;
     case "Exercises":
+      if(!event.pathParameters?.exerciseId) {break}
       key = { exerciseId: event.pathParameters?.exerciseId, userId: callerSub }
       break;
     default:
+        return {
+          statusCode: 404,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ error: "Path Failure" }),
+        };
       break;
   }
 

@@ -86,7 +86,6 @@ function handleDisplay(
               exercises={exercises}
               sessionExercises={sessionExercises}
               setSessionExercises={setSessionExercises}
-              userId={currentUser!.userId}
               editSessions={editSessions}
             />
           ))}           

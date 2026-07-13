@@ -19,11 +19,10 @@ type Props = {
   exercises: exercise[];  
   sessionExercises: sessionExercise[];
   setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
-  userId: string;
   editSessions:boolean;
 }
 
-export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, userId, editSessions}: Props) {
+export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, editSessions}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
 
   const [editSession, setEditSession] = useState(false);
@@ -117,7 +116,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
               <div className="f_p_e_header">Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
               <div className="f_p_row_c">
                 <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>                 
-                <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, userId, setAwaiting)} className="green_button"><FaCheck/></button>
+                <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, setAwaiting)} className="green_button"><FaCheck/></button>
               </div>
             </div>
         </div>}
@@ -166,7 +165,7 @@ function displayDate(date: string): string {
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, userId: string, setAwaiting: Dispatch<SetStateAction<boolean>> ){
+async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, setAwaiting: Dispatch<SetStateAction<boolean>> ){
   setAwaiting(true)
   const date = new Date
   
