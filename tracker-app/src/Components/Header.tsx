@@ -37,9 +37,9 @@ export default function Header({ currentUser, setCurrentUser, loadUserData,handl
       </div>
 
       <div className="h_buttons">
-        {/* {(currentUser && currentUser.userType == "developer") && */}
+        {(currentUser && currentUser.userType == "developer") &&
           <button  onClick={()=> setPage("dev")}> <FaFrog /> </button>
-        {/* } */}
+        }
         {currentUser && (page == "sessions" ?
           <button onClick={()=> setPage("progress")}><FaChartLine /></button>
           :
