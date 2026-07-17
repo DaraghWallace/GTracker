@@ -56,10 +56,10 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
   return (
     <div className="form">
       <div className="f_panel">
-        <div className="f_p_row">
-          <input type="text" placeholder="Focus" value={focus} size={7} onChange={e => setFocus(e.target.value)} /> - 
-          <div><input type="date" value={date} onChange={e => setDate(e.target.value)} /></div> - 
-          <div><input type="Number" value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} />Kgs</div>
+        <div className="f_p_col">
+          <input type="text" placeholder="Focus" value={focus} size={7} onChange={e => setFocus(e.target.value)} /> 
+          <div className="bold_text">Current Weight: <input type="Number" value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} />Kgs</div>
+          <div><input type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
         </div>
         
         

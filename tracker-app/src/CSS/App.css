@@ -24,7 +24,11 @@
     font-size: 25px;
 
     margin-left: 3px;
-  } 
+  }button:hover{
+    background-color: rgb(50, 50, 60);
+    border: solid 1px rgb(0, 200, 255);
+    color: rgb(243, 244, 245);
+  }
 
   .hello {
     background-color: rgb(60, 60, 70);
@@ -70,7 +74,9 @@
     color: rgb(40, 40, 50);
     font-size: 18px;
     margin-left: 3px;
-  } 
-
-
+  }.button:hover{
+    background-color: rgb(50, 50, 60);
+    border: solid 1px rgb(0, 200, 255);
+    color: rgb(243, 244, 245);
+  }
 }

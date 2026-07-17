@@ -66,8 +66,8 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
   return (
     <div className="form">
       <div className="f_panel">
-        <div className="f_p_e_header">
-          Exercise: {selectedExercise && selectedExercise.name}
+        <div className="thick_text">
+          {!selectedExercise && "New "}Exercise: {selectedExercise && selectedExercise.name}
           {selectedExercise && <button onClick={()=>setSelectedExercise(null)}><FaPen/></button>}
         </div>
 
@@ -76,9 +76,9 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
             {[...new Set(exercises.map(e => e.group))].map(group => (
               <div key={group}>
                 <div className="f_p_e_sub_header">{group}:</div>
-                <div>
+                <div className="f_e_cont">
                   {exercises.filter(e => e.group === group).map(exercise => (
-                    <button className="f_exercise_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>
+                    <button className="f_e_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>
                       {exercise.name}
                     </button>
                   ))}                  
@@ -87,34 +87,40 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
             ))}
           </div>
         )}
-        
-        <div className="f_p_row_c">
-          Sets: {numOfSets} 
+
+        <div className="f_p_row_snug">
+          <div className="thick_text">Sets: {numOfSets}</div> 
           <button onClick={()=>setNumOfSets(numOfSets+1)}><FaPlus/></button>
           {numOfSets >= 1 && <button onClick={()=>setNumOfSets(numOfSets-1)}><FaMinus/></button>}
         </div>
-
-        <div className="sets">
-          <div className="set_field">Weight</div>
-          <div className="set_field">Reps</div>
-          <div className="set_field">Done?</div>
+        
+        <div className="f_p_sets">
+          <div className="sets">
+            <div className="set_field">Weight</div>
+            <div className="set_field">Reps</div>
+            <div className="set_field">Done?</div>
           </div>
-        {displayReps(numOfSets,setArr, setSetArr)}
+          
+          {displayReps(numOfSets,setArr, setSetArr)}
 
-        <div className="f_p_row_c"> 
-          <div className="f_exercise_group">To failure?</div>
-          <input
-            type="checkbox"
-            checked={toFailure}
-            onChange={e => setToFailure(e.target.checked)}
-          />
+          <div className="f_p_row_mid"> 
+            <div className="bold_text">To failure?</div>
+            <input
+              type="checkbox"
+              checked={toFailure}
+              onChange={e => setToFailure(e.target.checked)}
+            />
+          </div>
         </div>
+        
+        {message && <div className="thick_text">{message}</div>}
+
+
         <div className="f_p_row_c">
-          <button onClick={handleSubmit} className="green_button"><FaCheck/></button>
+          <button onClick={handleSubmit}><FaCheck/></button>
           <button onClick={() => setNewSetFormOpen(false)}><FaXmark/></button>
         </div>
 
-        {message && <p>{message}</p>}
         {awaiting && <Loading message = {"Creating Set"}/>}
       </div>        
     </div>        

@@ -1,7 +1,5 @@
 import type { exercise, session, sessionExercise } from "../Helpers/customTypes";
-
 import "../CSS/progressGrid.css"
-
 
 type Props = {
   exercises: exercise[];
@@ -11,196 +9,159 @@ type Props = {
   yearFilter: number;
 }
 
-// type sessionCol = {"date": string, [exerciseId: string]: string | number}
-type weightRowItm = {"date": string, "userWeight": number}
-type strengthRep ={"date": string, "topRep": string}
-type strengthRowItm = {"exerciseName": string, "TopReps":strengthRep[]}
+type weightRowItm = { date: string; userWeight: number };
+type strengthRep = { date: string; topRep: string };
+type strengthRowItm = { exerciseName: string; TopReps: strengthRep[] };
 
-export default function ProgressGrid({exercises, sessionData, sessionExercises, monthFilter, yearFilter}: Props){
-  // wtRow: [{dateDone, userWeight}, {dateDone, userWeight},{dateDone, userWeight}, {etc}]
-  const dateArr: string[] = []
-  const weightProgArr: weightRowItm[] = []
-  sessionData.forEach(session => {
-    dateArr.push(session.dateDone)
-    weightProgArr.push({"date": session.dateDone, "userWeight": session.userWeight})
-  });
+const monthYearMatch = (dateStr: string, monthFilter: number, yearFilter: number) => {
+  const d = new Date(dateStr);
+  const matchedMo = monthFilter === 0 || d.getMonth() + 1 === monthFilter;
+  return matchedMo && d.getFullYear() === yearFilter;
+};
 
-  // strRow: {exerciseName, [{dateDone, topRep}, {dateDone, topRep}, {dateDone, topRep}, {etc}]}
-  const strengthProgArr: strengthRowItm[] = []
-  exercises.forEach(exercise => {
-    const strengthRepArr: strengthRep[] = []
-    sessionData.forEach(session => {
-      const sessionExercise = sessionExercises.find(
-        se => se.sessionId === session.sessionId && se.exerciseId === exercise.exerciseId
-      )
+const uniqueSorted = (arr: number[]) => [...new Set(arr)].sort((a, b) => a - b);
 
-      if (sessionExercise) {
-        strengthRepArr.push({
-          date: session.dateDone,
-          topRep: String(Math.max(...sessionExercise.sets.split(',').map(set => Number(set.split('x')[0]))))
-        })
-      }else strengthRepArr.push({date: session.dateDone, topRep: "-"})
-    });
+const bestRep = (reps: strengthRep[]) => {
+  const vals = reps.filter(r => r.topRep !== "-").map(r => Number(r.topRep));
+  return vals.length ? Math.max(...vals) : "-";
+};
 
-    strengthProgArr.push({ exerciseName: exercise.name, TopReps: strengthRepArr })
-  });
-  //objs.sort((a,b) => (a.last_nom > b.last_nom) ? 1 : ((b.last_nom > a.last_nom) ? -1 : 0))
-  strengthProgArr.sort((a,b) => (a.exerciseName > b.exerciseName) ? 1 : (b.exerciseName > a.exerciseName) ? -1 : 0)
+export default function ProgressGrid({ exercises, sessionData, sessionExercises, monthFilter, yearFilter }: Props) {
+  const dateArr = sessionData.map(s => s.dateDone);
+  const weightProgArr: weightRowItm[] = sessionData.map(s => ({ date: s.dateDone, userWeight: s.userWeight }));
 
-  return(
+  const strengthProgArr: strengthRowItm[] = exercises
+    .map(exercise => ({
+      exerciseName: exercise.name,
+      TopReps: sessionData.map(session => {
+        const se = sessionExercises.find(se => se.sessionId === session.sessionId && se.exerciseId === exercise.exerciseId);
+        const topRep = se
+          ? String(Math.max(...se.sets.split(',').map(set => Number(set.split('x')[0]))))
+          : "-";
+        return { date: session.dateDone, topRep };
+      })
+    }))
+    .sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
+
+  return (
     <div className="Grid_container">
-      {dateRowDisplay(monthFilter, yearFilter, dateArr)}
-      {weightRowDisplay(monthFilter, yearFilter, weightProgArr)}
-      {exerciseRowDisplay(monthFilter, yearFilter, strengthProgArr)}
+      {dateRow(monthFilter, yearFilter, dateArr)}
+      {weightRow(monthFilter, yearFilter, weightProgArr)}
+      {exerciseRows(monthFilter, yearFilter, strengthProgArr)}
     </div>
-  )
+  );
 }
 
-// type sessionCol = {"date": string, [exerciseId: string]: string | number}
-function dateRowDisplay(monthFilter:number, yearFilter:number, dateArr: string[]) {
-  switch (monthFilter) {
-    case 13:
-      return <div className="G_row">
+function dateRow(monthFilter: number, yearFilter: number, dateArr: string[]) {
+  if (monthFilter === 13) {
+    const months = uniqueSorted(dateArr.filter(d => new Date(d).getFullYear() === yearFilter).map(d => new Date(d).getMonth() + 1));
+    return (
+      <div className="G_row">
         <div className="G_cell">Month</div>
-        {[...new Set(dateArr
-            .filter(d => new Date(d).getFullYear() === yearFilter)
-            .map(d => new Date(d).getMonth() + 1)
-          )].sort((a, b) => a - b).map(month => (
-            <div key={month} className="G_cell">
-              {new Date(yearFilter, month - 1).toLocaleString('default', { month: 'short' })}
-            </div>
-          ))
-        }
+        {months.map(m => (
+          <div key={m} className="G_cell">{new Date(yearFilter, m - 1).toLocaleString('default', { month: 'short' })}</div>
+        ))}
       </div>
-    case 14:
-      return <div className="G_row">
+    );
+  }
+  if (monthFilter === 14) {
+    const years = uniqueSorted(dateArr.map(d => new Date(d).getFullYear()));
+    return (
+      <div className="G_row">
         <div className="G_cell">Year</div>
-        {[...new Set(dateArr.map((date) => new Date(date).getFullYear()))]
-        .sort((a, b) => a - b).map(year => (
-          <div key={year} className="G_cell">{year}</div>
-        ))
-        }
+        {years.map(y => <div key={y} className="G_cell">{y}</div>)}
       </div>
-    default:
-      return <div className="G_row">
-        <div className="G_cell">Date</div>
-        {dateArr.filter(thisDate => {
-            const date = new Date(thisDate);
-            const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-            const matchedYe = date.getFullYear() === yearFilter;
-            return matchedMo && matchedYe;
-          }).map(date => (
-              <div key={date} className="G_cell">{date}</div>
-          ))
-        }
-      </div>
+    );
   }
+  return (
+    <div className="G_row">
+      <div className="G_cell">Date</div>
+      {dateArr.filter(d => monthYearMatch(d, monthFilter, yearFilter)).map(d => (
+        <div key={d} className="G_cell">{d}</div>
+      ))}
+    </div>
+  );
 }
 
-function weightRowDisplay(monthFilter:number, yearFilter:number,weightProgArr: weightRowItm[]) {
-  switch (monthFilter) {
-    case 13: return <div className="G_row">
-      <div className="G_cell">Weight (avg)</div>
-      {[...new Set(weightProgArr
-        .filter(wP => new Date(wP.date).getFullYear() === yearFilter).map(wP => new Date(wP.date).getMonth() +1)
-      )].sort((a, b) => a - b).map(monthOf => {
-        const monthOfWeights = weightProgArr.filter(wP => 
-          new Date(wP.date).getMonth() + 1 === monthOf &&
-          new Date(wP.date).getFullYear() === yearFilter
-        )
-        const avgWeight = monthOfWeights.reduce((sum, wP) => sum + wP.userWeight, 0) / monthOfWeights.length
-        return <div key={monthOf} className="G_cell">{avgWeight.toFixed(2)}</div>
-      })}
-    </div>
-    case 14: return <div className="G_row">
-      <div className="G_cell">Weight (avg)</div>
-      {[...new Set(weightProgArr.map((weightProg) => new Date(weightProg.date).getFullYear()))].map(yearOf => {
-        const yearOfWeights = weightProgArr.filter(wP => new Date(wP.date).getFullYear() == yearOf)
-        const avgWeight = yearOfWeights.reduce((sum,wP) => sum + wP.userWeight,0) / yearOfWeights.length
-        return <div key={yearOf} className="G_cell">{avgWeight.toFixed(2)}</div>
-      })}
-    </div>
-    default: return <div className="G_row">
+function weightRow(monthFilter: number, yearFilter: number, weightProgArr: weightRowItm[]) {
+  if (monthFilter === 13) {
+    const months = uniqueSorted(weightProgArr.filter(w => new Date(w.date).getFullYear() === yearFilter).map(w => new Date(w.date).getMonth() + 1));
+    return (
+      <div className="G_row">
+        <div className="G_cell">Weight (avg)</div>
+        {months.map(m => {
+          const matched = weightProgArr.filter(w => new Date(w.date).getMonth() + 1 === m && new Date(w.date).getFullYear() === yearFilter);
+          const avg = matched.reduce((s, w) => s + w.userWeight, 0) / matched.length;
+          return <div key={m} className="G_cell">{avg.toFixed(2)}</div>;
+        })}
+      </div>
+    );
+  }
+  if (monthFilter === 14) {
+    const years = uniqueSorted(weightProgArr.map(w => new Date(w.date).getFullYear()));
+    return (
+      <div className="G_row">
+        <div className="G_cell">Weight (avg)</div>
+        {years.map(y => {
+          const matched = weightProgArr.filter(w => new Date(w.date).getFullYear() === y);
+          const avg = matched.reduce((s, w) => s + w.userWeight, 0) / matched.length;
+          return <div key={y} className="G_cell">{avg.toFixed(2)}</div>;
+        })}
+      </div>
+    );
+  }
+  return (
+    <div className="G_row">
       <div className="G_cell">Weight</div>
-      {weightProgArr.filter(weight => {
-          const date = new Date(weight.date);
-          const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-          const matchedYe = date.getFullYear() === yearFilter;
-          return matchedMo && matchedYe;
-        }).map(weight => (
-          <div key={weight.date} className="G_cell">{weight.userWeight}</div>
-        ))
-      }
+      {weightProgArr.filter(w => monthYearMatch(w.date, monthFilter, yearFilter)).map(w => (
+        <div key={w.date} className="G_cell">{w.userWeight}</div>
+      ))}
     </div>
-  }
+  );
 }
 
-function exerciseRowDisplay(monthFilter:number, yearFilter:number, strengthProgArr: strengthRowItm[]) {
-  switch (monthFilter) {
-    case 13: 
-      return strengthProgArr
-      .filter(itm => itm.TopReps.some(rep => rep.topRep !== "-"))
-      .map(strengthProgItm => 
-        <div className="G_row" key={strengthProgItm.exerciseName}>  
-          <div className="G_cell">{strengthProgItm.exerciseName}</div>
-          {[...new Set(strengthProgItm.TopReps
-            .filter(item => new Date(item.date).getFullYear() === yearFilter)
-            .map(item => new Date(item.date).getMonth() + 1)
-            )].sort((a, b) => a - b).map(month => {
-              const monthReps = strengthProgItm.TopReps.filter(item =>
-                new Date(item.date).getMonth() + 1 === month &&
-                new Date(item.date).getFullYear() === yearFilter &&
-                item.topRep !== "-"
-              )
-              const best = monthReps.length > 0 
-                ? Math.max(...monthReps.map(r => Number(r.topRep)))
-                : "-"
-              return <div key={month} className="G_cell">{best}</div>
-            })
-          }
-        </div>
-      )
-    case 14:
-      return strengthProgArr
-        .filter(itm => itm.TopReps.some(rep => rep.topRep !== "-"))
-        .map(strengthProgItm =>
-          <div className="G_row" key={strengthProgItm.exerciseName}>
-            <div className="G_cell">{strengthProgItm.exerciseName}</div>
-            {[...new Set(strengthProgItm.TopReps.map(item => new Date(item.date).getFullYear()))]
-              .sort((a, b) => a - b)
-              .map(year => {
-                const yearReps = strengthProgItm.TopReps.filter(item =>
-                  new Date(item.date).getFullYear() === year &&
-                  item.topRep !== "-"
-                )
-                const best = yearReps.length > 0
-                  ? Math.max(...yearReps.map(r => Number(r.topRep)))
-                  : "-"
-                return <div key={year} className="G_cell">{best}</div>
-              })
-            }
+function exerciseRows(monthFilter: number, yearFilter: number, strengthProgArr: strengthRowItm[]) {
+  if (monthFilter === 13) {
+    return strengthProgArr
+      .filter(itm => itm.TopReps.some(r => r.topRep !== "-"))
+      .map(itm => {
+        const months = uniqueSorted(itm.TopReps.filter(r => new Date(r.date).getFullYear() === yearFilter).map(r => new Date(r.date).getMonth() + 1));
+        return (
+          <div className="G_row" key={itm.exerciseName}>
+            <div className="G_cell">{itm.exerciseName}</div>
+            {months.map(m => {
+              const matched = itm.TopReps.filter(r => new Date(r.date).getMonth() + 1 === m && new Date(r.date).getFullYear() === yearFilter);
+              return <div key={m} className="G_cell">{bestRep(matched)}</div>;
+            })}
           </div>
-      )
-    default:
-      return strengthProgArr
-        .filter(itm => itm.TopReps.some(rep => {
-          const date = new Date(rep.date)
-          const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-          const matchedYe = date.getFullYear() === yearFilter;
-          return matchedMo && matchedYe && rep.topRep !== "-"
-        }))
-        .map(strengthProgItm => 
-          <div className="G_row" key={strengthProgItm.exerciseName}> 
-            <div className="G_cell">{strengthProgItm.exerciseName}</div>
-            {strengthProgItm.TopReps.filter(thisRep => {
-              const date = new Date(thisRep.date)
-              const matchedMo = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-              const matchedYe = date.getFullYear() === yearFilter;
-              return matchedMo && matchedYe;
-            }).map(rep =>
-              <div key={rep.date} className="G_cell">{rep.topRep}</div>
-            )}
+        );
+      });
+  }
+  if (monthFilter === 14) {
+    return strengthProgArr
+      .filter(itm => itm.TopReps.some(r => r.topRep !== "-"))
+      .map(itm => {
+        const years = uniqueSorted(itm.TopReps.map(r => new Date(r.date).getFullYear()));
+        return (
+          <div className="G_row" key={itm.exerciseName}>
+            <div className="G_cell">{itm.exerciseName}</div>
+            {years.map(y => {
+              const matched = itm.TopReps.filter(r => new Date(r.date).getFullYear() === y);
+              return <div key={y} className="G_cell">{bestRep(matched)}</div>;
+            })}
           </div>
-        )
-  }   
+        );
+      });
+  }
+  return strengthProgArr
+    .filter(itm => itm.TopReps.some(r => monthYearMatch(r.date, monthFilter, yearFilter) && r.topRep !== "-"))
+    .map(itm => (
+      <div className="G_row" key={itm.exerciseName}>
+        <div className="G_cell">{itm.exerciseName}</div>
+        {itm.TopReps.filter(r => monthYearMatch(r.date, monthFilter, yearFilter)).map(r => (
+          <div key={r.date} className="G_cell">{r.topRep}</div>
+        ))}
+      </div>
+    )
+  );
 }

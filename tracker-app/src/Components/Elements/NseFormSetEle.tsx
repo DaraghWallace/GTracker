@@ -27,25 +27,46 @@ export default function NseSetFormEle({setArr, setSetArr}: Props) {
     }
   }
 
+
+  
   return (
-    <div className="sets">
-      <input className="set_field"
-          type="number"
-          placeholder="Kgs"
-          value={weight}
-          onChange={e => setWeight(e.target.value)}
-        />
-      <input className="set_field"
-        type="number"
-        placeholder="#"
-        value={reps}
-        onChange={e => setReps(e.target.value)}
-      />
-      <input className="set_field"
-        type="checkbox"
-        checked={completed}
-        onChange={()=> completeSet()}
-      />
-    </div>
+    !completed ? 
+      <div className="sets">
+        <div className="set_field">
+          <input
+            type="number"
+            placeholder="Kgs"
+            value={weight}
+            onChange={e => setWeight(e.target.value)}
+          />
+        </div>
+        <div className="set_field">
+          <input 
+            type="number"
+            placeholder="#"
+            value={reps}
+            onChange={e => setReps(e.target.value)}
+          />        
+        </div>
+        <div className="set_field">
+          <input
+            type="checkbox"
+            checked={completed}
+            onChange={()=> completeSet()}
+          />        
+        </div>
+      </div>
+      :
+      <div className="sets">
+        <div className="set_field">{weight}</div>
+        <div className="set_field">{reps}</div>
+        <div className="set_field">
+          <input
+            type="checkbox"
+            checked={completed}
+            onChange={()=> completeSet()}
+          />        
+        </div>
+      </div>
   );
 }

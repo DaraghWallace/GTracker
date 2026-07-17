@@ -76,25 +76,27 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
       <div className="f_panel">
         {tab !== "confirm" && (
           <div className="f_p_row_c">
-            <button className="f_exercise_button" onClick={() => setTab("login")}>Sign in</button>
-            <button className="f_exercise_button" onClick={() => setTab("signup")}>Sign up</button>
+            {tab != "login" && <button className="f_wide_button" onClick={() => setTab("login")}>Sign in</button>}
+            {tab != "signup" && <button className="f_wide_button" onClick={() => setTab("signup")}>Sign up</button>}
           </div>
         )}
 
         {tab === "login" && (
           <div className="f_p_col">
+            <div className="thick_text">Welcome Back</div>
             <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
             <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
             
             <div className="f_p_row_c">
-              <button className="green_button" onClick={handleLogin}><FaCheck/></button>
-              <button className="red_button" onClick={() => setUserInFormOpen(false)}><FaXmark/></button>            
+              <button onClick={handleLogin}><FaCheck/></button>
+              <button onClick={() => setUserInFormOpen(false)}><FaXmark/></button>            
             </div>  
           </div>
         )}
 
         {tab === "signup" && (
           <div className="f_p_col">
+            <div className="thick_text">Welcome</div>
             <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
             <input type="text" placeholder="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} />
             <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
@@ -103,8 +105,8 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
               <option value="trainer">Trainer</option>
             </select>
             <div className="f_p_row_c">
-              <button className="green_button" onClick={handleSignUp}><FaCheck/></button>
-              <button className="red_button" onClick={() => setUserInFormOpen(false)}><FaXmark/></button>               
+              <button onClick={handleSignUp}><FaCheck/></button>
+              <button onClick={() => setUserInFormOpen(false)}><FaXmark/></button>               
             </div>
           </div>
         )}
@@ -113,7 +115,7 @@ export default function UserInForm({ setCurrentUser, loadUserData , setUserInFor
           <div>
             <p>Check your email for a verification code.</p>
             <input type="text" placeholder="123456" value={code} onChange={e => setCode(e.target.value)} />
-            <button className="wide_button" onClick={handleConfirm}>Verify</button>
+            <button className="f_wide_button" onClick={handleConfirm}>Verify</button>
           </div >
         )}
 

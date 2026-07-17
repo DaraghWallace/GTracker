@@ -4,7 +4,7 @@ import SessionExerciseEle from "./SessionExerciseEle"
 import Loading from "./Loading";
 
 import type { exercise, session, sessionExercise } from "../../Helpers/customTypes";
-import { deleteSession, getSessions, updateSession } from "../../Helpers/APIfunctions";
+import { deleteSession, deleteSessionExercise, getSessions, updateSession } from "../../Helpers/APIfunctions";
 import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 
 import "../../CSS/sessionEle.css"
@@ -116,7 +116,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
               <div className="f_p_e_header">Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
               <div className="f_p_row_c">
                 <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>                 
-                <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, setAwaiting)} className="green_button"><FaCheck/></button>
+                <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, setAwaiting, sessionExercises)} className="green_button"><FaCheck/></button>
               </div>
             </div>
         </div>}
@@ -165,11 +165,17 @@ function displayDate(date: string): string {
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, setAwaiting: Dispatch<SetStateAction<boolean>> ){
+async function handleDeleteSession(sessionId:string, setSessionData: React.Dispatch<React.SetStateAction<session[]>>, setAwaiting: Dispatch<SetStateAction<boolean>>, sessionExercises: sessionExercise[] ){
   setAwaiting(true)
   const date = new Date
   
+  await sessionExercises.forEach(sessionExercise => {
+    if(sessionExercise.sessionId === sessionId){
+      deleteSessionExercise(sessionExercise.sessionExerciseId)
+    }
+  });
   await deleteSession(sessionId)
+
   const data = await getSessions('01/01/2024', `${date.getFullYear()}-12-31`,)
   setSessionData(data)
   setAwaiting(false)
