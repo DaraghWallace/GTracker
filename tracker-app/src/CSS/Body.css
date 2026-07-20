@@ -20,10 +20,15 @@
   justify-content: space-between;
 }
 
-.b_h_filter{
+.b_h_filters {
   display: flex;
   flex-direction: row;
   padding-top: 10px;
+}
+
+.b_h_filter{
+  display: flex;
+  flex-direction: row;
 
   font-size: 20px;
 }

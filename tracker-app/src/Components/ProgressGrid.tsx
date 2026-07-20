@@ -7,11 +7,12 @@ type Props = {
   sessionExercises: sessionExercise[];
   monthFilter: number;
   yearFilter: number;
+  groupFilter: string;
 }
 
 type weightRowItm = { date: string; userWeight: number };
 type strengthRep = { date: string; topRep: string };
-type strengthRowItm = { exerciseName: string; TopReps: strengthRep[] };
+type strengthRowItm = { exerciseName: string; TopReps: strengthRep[], group: string };
 
 const monthYearMatch = (dateStr: string, monthFilter: number, yearFilter: number) => {
   const d = new Date(dateStr);
@@ -26,19 +27,20 @@ const bestRep = (reps: strengthRep[]) => {
   return vals.length ? Math.max(...vals) : "-";
 };
 
-export default function ProgressGrid({ exercises, sessionData, sessionExercises, monthFilter, yearFilter }: Props) {
+export default function ProgressGrid({ exercises, sessionData, sessionExercises, monthFilter, yearFilter, groupFilter }: Props) {
   const dateArr = sessionData.map(s => s.dateDone);
   const weightProgArr: weightRowItm[] = sessionData.map(s => ({ date: s.dateDone, userWeight: s.userWeight }));
 
   const strengthProgArr: strengthRowItm[] = exercises
     .map(exercise => ({
       exerciseName: exercise.name,
+      group: exercise.group,
       TopReps: sessionData.map(session => {
         const se = sessionExercises.find(se => se.sessionId === session.sessionId && se.exerciseId === exercise.exerciseId);
         const topRep = se
           ? String(Math.max(...se.sets.split(',').map(set => Number(set.split('x')[0]))))
           : "-";
-        return { date: session.dateDone, topRep };
+        return { date: session.dateDone, topRep, };
       })
     }))
     .sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
@@ -47,7 +49,7 @@ export default function ProgressGrid({ exercises, sessionData, sessionExercises,
     <div className="Grid_container">
       {dateRow(monthFilter, yearFilter, dateArr)}
       {weightRow(monthFilter, yearFilter, weightProgArr)}
-      {exerciseRows(monthFilter, yearFilter, strengthProgArr)}
+      {exerciseRows(monthFilter, yearFilter, strengthProgArr, groupFilter)}
     </div>
   );
 }
@@ -120,9 +122,10 @@ function weightRow(monthFilter: number, yearFilter: number, weightProgArr: weigh
   );
 }
 
-function exerciseRows(monthFilter: number, yearFilter: number, strengthProgArr: strengthRowItm[]) {
+function exerciseRows(monthFilter: number, yearFilter: number, strengthProgArr: strengthRowItm[], groupFilter:string) {
   if (monthFilter === 13) {
     return strengthProgArr
+      .filter(itm => groupFilter === "All" || itm.group === groupFilter)
       .filter(itm => itm.TopReps.some(r => r.topRep !== "-"))
       .map(itm => {
         const months = uniqueSorted(itm.TopReps.filter(r => new Date(r.date).getFullYear() === yearFilter).map(r => new Date(r.date).getMonth() + 1));
@@ -139,6 +142,7 @@ function exerciseRows(monthFilter: number, yearFilter: number, strengthProgArr: 
   }
   if (monthFilter === 14) {
     return strengthProgArr
+      .filter(itm => groupFilter === "All" || itm.group === groupFilter)
       .filter(itm => itm.TopReps.some(r => r.topRep !== "-"))
       .map(itm => {
         const years = uniqueSorted(itm.TopReps.map(r => new Date(r.date).getFullYear()));
@@ -154,6 +158,7 @@ function exerciseRows(monthFilter: number, yearFilter: number, strengthProgArr: 
       });
   }
   return strengthProgArr
+    .filter(itm => groupFilter === "All" || itm.group === groupFilter)
     .filter(itm => itm.TopReps.some(r => monthYearMatch(r.date, monthFilter, yearFilter) && r.topRep !== "-"))
     .map(itm => (
       <div className="G_row" key={itm.exerciseName}>
