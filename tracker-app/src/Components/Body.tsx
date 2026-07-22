@@ -22,7 +22,7 @@ type Props = {
 
 export  default function Body({currentUser, sessionData, setSessionData, exercises, sessionExercises, setSessionExercises, page}: Props){
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
-  const [editSessions, setEditSessions] = useState(false);
+  const [editSessions, setEditSessions] = useState(true);
 
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());

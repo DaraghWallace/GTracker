@@ -9,11 +9,8 @@
 }
 
 .b_header{
-  background-color: rgb(60, 60, 70);
+  background-color: rgb(40, 40, 50);
   border-bottom: solid 2px rgb(0, 200, 255);
-
-  padding: 4px;
-
 
   display: flex;
   flex-direction: row;
@@ -23,13 +20,16 @@
 .b_h_filters {
   display: flex;
   flex-direction: row;
-  padding-top: 10px;
 }
 
 .b_h_filter{
+  background-color: rgb(60, 60, 70);
+
+  margin-right: 10px;
+  padding: 10px;
   display: flex;
   flex-direction: row;
-
+  justify-content: space-between;
   font-size: 20px;
 }
 

@@ -123,7 +123,7 @@ function weightRow(monthFilter: number, yearFilter: number, weightProgArr: weigh
 }
 
 function exerciseRows(monthFilter: number, yearFilter: number, strengthProgArr: strengthRowItm[], groupFilter:string) {
-  if (monthFilter === 13) {
+  if (monthFilter === 13) { //Monthly
     return strengthProgArr
       .filter(itm => groupFilter === "All" || itm.group === groupFilter)
       .filter(itm => itm.TopReps.some(r => r.topRep !== "-"))
@@ -140,7 +140,7 @@ function exerciseRows(monthFilter: number, yearFilter: number, strengthProgArr: 
         );
       });
   }
-  if (monthFilter === 14) {
+  if (monthFilter === 14) { //Yearly
     return strengthProgArr
       .filter(itm => groupFilter === "All" || itm.group === groupFilter)
       .filter(itm => itm.TopReps.some(r => r.topRep !== "-"))
