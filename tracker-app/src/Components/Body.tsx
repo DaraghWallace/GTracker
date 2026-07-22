@@ -22,7 +22,7 @@ type Props = {
 
 export  default function Body({currentUser, sessionData, setSessionData, exercises, sessionExercises, setSessionExercises, page}: Props){
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
-  const [editSessions, setEditSessions] = useState(true);
+  const [editSessions, setEditSessions] = useState(false);
 
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
@@ -153,7 +153,7 @@ function contentFilter( page: string, exercises: exercise[],
             <option hidden>{groupFilter}</option>
             <option value={"All"}>All</option>
             {mGroupList.map(group => {
-              return <option value={group}>{group}</option>
+              return <option value={group} key={group}>{group}</option>
             })}
           </select>
         </div>

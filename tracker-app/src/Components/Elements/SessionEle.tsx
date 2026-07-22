@@ -25,13 +25,13 @@ type Props = {
 export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, editSessions}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
 
-  const [editSession, setEditSession] = useState(true);
+  const [editSession, setEditSession] = useState(false);
   const [delSeshConfirmOpen, setDelSeshConfirmOpen] = useState(false);
   const [newFocus, setNewFocus] = useState(session.focus);
   const [newDateDone, setNewDateDone] = useState(session.dateDone);
   const [newUserWeight, setNewUserWeight] = useState(session.userWeight);
 
-  const [editSetVisible, setEditSetVisible] = useState(true);
+  const [editSetVisible, setEditSetVisible] = useState(false);
 
   const [awaiting, setAwaiting] = useState(false);
 

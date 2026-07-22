@@ -72,7 +72,7 @@ export default function SessionExerciseEle({sessionId, sessionExercise, exercise
         {displaySet(sessionExercise.sets).map((set, index)=>{
           return (
           <div className="es_rep" key={index}>
-            {(editSessions && editSets)?
+            {(editSessions && editSets && editSetVisible)?
               <div>
                 <input type="number" data-index={index} data-key="weight" placeholder={String(set.weight)}
                   onChange={(e)=>handleUpdateSetOfReps(e.target, newSets, setNewSets)}
