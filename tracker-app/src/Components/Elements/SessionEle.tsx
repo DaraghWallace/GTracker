@@ -10,7 +10,7 @@ import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 import "../../CSS/sessionEle.css"
 import "../../CSS/form.css"
 
-import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash } from "react-icons/fa6";
+import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash, /*FaAngleDown, FaAngleUp*/ } from "react-icons/fa6";
 
 
 type Props = {
@@ -24,6 +24,8 @@ type Props = {
 
 export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, editSessions}: Props) {
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
+  
+  // const [hideSession, setHideSession] = useState(false);
 
   const [editSession, setEditSession] = useState(false);
   const [delSeshConfirmOpen, setDelSeshConfirmOpen] = useState(false);
@@ -65,21 +67,21 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
             <div className="s_header_buttons">
               <button onClick={()=> handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData, setAwaiting)} className="green_button"><FaCheck /></button>
               <button onClick={()=> setDelSeshConfirmOpen(true)} className="red_button"><FaTrash /></button>
-              <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}} ><FaXmark/></button>          
+              <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}}><FaXmark/></button>          
             </div>
-          }  
+          }
 
-          { editSessions &&
+          { editSessions && 
             <div className="s_header_buttons">
-              {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)} ><FaPlus/></button>}
-              {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)} ><FaXmark/></button>}
+              {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}><FaPlus/></button>}
+              {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}><FaXmark/></button>}
               {editSetVisible ? 
                 <button onClick={()=> setEditSetVisible(false)}><FaXmark/></button>
                 :
                 <button onClick={()=> setEditSetVisible(true)}><FaPen/></button>
               }            
             </div>      
-          }          
+          }
         </div>
         
 
@@ -95,21 +97,22 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           </div>
         }
 
-        {sessionExercises &&
-          <div className="seshEx_container">  
-          {sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => ( 
-            <SessionExerciseEle key={index}
-              sessionId = {session.sessionId}
-              sessionExercise = {sessionExercise}
-              exercises = {exercises}
-              editSetVisible = {editSetVisible}
-              setSessionExercises = {setSessionExercises}
-              editSessions={editSessions}
-              editSession={editSession}
-            />
-            ))}           
-          </div>
-        }
+        {/* {hideSession &&   */}
+          {sessionExercises &&
+            <div className="seshEx_container">  
+              {sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => ( 
+                <SessionExerciseEle key={index}
+                  sessionId = {session.sessionId}
+                  sessionExercise = {sessionExercise}
+                  exercises = {exercises}
+                  editSetVisible = {editSetVisible}
+                  setSessionExercises = {setSessionExercises}
+                  editSessions={editSessions}
+                  editSession={editSession}
+                />
+              ))}           
+            </div>}
+        {/* } */}
 
         {delSeshConfirmOpen && <div className="form"> 
             <div className="f_panel">
@@ -120,6 +123,11 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
               </div>
             </div>
         </div>}
+
+        {/* <button className="hide_button" onClick={()=>setHideSession(!hideSession)}>
+          {hideSession ? <FaAngleUp /> : <FaAngleDown />}
+        </button>     */}
+
         {awaiting && <Loading message = {"Submitting Request"}/>}
       </div>
     )    

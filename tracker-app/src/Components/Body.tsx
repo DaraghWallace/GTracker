@@ -26,7 +26,7 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
 
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
-  const [groupFilter, setGroupFilter] = useState("Legs");
+  const [groupFilter, setGroupFilter] = useState("All");
 
   return (<div className="Body">
     {page != "dev" && 
