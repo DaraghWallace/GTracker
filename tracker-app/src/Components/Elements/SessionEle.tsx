@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 
 import SessionExerciseEle from "./SessionExerciseEle"
 import Loading from "./Loading";
@@ -18,15 +18,21 @@ type Props = {
   setSessionData: React.Dispatch<React.SetStateAction<session[]>>;
   exercises: exercise[];  
   sessionExercises: sessionExercise[];
-  setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
+  // setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
   editSessions:boolean;
 }
 
-export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, editSessions}: Props) {
-  const [newSetFormOpen, setNewSetFormOpen] = useState(false);
+export default function SessionEle({session, setSessionData, exercises, sessionExercises, editSessions}: Props) {
+  const [sessionSets, setSessionSets] = useState(
+    sessionExercises.filter(set => set.sessionId === session.sessionId)
+  );
   
-  // const [hideSession, setHideSession] = useState(false);
+  useEffect(() => {
+    setSessionSets(sessionExercises.filter(set => set.sessionId === session.sessionId));
+  }, [sessionExercises, session.sessionId]);
 
+  // const [hideSession, setHideSession] = useState(false);
+  const [newSetFormOpen, setNewSetFormOpen] = useState(false);
   const [editSession, setEditSession] = useState(false);
   const [delSeshConfirmOpen, setDelSeshConfirmOpen] = useState(false);
   const [newFocus, setNewFocus] = useState(session.focus);
@@ -83,32 +89,27 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
             </div>      
           }
         </div>
-        
-
 
         {newSetFormOpen && 
           <div className="F_inset_feildCont">
             <NewSessionExerciseForm 
               sessionId = {session?.sessionId} 
               exercises = {exercises}
-              setSessionExercises={setSessionExercises}
+              setSessionSets={setSessionSets}
               setNewSetFormOpen = {setNewSetFormOpen}
             />
           </div>
         }
 
         {/* {hideSession &&   */}
-          {sessionExercises &&
+          {sessionSets &&
             <div className="seshEx_container">  
-              {sessionExercises.filter(set => set.sessionId === session.sessionId).map((sessionExercise, index) => ( 
+              {sessionSets.map((sessionExercise, index) => ( 
                 <SessionExerciseEle key={index}
-                  sessionId = {session.sessionId}
-                  sessionExercise = {sessionExercise}
+                  sessionExercise = {sessionExercise} 
                   exercises = {exercises}
-                  editSetVisible = {editSetVisible}
-                  setSessionExercises = {setSessionExercises}
-                  editSessions={editSessions}
-                  editSession={editSession}
+                  setSessionSets = {setSessionSets}
+                  editSetVisible={editSetVisible}
                 />
               ))}           
             </div>}

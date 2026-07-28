@@ -62,9 +62,6 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
           <div><input type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
         </div>
         
-        
-        
-
         <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
         {message && <p>{message}</p>}   
         

@@ -37,7 +37,7 @@ export default function App() {
   const [sessionData, setSessionData] = useState<session[]>([]);
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
-  const [page, setPage] = useState("sessions");
+  const [page, setPage] = useState("sessions"); // sessions / progress 
 
   async function loadUserData() {
     const date = new Date()
@@ -102,7 +102,7 @@ export default function App() {
           setSessionData={setSessionData}
           exercises={exercises}
           sessionExercises={sessionExercises}
-          setSessionExercises={setSessionExercises}
+          // setSessionExercises={setSessionExercises}
           page={page}
         />
       ) : (

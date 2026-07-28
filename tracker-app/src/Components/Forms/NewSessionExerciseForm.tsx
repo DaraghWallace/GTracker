@@ -11,11 +11,11 @@ import "../../CSS/form.css"
 type Props = {
   sessionId: string;
   exercises: exercise[];
-  setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
+  setSessionSets: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
   setNewSetFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, setNewSetFormOpen }: Props) {
+export default function NewSessionExerciseForm({ sessionId, exercises, setSessionSets, setNewSetFormOpen }: Props) {
   // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
   const [numOfSets, setNumOfSets] = useState(Number);
@@ -55,7 +55,10 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
       setMessage("Set created!");
       setNewSetFormOpen(false)
       const data = await getSessionExerciseBySession(sessionId)
-      setSessionExercises(data)
+      // setSessionExercises(data)
+      setSessionSets(data)
+
+
       setAwaiting(false)
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
