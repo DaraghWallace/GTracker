@@ -14,22 +14,22 @@ import { getUserAttributes, logout } from './Helpers/amplify';
 import progPng from "./assets/progress.png"
 import seshPng from "./assets/sessions.png"
 import Loading from './Components/Elements/Loading';
+import HelpWindow from './Components/Elements/helpWindow';
+
 
 /*
-  loadUserData: Funtion that runs scripts from "Helpers/APIfunctions" to get data to be displayed
-  handleSignOut: Removes user credentilas and data from session
-  useEffect
-    fetchAuthSession: Build user info and signs the in, here to maintian login if theyve used the sight before
-      getUserAttributes
-      setCurrentUser
-
-  batchRequests: fetches data 10 at a time to for performance
+  loadUserData: loads exercises, sessions, and their exercises, then marks page ready
+  handleSignOut: logs out and clears local state
+  batchRequests: fetches session exercises 10 sessions at a time
+  useEffect: restores login on page load and triggers loadUserData
 
   Display
     App
-      Header: Handles sign in and page select
-      Body: Priamary content display + add content   
+      Header: sign in/out, page switcher
+      Body: main content (signed in) / welcome message (signed out)
+      Loading: shown while pageState === "loading"
 */
+
 
 export default function App() {
   const [pageState, setPageState] = useState("start");
@@ -38,6 +38,9 @@ export default function App() {
   const [sessionExercises, setSessionExercises] = useState<sessionExercise[]>([]);
   const [exercises, setExercises] = useState<exercise[]>([]);
   const [page, setPage] = useState("sessions"); // sessions / progress 
+
+  const [helpOpen, setHelpOpen] = useState(false);
+  
 
   async function loadUserData() {
     const date = new Date()
@@ -93,6 +96,7 @@ export default function App() {
         handleSignOut = {handleSignOut}
         setPage = {setPage}
         page={page}
+        setHelpOpen={setHelpOpen}
       />
 
       {currentUser ?(
@@ -119,6 +123,7 @@ export default function App() {
         </div>
       )}
       {pageState=="loading" && <Loading message={'Loading User data'}/>}
+      {helpOpen && <HelpWindow setHelpOpen = {setHelpOpen}/>}
     </div>
   )
 }

@@ -4,10 +4,11 @@ import UserInForm from "./Forms/UserInForm";
 
 import "../CSS/Header.css"
 
-import { FaChartLine, FaDumbbell, FaArrowRightFromBracket,FaArrowRightToBracket , FaFrog   } from "react-icons/fa6";
+import { FaChartLine, FaDumbbell, FaArrowRightFromBracket,FaArrowRightToBracket , FaFrog , FaCircleQuestion   } from "react-icons/fa6";
 
 /*
-  Handles sign in and page select
+  Header
+    Handles sign in and page select
 */
 
 type Props = {
@@ -17,9 +18,10 @@ type Props = {
   handleSignOut: () => Promise<void>;
   setPage: Dispatch<SetStateAction<string>>
   page: string
+  setHelpOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export default function Header({ currentUser, setCurrentUser, loadUserData,handleSignOut, setPage, page }: Props) {
+export default function Header({ currentUser, setCurrentUser, loadUserData,handleSignOut, setPage, page, setHelpOpen }: Props) {
   const [userInFormOpen, setUserInFormOpen] = useState(false);
 
   return (
@@ -37,6 +39,7 @@ export default function Header({ currentUser, setCurrentUser, loadUserData,handl
       </div>
 
       <div className="h_buttons">
+        <button onClick={()=> setHelpOpen(true)}><FaCircleQuestion/></button>
         {(currentUser && currentUser.userType == "developer") &&
           <button  onClick={()=> setPage("dev")}> <FaFrog /> </button>
         }

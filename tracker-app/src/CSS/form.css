@@ -19,7 +19,7 @@
   border: solid 5px rgb(0, 200, 255);
   
   
-  min-width: 300px;
+  min-width: 400px;
   max-width: fit-content;
 
   height: fit-content;
@@ -131,7 +131,7 @@ select{
   background-color: rgb(60, 60, 70);
   display: flex;
   flex-direction: column;
-  max-height: 500px;
+  max-height: 700px;
   max-width: 600px;
   overflow-y: auto;
 }
@@ -188,6 +188,29 @@ select{
   background-color: rgb(50, 50, 60);
   border: solid 1px rgb(0, 200, 255);
   color: rgb(243, 244, 245);
+}
+
+.help_fields{
+  background-color: rgb(40, 40, 50);
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+  max-height: 700px;
+  max-width: 600px;
+  overflow-y: auto;
+}
+
+.help_text_feilds{
+  margin-top: 10px;
+  background-color: rgb(60, 60, 70);
+}
+
+.corner_button{
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  margin: 0;
 }
 
 /* ----------------------------------------------

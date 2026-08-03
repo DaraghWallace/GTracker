@@ -10,6 +10,17 @@ import "../CSS/form.css"
 import { FaPlus, FaPen, FaXmark } from "react-icons/fa6";
 import DevRoom from "./DevRoom";
 
+/*
+  handleDisplay: renders the active page - sessions list, progress grid, or dev room
+  contentFilter: renders the header's date/group filter controls
+ 
+  Display
+    Body
+      b_header: filter controls + (sessions only) add/edit buttons
+      b_content: active page content + NewSessionForm overlay when open
+*/
+
+
 type Props = {
   currentUser: user | null;
   sessionData: session[];
@@ -141,11 +152,14 @@ function contentFilter( page: string, exercises: exercise[],
           {page == "progress" && <option value={14}>Yearly</option>}
         </select>
         {monthFilter != 14 &&
-          <select onChange={(e)=> setYearFilter(Number(e.target.value))} value={yearFilter}>
-            <option value={2026}>2026</option>className="b_h_date_filter"
-            <option value={2025}>2025</option>
-            <option value={2024}>2024</option>
-          </select>  
+          <>
+             - <select onChange={(e)=> setYearFilter(Number(e.target.value))} value={yearFilter}>
+              <option value={2026}>2026</option>
+              <option value={2025}>2025</option>
+              <option value={2024}>2024</option>
+            </select>          
+          </>
+  
         }        
       </div>
       {page == "progress" &&
