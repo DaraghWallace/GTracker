@@ -69,7 +69,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, setSessi
               <input type="number" data-index={index} data-key="weight" placeholder={String(set.weight)}
                 onChange={(e)=>handleUpdateSetOfReps(e.target, newSets, setNewSets,)}
               /> 
-              x 
+              Kgs x 
               <input type="number" data-index={index} data-key="reps" placeholder={String(set.reps)}
                 onChange={(e)=>handleUpdateSetOfReps(e.target, newSets, setNewSets)}
               />                  
