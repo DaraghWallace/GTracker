@@ -11,8 +11,11 @@ import { getExercises, getSessionExerciseBySession, getSessions } from './Helper
 import { getUserAttributes, logout } from './Helpers/amplify';
 
 
-import progPng from "./assets/progress.png"
-import seshPng from "./assets/sessions.png"
+import dtProgPng from "./assets/progress.png"
+import dtSeshPng from "./assets/sessions.png"
+import mobSeshPng from "./assets/mobileSesh.png"
+import mobProgPng from "./assets/mobileProg.png"
+
 import Loading from './Components/Elements/Loading';
 import HelpWindow from './Components/Elements/helpWindow';
 
@@ -111,15 +114,22 @@ export default function App() {
         />
       ) : (
         <div className='hello'>
-          Welcome to My Gym tracking App, A web app to simplify tracking sessions and progress. Sign in to get started and keep an eye out for new features and updates like:
+          Welcome to My Gym tracking App, A web app to simplify tracking sessions and progress. Sign in to get started
+          <br/>
+          <div className='imgs'>
+            <div>Track your sessions</div>
+            <img src = {dtSeshPng} className='dt_img'/>
+            <img src = {mobSeshPng} className='mob_img'/>
+            
+            <div>Review your Progress your sessions</div>
+            <img src = {dtProgPng} className='dt_img'/>
+            <img src = {mobProgPng} className='mob_img'/>
+          </div>
+
+          And keep an eye out for new features and updates like:
           <div>- Cardio tracking</div>
           <div>- Helpful Graphs</div>
           <div>- Trainer / client features</div>
-
-          <div className='imgs'>
-            <img src = {seshPng}/>
-            <img src = {progPng}/>
-          </div>
         </div>
       )}
       {pageState=="loading" && <Loading message={'Loading User data'}/>}
