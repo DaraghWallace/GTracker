@@ -16,27 +16,27 @@ type Props = {
 }
 
 export default function HelpWindow( {setHelpOpen}: Props) {
-  const [page, setPage] = useState("sessions");
+  // const [page, setPage] = useState("sessions");
   const [subPage, setSubPage] = useState("new");
   
   return(
     <div className="form">
       <div className="f_panel">
-        <div className="f_p_row_c">
+        {/* <div className="f_p_row_c">
           <button onClick={() => setPage("sessions")} className="f_wide_button">Sessions</button>
           <button onClick={() => setPage("graphs")}className="f_wide_button">Graphs</button>
-        </div>
+        </div> */}
 
         <div className="help_header">How to use the Tracker</div>
         
-        {page == "sessions" && 
+        {/* {page == "sessions" &&  */}
           <div className="f_p_row_c">
             <button onClick={() => setSubPage("new")} className="f_wide_button"><FaPlus/> Add Item</button>
             <button onClick={() => setSubPage("edit")} className="f_wide_button"><FaPen/> Edit Item</button>          
           </div>
-        }
+        {/* } */}
         
-        {displayContent(page, subPage)}
+        {displayContent(/*page,*/ subPage)}
 
         <button className="corner_button" onClick={() => setHelpOpen(false)}> <FaXmark/> </button>
       </div>
@@ -44,9 +44,9 @@ export default function HelpWindow( {setHelpOpen}: Props) {
   )
 }
 
-function displayContent(page: string, subPage: string){
-  switch (page) {
-    case "sessions":
+function displayContent(/*page: string,*/ subPage: string){
+  // switch (page) {
+    // case "sessions":
       switch (subPage) {
         case "new":
           return(
@@ -127,8 +127,9 @@ function displayContent(page: string, subPage: string){
             </>
 
           )
+          
     default:
       break;
     }
-  }
+  // }
 }
