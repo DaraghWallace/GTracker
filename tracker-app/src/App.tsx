@@ -17,7 +17,7 @@ import mobSeshPng from "./assets/mobileSesh.png"
 import mobProgPng from "./assets/mobileProg.png"
 
 import Loading from './Components/Elements/Loading';
-import HelpWindow from './Components/Elements/helpWindow';
+import HelpWindow from './Components/Elements/HelpWindow';
 
 
 /*
@@ -121,7 +121,7 @@ export default function App() {
             <img src = {dtSeshPng} className='dt_img'/>
             <img src = {mobSeshPng} className='mob_img'/>
             
-            <div>Review your Progress your sessions</div>
+            <div>Review your Progress</div>
             <img src = {dtProgPng} className='dt_img'/>
             <img src = {mobProgPng} className='mob_img'/>
           </div>
