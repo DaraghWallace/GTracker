@@ -10,7 +10,7 @@ import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 import "../../CSS/sessionEle.css"
 import "../../CSS/form.css"
 
-import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash, /*FaAngleDown, FaAngleUp*/ } from "react-icons/fa6";
+import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash, FaAngleDown, FaAngleUp } from "react-icons/fa6";
 
 
 type Props = {
@@ -31,7 +31,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
     setSessionSets(sessionExercises.filter(set => set.sessionId === session.sessionId));
   }, [sessionExercises, session.sessionId]);
 
-  // const [hideSession, setHideSession] = useState(false);
+  const [showSession, setShowSession] = useState(true);
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
   const [editSession, setEditSession] = useState(false);
   const [delSeshConfirmOpen, setDelSeshConfirmOpen] = useState(false);
@@ -71,6 +71,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
 
           {(editSessions && editSession) &&
             <div className="s_header_buttons">
+              Sessions: 
               <button onClick={()=> handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData, setAwaiting)} className="green_button"><FaCheck /></button>
               <button onClick={()=> setDelSeshConfirmOpen(true)} className="red_button"><FaTrash /></button>
               <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}}><FaXmark/></button>          
@@ -79,6 +80,7 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
 
           { editSessions && 
             <div className="s_header_buttons">
+              Exercises: 
               {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}><FaPlus/></button>}
               {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}><FaXmark/></button>}
               {editSetVisible ? 
@@ -101,8 +103,8 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
           </div>
         }
 
-        {/* {hideSession &&   */}
-          {sessionSets &&
+        {showSession &&
+          sessionSets &&
             <div className="seshEx_container">  
               {sessionSets.map((sessionExercise, index) => ( 
                 <SessionExerciseEle key={index}
@@ -112,8 +114,8 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
                   editSetVisible={editSetVisible}
                 />
               ))}           
-            </div>}
-        {/* } */}
+            </div>
+        }
 
         {delSeshConfirmOpen && <div className="form"> 
             <div className="f_panel">
@@ -125,9 +127,9 @@ export default function SessionEle({session, setSessionData, exercises, sessionE
             </div>
         </div>}
 
-        {/* <button className="hide_button" onClick={()=>setHideSession(!hideSession)}>
-          {hideSession ? <FaAngleUp /> : <FaAngleDown />}
-        </button>     */}
+        <button className="hide_button" onClick={()=>setShowSession(!showSession)}>
+          {showSession ? <><FaAngleUp/> Hide <FaAngleUp/></>: <><FaAngleDown/> Show <FaAngleDown/></>}
+        </button>    
 
         {awaiting && <Loading message = {"Submitting Request"}/>}
       </div>

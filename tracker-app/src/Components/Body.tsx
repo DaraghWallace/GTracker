@@ -37,11 +37,17 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
   const [groupFilter, setGroupFilter] = useState("All");
+  const [dateSort, setDateSort] = useState(false); // true = acending (jan - dec) || false decending (dec to Jan)
 
   return (<div className="Body">
     {page != "dev" && 
       <div className="b_header">
-        <div>{contentFilter(page, exercises, setMonthFilter, monthFilter, setYearFilter, yearFilter, setGroupFilter, groupFilter)}</div>         
+        <div>
+          {
+            contentFilter(page, exercises, setMonthFilter, monthFilter, setYearFilter, yearFilter, 
+            setGroupFilter, groupFilter, setDateSort, dateSort)
+          }
+        </div>         
         {page == "sessions" &&
           <div className="b_h_buttons">
             <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
@@ -61,7 +67,8 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
       {currentUser && 
         handleDisplay(page,currentUser,
           sessionData,setSessionData, sessionExercises,
-          exercises,editSessions,monthFilter,yearFilter, groupFilter
+          exercises,editSessions,monthFilter,yearFilter, 
+          groupFilter, dateSort
         )  
       }
     
@@ -76,16 +83,23 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
 
 
 function handleDisplay(
-  page:string, currentUser: user, 
-  sessionData: session[], setSessionData: Dispatch<SetStateAction<session[]>>,
-  sessionExercises: sessionExercise[], 
-  exercises: exercise[], editSessions: boolean,
-  monthFilter: number, yearFilter: number, groupFilter: string) {
+    page:string, currentUser: user, sessionData: session[], 
+    setSessionData: Dispatch<SetStateAction<session[]>>, sessionExercises: sessionExercise[], 
+    exercises: exercise[], editSessions: boolean, monthFilter: number, yearFilter: number, 
+    groupFilter: string, dateSort: boolean
+  ) {
+  
+  const sorted = [...sessionData].sort((a, b) =>
+    dateSort
+      ? new Date(a.dateDone).getTime() - new Date(b.dateDone).getTime()
+      : new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime()
+  ) 
+
   switch (page) {
     case "sessions":
       return(
         <div className="sessions">
-          {sessionData.filter((session) => {
+          {sorted.filter((session) => {
             const date = new Date(session.dateDone);
             const matchesMonth = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
             const matchesYear = date.getFullYear() === yearFilter;
@@ -120,9 +134,10 @@ function handleDisplay(
 }
 
 function contentFilter( page: string, exercises: exercise[], 
-  setMonthFilter: Dispatch<SetStateAction<number>>,monthFilter: number, 
-  setYearFilter: Dispatch<SetStateAction<number>>, yearFilter: number,
-  setGroupFilter: Dispatch<SetStateAction<string>>, groupFilter: string,
+    setMonthFilter: Dispatch<SetStateAction<number>>,monthFilter: number, 
+    setYearFilter: Dispatch<SetStateAction<number>>, yearFilter: number,
+    setGroupFilter: Dispatch<SetStateAction<string>>, groupFilter: string,
+    setDateSort: Dispatch<SetStateAction<boolean>>, dateSort: boolean,
   ) {
   const mGroupList: string[] = [...new Set(exercises.map(ex => ex.group))];
   return (
@@ -155,9 +170,15 @@ function contentFilter( page: string, exercises: exercise[],
               <option value={2024}>2024</option>
             </select>          
           </>
-  
         }        
       </div>
+      {page == "sessions" &&
+        <div className="b_h_filter">
+          <button className="filter_button" onClick={() => setDateSort(!dateSort)}>
+            {!dateSort? "Dec to Jan": "Jan to Dec"}
+          </button>
+        </div>
+      }
       {page == "progress" &&
         <div className="b_h_filter">
           <div>Group Filter: </div>

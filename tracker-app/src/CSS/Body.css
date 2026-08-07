@@ -3,13 +3,9 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
-.b_content{
-  flex: 1;
-  min-height: 0;
-  padding-bottom: 10px;
-}
 
 .b_header{
   background-color: rgb(40, 40, 50);
@@ -20,6 +16,10 @@
   justify-content: space-between;
 }
 
+/* .b_content{
+  flex: 1;
+} */
+
 .b_h_filters {
   display: flex;
   flex-direction: row;
@@ -27,8 +27,7 @@
 
 .b_h_filter{
   background-color: rgb(60, 60, 70);
-
-  margin-right: 10px;
+  width: fit-content;
   padding: 10px;
   display: flex;
   flex-direction: row;
@@ -41,7 +40,6 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
   }  
 }
 
@@ -50,12 +48,8 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    overflow-y: auto;
   }  
 }
-
-
-
 
 select{
   font-size: 16px;
