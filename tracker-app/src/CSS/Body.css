@@ -27,12 +27,20 @@
 
 .b_h_filter{
   background-color: rgb(60, 60, 70);
-  width: fit-content;
+  max-width: 300px;
   padding: 10px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   font-size: 20px;
+}
+
+.b_h_buttons{
+  background-color: rgb(60, 60, 70);
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 @media (max-width: 750px) {
