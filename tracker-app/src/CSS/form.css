@@ -55,9 +55,6 @@
     background-color: rgb(50, 50, 60);
     border: solid 5px rgb(0, 200, 255);
     
-    min-width: 400px;
-    max-width: fit-content;
-
     height: fit-content;
     max-height: 100%;
     
@@ -66,7 +63,7 @@
     align-items: left;
     justify-content: space-between;
 
-    overflow-y: auto;
+    overflow-y: hidden;
     padding-left: 10px;
     padding-right: 10px;
 
