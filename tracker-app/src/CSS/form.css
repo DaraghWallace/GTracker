@@ -1,15 +1,17 @@
-.form{
-  background-color: rgba(0, 40, 50, 0.6);
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+@media (min-width: 750px) {
+  .form{
+    background-color: rgba(0, 40, 50, 0.6);
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
 
-  display: flex;
-  justify-content: center;
-  -webkit-animation: fade-in 0.5s ease-in reverse forwards;
-	        animation: fade-in 0.5s ease-in reverse forwards;
+    display: flex;
+    justify-content: center;
+    -webkit-animation: fade-in 0.5s ease-in reverse forwards;
+            animation: fade-in 0.5s ease-in reverse forwards;
+  }
 }
 
 
@@ -43,10 +45,14 @@
 
 @media (max-width: 750px) {
   .f_panel{
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
     background-color: rgb(50, 50, 60);
     border: solid 5px rgb(0, 200, 255);
-    margin-left: 10px;
-    margin-right: 10px;
     
     min-width: 400px;
     max-width: fit-content;
