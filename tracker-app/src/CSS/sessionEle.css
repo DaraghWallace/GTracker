@@ -3,11 +3,11 @@
     border: solid 2px rgb(0, 200, 255);
     width: 300px;
     max-width: 400px;
-
     flex-grow: 4;
   }
 
   .seshEx_container{
+    min-height: 30px;
     max-height: 500px;
     overflow-y: auto;  
   }

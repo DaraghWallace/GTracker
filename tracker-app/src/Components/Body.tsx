@@ -16,8 +16,8 @@ import DevRoom from "./DevRoom";
  
   Display
     Body
-      b_header: filter controls + (sessions only) add/edit buttons
-      b_content: active page content + NewSessionForm overlay when open
+      Header: filter controls + (sessions only) add/edit buttons
+      Content: active page content + NewSessionForm overlay when open
 */
 
 

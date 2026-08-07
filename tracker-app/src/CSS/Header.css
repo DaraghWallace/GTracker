@@ -1,12 +1,12 @@
 .Header{
   background-color: rgb(40, 40, 50);
+  border-bottom: solid 3px rgb(0, 200, 255);;
 
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   
   padding: 4px;
-  margin-bottom: 5px;
 }
 
 .h_hello{
