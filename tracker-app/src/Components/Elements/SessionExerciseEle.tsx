@@ -50,7 +50,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, setSessi
           {/* <button onClick={()=> {handleCancelEdit(setNewSets, sessionExercise, setEditSets)}}><FaXmark/></button>  */}
           {delConfirm? 
             <>Are you Sure
-              <button onClick={()=>handleDeleteSessionExercise(sessionExercise, setSessionSets, setDelConfirm)}>Y</button>
+              <button onClick={()=>handleDeleteSessionExercise(sessionExercise, setSessionSets, setDelConfirm, setAwaiting)}>Y</button>
               <button onClick={()=>setDelConfirm(false)}>N</button>
             </>
           : 
@@ -81,7 +81,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, setSessi
       )})}
     </div>
 
-    {awaiting && <Loading  message = {"Message"}/>}
+    {awaiting && <Loading  message = {"Sending Request"}/>}
 
   </div>
 }
@@ -134,12 +134,15 @@ function getExercise(exerciseId: string, exercises: exercise[]): exercise {
 
 async function handleDeleteSessionExercise(sessionExercise:sessionExercise, 
     setSessionSets: React.Dispatch<React.SetStateAction<sessionExercise[]>>,
-    setDelConfirm: React.Dispatch<React.SetStateAction<boolean>>
+    setDelConfirm: React.Dispatch<React.SetStateAction<boolean>>,
+    setAwaiting: React.Dispatch<React.SetStateAction<boolean>>
   ) {
+  setAwaiting(true)
   await deleteSessionExercise(sessionExercise.sessionExerciseId)
   const updatedSessionExercise: sessionExercise[] = await getSessionExerciseBySession(sessionExercise.sessionId)
   setDelConfirm(false)
   setSessionSets(updatedSessionExercise)
+  setAwaiting(false)
 }
 
 function handleCancelEdit(setNewSets: Dispatch<SetStateAction<string>>, sessionExercise: sessionExercise, setEditSets: Dispatch<SetStateAction<boolean>>) {

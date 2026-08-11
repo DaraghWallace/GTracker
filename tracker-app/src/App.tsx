@@ -127,7 +127,6 @@ export default function App() {
 
           And keep an eye out for new features and updates like:
           <div>- Cardio tracking</div>
-          <div>- Helpful Graphs</div>
           <div>- Trainer / client features</div>
         </div>
       )}
