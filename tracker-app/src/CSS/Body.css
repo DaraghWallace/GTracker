@@ -69,7 +69,24 @@
     justify-content: space-between;
   }
 }
+@media (max-width: 400px) {
+  .b_h_filter{
+    background-color: rgb(60, 60, 70);
+    max-width: 300px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 20px;
+  }
 
+  .b_h_buttons{
+    background-color: rgb(60, 60, 70);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+}
 select{
   font-size: 16px;
   border: 0;

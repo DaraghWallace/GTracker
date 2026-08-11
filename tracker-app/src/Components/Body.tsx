@@ -165,7 +165,7 @@ function contentFilter( page: string, exercises: exercise[],
   return (
     <div className="b_h_filters">
       <div className="b_h_filter"> {/* Date Filter */}
-       <div>Date Filter: </div>
+        <div>Date Filter: </div>
         <select onChange={(e)=> setMonthFilter(Number(e.target.value))} value={monthFilter}>
           {/* <option disabled selected hidden value={monthFilter}>{displayMonth(monthFilter)}</option> */}
           <option value={0}>All of</option>
@@ -186,7 +186,7 @@ function contentFilter( page: string, exercises: exercise[],
         </select>
         {monthFilter != 14 &&
           <>
-             - <select onChange={(e)=> setYearFilter(Number(e.target.value))} value={yearFilter}>
+            <select onChange={(e)=> setYearFilter(Number(e.target.value))} value={yearFilter}>
               <option value={2026}>2026</option>
               <option value={2025}>2025</option>
               <option value={2024}>2024</option>
