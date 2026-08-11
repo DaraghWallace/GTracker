@@ -8,9 +8,10 @@
 
 
 .b_header{
+  /* background-color: rgb(60, 60, 70); */
   background-color: rgb(40, 40, 50);
   border-bottom: solid 2px rgb(0, 200, 255);
-
+  
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -23,6 +24,7 @@
 .b_h_filters {
   display: flex;
   flex-direction: row;
+  width: fit-content;
 }
 
 .b_h_filter{
@@ -35,13 +37,7 @@
   font-size: 20px;
 }
 
-.b_h_buttons{
-  background-color: rgb(60, 60, 70);
-  padding: 10px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
+
 
 @media (max-width: 750px) {
   .sessions{
@@ -49,6 +45,13 @@
     display: flex;
     flex-direction: column;
   }  
+
+  .b_h_buttons{
+    background-color: rgb(60, 60, 70);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 }
 
 @media (min-width: 750px) {
@@ -57,6 +60,14 @@
     flex-direction: row;
     flex-wrap: wrap;
   }  
+
+  .b_h_buttons{
+    background-color: rgb(60, 60, 70);
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
 }
 
 select{

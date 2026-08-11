@@ -3,11 +3,12 @@ import SessionEle from "../Components/Elements/SessionEle"
 import type { exercise, session, sessionExercise, user } from "../Helpers/customTypes";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import ProgressGrid from "./ProgressGrid";
+import ProgressGraph from "./ProgressGraph";
 
 import "../CSS/Body.css"
 import "../CSS/form.css"
 
-import { FaPlus, FaPen, FaXmark } from "react-icons/fa6";
+import { FaPlus, FaPen, FaXmark, FaChartLine, FaTableList  } from "react-icons/fa6";
 import DevRoom from "./DevRoom";
 
 /*
@@ -39,15 +40,16 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
   const [groupFilter, setGroupFilter] = useState("All");
   const [dateSort, setDateSort] = useState(false); // true = acending (jan - dec) || false decending (dec to Jan)
 
+  const [progressDisplay, setProgressDisplay] = useState("grid");
+
+
   return (<div className="Body">
     {page != "dev" && 
       <div className="b_header">
-        <div>
-          {
-            contentFilter(page, exercises, setMonthFilter, monthFilter, setYearFilter, yearFilter, 
-            setGroupFilter, groupFilter, setDateSort, dateSort)
-          }
-        </div>         
+        {
+          contentFilter(page, exercises, setMonthFilter, monthFilter, setYearFilter, yearFilter, 
+          setGroupFilter, groupFilter, setDateSort, dateSort)
+        }
         {page == "sessions" &&
           <div className="b_h_buttons">
             <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
@@ -56,6 +58,12 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
               :
               <button onClick={() => setEditSessions(true)}><FaPen /></button>
             }          
+          </div>
+        }
+        {page == "progress" &&
+          <div className="b_h_buttons">
+            <button onClick={()=>setProgressDisplay("grid")}><FaTableList/></button>
+            <button onClick={()=>setProgressDisplay("graph")}><FaChartLine/></button>
           </div>
         }
       </div>    
@@ -68,7 +76,7 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
         handleDisplay(page,currentUser,
           sessionData,setSessionData, sessionExercises,
           exercises,editSessions,monthFilter,yearFilter, 
-          groupFilter, dateSort
+          groupFilter, dateSort, progressDisplay
         )  
       }
     
@@ -86,7 +94,7 @@ function handleDisplay(
     page:string, currentUser: user, sessionData: session[], 
     setSessionData: Dispatch<SetStateAction<session[]>>, sessionExercises: sessionExercise[], 
     exercises: exercise[], editSessions: boolean, monthFilter: number, yearFilter: number, 
-    groupFilter: string, dateSort: boolean
+    groupFilter: string, dateSort: boolean, progressDisplay: string
   ) {
   
   const sorted = [...sessionData].sort((a, b) =>
@@ -116,18 +124,31 @@ function handleDisplay(
         </div>      
       )
     case "progress":     
-      return (
-        <ProgressGrid
-          exercises={exercises}
-          sessionData={sessionData}
-          sessionExercises={sessionExercises}
-          monthFilter={monthFilter}
-          yearFilter={yearFilter}
-          groupFilter={groupFilter}
-        />
-      )
-    case "dev":
-      return <DevRoom user={currentUser} exercises={exercises}/>
+      if (progressDisplay == "grid") {
+        return (
+          <ProgressGrid
+            exercises={exercises}
+            sessionData={sessionData}
+            sessionExercises={sessionExercises}
+            monthFilter={monthFilter}
+            yearFilter={yearFilter}
+            groupFilter={groupFilter}
+          />
+        )        
+      } if (progressDisplay == "graph") {
+        return (
+          <ProgressGraph
+            exercises={exercises}
+            sessionData={sessionData}
+            sessionExercises={sessionExercises}
+            monthFilter={monthFilter}
+            yearFilter={yearFilter}          
+          />
+        )        
+      }
+      break;
+      case "dev":
+        return <DevRoom user={currentUser} exercises={exercises}/>
     default:
       break;
   }
@@ -142,8 +163,8 @@ function contentFilter( page: string, exercises: exercise[],
   const mGroupList: string[] = [...new Set(exercises.map(ex => ex.group))];
   return (
     <div className="b_h_filters">
-      <div className="b_h_filter">
-        <div>Date Filter: </div>
+      <div className="b_h_filter"> {/* Date Filter */}
+       <div>Date Filter: </div>
         <select onChange={(e)=> setMonthFilter(Number(e.target.value))} value={monthFilter}>
           {/* <option disabled selected hidden value={monthFilter}>{displayMonth(monthFilter)}</option> */}
           <option value={0}>All of</option>
@@ -173,14 +194,14 @@ function contentFilter( page: string, exercises: exercise[],
         }        
       </div>
       {page == "sessions" &&
-        <div className="b_h_filter">
+        <div className="b_h_filter">  {/* Sort by date */}
           <button className="filter_button" onClick={() => setDateSort(!dateSort)}>
             {!dateSort? "Dec to Jan": "Jan to Dec"}
           </button>
         </div>
       }
       {page == "progress" &&
-        <div className="b_h_filter">
+        <div className="b_h_filter">  {/* Group Filter */}
           <div>Group Filter: </div>
           <select onChange={(e) => setGroupFilter(e.target.value)}>
             <option hidden>{groupFilter}</option>

@@ -9,7 +9,10 @@
 }
 
 .G_cell_big{
-  border: 1px solid rgb(200, 200, 255);
+  border: 1px solid rgb(40, 40, 50);
+  background-color: rgb(0, 200, 255);
+  color:rgb(40, 40, 50);
+  font-weight: bold;
   padding: 1px;
   width: 200px;
   flex-shrink: 0;  
@@ -30,4 +33,26 @@
   width: 80px;
   flex-shrink: 0;  
   text-align: center;
+}
+
+.Graph_container{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.graph_item{
+  border: solid 2px rgb(0, 200, 255);
+  flex-grow: 4;
+  width: 400px;
+  max-width: 600px;
+  height: 400px;
+
+}
+
+.gi_header{
+  background-color: rgb(60, 60, 70);
+  width: 100%;
+  font-size: 25px;
+  font-weight: bold;
 }

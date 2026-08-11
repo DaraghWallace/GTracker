@@ -1,6 +1,7 @@
 .EsSesh{
   display: flex;
   flex-direction: column;
+  border-bottom: solid 1px rgb(0, 200, 255);
 }
 
 .es_header{
