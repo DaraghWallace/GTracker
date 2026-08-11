@@ -8,7 +8,7 @@ import {
   buildWeightProgArr,
   buildStrengthProgArr,
   getBuckets,
-} from "../Helpers/ProgressData"
+} from "../Helpers/progressData"
 
 type Props = {
   exercises: exercise[];

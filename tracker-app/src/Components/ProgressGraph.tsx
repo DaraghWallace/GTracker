@@ -4,7 +4,7 @@ import {
   groupByMuscleGroup,
   getBuckets,
   bestRep,
-} from "../Helpers/ProgressData";
+} from "../Helpers/progressData";
 
 import { Chart as ChartJS, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend } from "chart.js";
 import { Line } from "react-chartjs-2";
