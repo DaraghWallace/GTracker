@@ -45,9 +45,6 @@ export function buildStrengthProgArr(
   })).sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
 }
 
-// Shared bucketing logic: turns the monthFilter/yearFilter combo into a list
-// of buckets, each with a label and a matcher fn. Used by both the grid
-// (columns) and the graph (x-axis points).
 export function getBuckets(monthFilter: number, yearFilter: number, dates: string[]): Bucket[] {
   if (monthFilter === 13) { // monthly view
     const months = uniqueSorted(

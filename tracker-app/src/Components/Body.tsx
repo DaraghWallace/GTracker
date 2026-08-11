@@ -48,7 +48,7 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
       <div className="b_header">
         {
           contentFilter(page, exercises, setMonthFilter, monthFilter, setYearFilter, yearFilter, 
-          setGroupFilter, groupFilter, setDateSort, dateSort)
+          setGroupFilter, groupFilter, setDateSort, dateSort, progressDisplay)
         }
         {page == "sessions" &&
           <div className="b_h_buttons">
@@ -159,6 +159,7 @@ function contentFilter( page: string, exercises: exercise[],
     setYearFilter: Dispatch<SetStateAction<number>>, yearFilter: number,
     setGroupFilter: Dispatch<SetStateAction<string>>, groupFilter: string,
     setDateSort: Dispatch<SetStateAction<boolean>>, dateSort: boolean,
+    progressDisplay: string
   ) {
   const mGroupList: string[] = [...new Set(exercises.map(ex => ex.group))];
   return (
@@ -200,7 +201,7 @@ function contentFilter( page: string, exercises: exercise[],
           </button>
         </div>
       }
-      {page == "progress" &&
+      {(page == "progress" && progressDisplay == "grid") &&
         <div className="b_h_filter">  {/* Group Filter */}
           <div>Group Filter: </div>
           <select onChange={(e) => setGroupFilter(e.target.value)}>

@@ -41,18 +41,41 @@
   flex-wrap: wrap;
 }
 
-.graph_item{
-  border: solid 2px rgb(0, 200, 255);
-  flex-grow: 4;
-  width: 400px;
-  max-width: 600px;
-  height: 400px;
-
+@media (max-width: 750px) {
+  .graph_item{
+    /* border: solid 2px rgb(0, 200, 255); */
+    flex-grow: 100;
+    width: 100%;
+    height: 600px;
+    display: grid;
+    grid-template-rows: auto 1fr; /* header takes its content height, chart takes the rest */
+    margin-bottom: 10px;
+  }
 }
+
+@media (min-width: 750px) {
+  .graph_item{
+    border: solid 2px rgb(0, 200, 255);
+    flex-grow: 100;
+    width: 50%;
+    height: 600px;
+    display: grid;
+    grid-template-rows: auto 1fr; /* header takes its content height, chart takes the rest */
+  }
+}
+
+
 
 .gi_header{
   background-color: rgb(60, 60, 70);
   width: 100%;
-  font-size: 25px;
+  font-size: 35px;
   font-weight: bold;
+  text-align: center;
+}
+
+.gi_chart_wrap{
+  position: relative; /* required — Chart.js measures this to size the canvas */
+  min-height: 0;
+  min-width: 0;
 }
