@@ -6,11 +6,13 @@
 
 .es_header{
   background-color: rgb(60, 60, 70);
+  padding: 5px;
   font-weight: bold;
   font-size: 18px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+
 }
 
 .es_reps{

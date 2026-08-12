@@ -79,9 +79,9 @@ input[type=text] {
 
 @media (max-width: 750px) {
   .Session{
-    border-top: solid 4px rgb(0, 200, 255);
+    border: solid 1px rgb(0, 200, 255);
     /* border-bottom: solid 1px rgb(0, 200, 255); */
-    width: 100%;
+    margin: 10px;
   }
 
   .seshEx_container{
@@ -146,7 +146,10 @@ input[type=text] {
   }
 
   .hide_button{
+    border-top: solid 1px rgb(40, 40, 50);
     border-bottom: solid 3px rgb(40, 40, 50);
+    background-color: rgb(60, 60, 70);
+    color: white;
     font-weight: bold;
     width: 100%;
     margin: 0;
