@@ -22,7 +22,7 @@ type Props = {
 
 export default function HelpWindow( {setHelpOpen}: Props) {
   const [page, setPage] = useState("sessions");
-  const [subPage, setSubPage] = useState("new");
+  const [subPage, setSubPage] = useState("1");
   
   return(
     <div className="form">
@@ -36,15 +36,15 @@ export default function HelpWindow( {setHelpOpen}: Props) {
         
         {page == "sessions" && 
           <div className="f_p_row_c">
-            <button onClick={() => setSubPage("new")} className="f_wide_button"><FaPlus/> Add Item</button>
-            <button onClick={() => setSubPage("edit")} className="f_wide_button"><FaPen/> Edit Item</button>          
+            <button onClick={() => setSubPage("1")} className="f_wide_button"><FaPlus/> Add Item</button>
+            <button onClick={() => setSubPage("2")} className="f_wide_button"><FaPen/> Edit Item</button>          
           </div>
         }
         
         {page == "graphs" && 
           <div className="f_p_row_c">
-            <button onClick={() => setSubPage("grid")} className="f_wide_button"><FaTableList/> Spread Sheet</button>
-            <button onClick={() => setSubPage("graph")} className="f_wide_button"><FaChartLine/> Graphs</button>          
+            <button onClick={() => setSubPage("1")} className="f_wide_button"><FaTableList/> Spread Sheet</button>
+            <button onClick={() => setSubPage("2")} className="f_wide_button"><FaChartLine/> Graphs</button>          
           </div>
         }
         {displayContent(page, subPage)}
@@ -59,7 +59,7 @@ function displayContent(page: string, subPage: string) {
   switch (page) {
     case "sessions":
       switch (subPage) {
-        case "new":
+        case "1":
           return (
             <>
               <div className="help_fields">
@@ -93,7 +93,7 @@ function displayContent(page: string, subPage: string) {
               </div>
             </>
           );
-        case "edit":
+        case "2":
           return (
             <>
               <div className="help_fields">
@@ -140,7 +140,7 @@ function displayContent(page: string, subPage: string) {
 
     case "graphs":
       switch (subPage) {
-        case "grid":
+        case "1":
           return (
             <div className="help_fields">
               <div className="thick_text">Reading the Grid</div>
@@ -166,7 +166,7 @@ function displayContent(page: string, subPage: string) {
               </div>
             </div>
           );
-        case "graph":
+        case "2":
           return (
             <div className="help_fields">
               <div className="thick_text">Reading the Graph</div>

@@ -1,7 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import type { session } from "../../Helpers/customTypes";
-import { createSession, getSessions } from "../../Helpers/APIfunctions";
+import { createSession } from "../../Helpers/APIfunctions";
 
 import {  FaXmark, FaCheck, } from "react-icons/fa6";
 import Loading from "../Elements/Loading";
@@ -24,33 +24,31 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
   const [postStatus, setPostStatus] = useState("waiting");
 
   async function handleSubmit() {
-    if (!date) return setMessage("Date is required.");
+      if (!date) return setMessage("Date is required.");
 
-    const newSession: session = {
-      sessionId: uuidv4(),
-      userId,
-      dateDone: date,
-      userWeight: userWeight,
-      focus: focus || null,
-      notes: notes || null,
-    };
+      const newSession: session = {
+        sessionId: uuidv4(),
+        userId,
+        dateDone: date,
+        userWeight: userWeight,
+        focus: focus || null,
+        notes: notes || null,
+      };
 
-    try {
-      setPostStatus("posting")
-      const date = new Date
-      await createSession(newSession);
-      setMessage("Session created!");
-      const data = await getSessions(
-        `${date.getFullYear()}-01-01`, `${date.getFullYear()}-12-31`
-      );
-      // console.log(data);
-      setSessionData(data);
-      setNewSessionFormOpen(false)
-      setPostStatus("Done")
-    } catch (e: unknown) {
-      setPostStatus("failed")
-      setMessage(e instanceof Error ? e.message : "Something went wrong");
-    }
+      try {
+        setPostStatus("posting")
+        await createSession(newSession);
+        setMessage("Session created!");
+
+        // Add it straight into state instead of refetching a (possibly narrower) range
+        setSessionData(prev => [...prev, newSession]);
+
+        setNewSessionFormOpen(false)
+        setPostStatus("Done")
+      } catch (e: unknown) {
+        setPostStatus("failed")
+        setMessage(e instanceof Error ? e.message : "Something went wrong");
+      }
   }
 
   return (
