@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 
 import SessionExerciseEle from "./SessionExerciseEle"
 import Loading from "./Loading";
@@ -14,22 +14,16 @@ import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash, FaAngleDown, FaAngleUp } from
 
 
 type Props = {
-  session: session;  
+  session: session;
   setSessionData: React.Dispatch<React.SetStateAction<session[]>>;
-  exercises: exercise[];  
+  exercises: exercise[];
   sessionExercises: sessionExercise[];
-  // setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
-  editSessions:boolean;
+  setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
+  editSessions: boolean;
 }
 
-export default function SessionEle({session, exercises, sessionExercises, editSessions}: Props) {
-  const [sessionSets, setSessionSets] = useState(
-    sessionExercises.filter(set => set.sessionId === session.sessionId)
-  );
-  
-  useEffect(() => {
-    setSessionSets(sessionExercises.filter(set => set.sessionId === session.sessionId));
-  }, [sessionExercises, session.sessionId]);
+export default function SessionEle({session, setSessionData, exercises, sessionExercises, setSessionExercises, editSessions}: Props) {
+  const sessionSets = sessionExercises.filter(set => set.sessionId === session.sessionId);
 
   const [showSession, setShowSession] = useState(true);
   const [newSetFormOpen, setNewSetFormOpen] = useState(false);
@@ -43,12 +37,12 @@ export default function SessionEle({session, exercises, sessionExercises, editSe
 
   const [awaiting, setAwaiting] = useState(false);
 
-  
+
   try {
     return (
       <div className="Session">
         <div className="s_header">
-          {(editSessions && editSession)? 
+          {(editSessions && editSession)?
             <div className="s_header_form">
               <div>Focus: <input type="text" placeholder={session.focus || ""} size={7} value={newFocus || ""}
                 onChange={(e) => setNewFocus(e.target.value)}
@@ -58,7 +52,7 @@ export default function SessionEle({session, exercises, sessionExercises, editSe
               /></div>
               <div>Weight: <input placeholder={session.dateDone} type="number" value={newUserWeight}
                 onChange={(e) => setNewUserWeight(Number(e.target.value))}
-              />Kgs </div>   
+              />Kgs </div>
             </div>
             :
             <div className="s_header_text" /*onClick={()=> console.log(session)}*/>
@@ -66,38 +60,38 @@ export default function SessionEle({session, exercises, sessionExercises, editSe
               <div>{session.userWeight > 0 && `${session.userWeight}Kgs`}</div>
               {editSessions && <>{!editSession &&<button onClick={()=> setEditSession(true)}><FaPen/></button>}</>}
               {/* {session.notes} */}
-            </div>      
+            </div>
           }
 
           {(editSessions && editSession) &&
             <div className="s_header_buttons">
-              Sessions: 
-              <button onClick={()=> handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setAwaiting)} className="green_button"><FaCheck /></button>
+              Sessions:
+              <button onClick={()=> handleUpdateSession(session, newFocus, newDateDone, newUserWeight, setEditSession, setSessionData, setAwaiting)} className="green_button"><FaCheck /></button>
               <button onClick={()=> setDelSeshConfirmOpen(true)} className="red_button"><FaTrash /></button>
-              <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}}><FaXmark/></button>          
+              <button onClick={()=> {setEditSession(false); setEditSetVisible(false)}}><FaXmark/></button>
             </div>
           }
 
-          { editSessions && 
+          { editSessions &&
             <div className="s_header_buttons">
-              Exercises: 
+              Exercises:
               {!newSetFormOpen && <button onClick={()=> setNewSetFormOpen(true)}><FaPlus/></button>}
               {newSetFormOpen && <button onClick={()=> setNewSetFormOpen(false)}><FaXmark/></button>}
-              {editSetVisible ? 
+              {editSetVisible ?
                 <button onClick={()=> setEditSetVisible(false)}><FaXmark/></button>
                 :
                 <button onClick={()=> setEditSetVisible(true)}><FaPen/></button>
-              }            
-            </div>      
+              }
+            </div>
           }
         </div>
 
-        {newSetFormOpen && 
+        {newSetFormOpen &&
           <div className="F_inset_feildCont">
-            <NewSessionExerciseForm 
-              sessionId = {session?.sessionId} 
+            <NewSessionExerciseForm
+              sessionId = {session?.sessionId}
               exercises = {exercises}
-              setSessionSets={setSessionSets}
+              setSessionExercises={setSessionExercises}
               setNewSetFormOpen = {setNewSetFormOpen}
             />
           </div>
@@ -105,44 +99,47 @@ export default function SessionEle({session, exercises, sessionExercises, editSe
 
         {showSession &&
           sessionSets &&
-            <div className="seshEx_container">  
-              {sessionSets.map((sessionExercise, index) => ( 
+            <div className="seshEx_container">
+              {sessionSets.map((sessionExercise, index) => (
                 <SessionExerciseEle key={index}
-                  sessionExercise = {sessionExercise} 
+                  sessionExercise = {sessionExercise}
                   exercises = {exercises}
-                  setSessionSets = {setSessionSets}
+                  setSessionExercises = {setSessionExercises}
                   editSetVisible={editSetVisible}
                 />
-              ))}           
+              ))}
             </div>
         }
 
-        {delSeshConfirmOpen && <div className="form"> 
+        {delSeshConfirmOpen && <div className="form">
             <div className="f_panel">
               <div className="f_p_e_header">Are you sure you want to delete your {displayDate(session.dateDone)} session</div>
               <div className="f_p_row_c">
-                <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>                 
-                <button onClick={()=>handleDeleteSession(session.sessionId, setAwaiting, sessionExercises)} className="green_button"><FaCheck/></button>
+                <button onClick={()=> setDelSeshConfirmOpen(false)}><FaXmark/></button>
+                <button onClick={()=>handleDeleteSession(session.sessionId, setSessionData, setSessionExercises, setAwaiting, sessionExercises)} className="green_button"><FaCheck/></button>
               </div>
             </div>
         </div>}
 
         <button className="hide_button" onClick={()=>setShowSession(!showSession)}>
           {showSession ? <><FaAngleUp/> Hide <FaAngleUp/></>: <><FaAngleDown/> Show <FaAngleDown/></>}
-        </button>    
+        </button>
 
         {awaiting && <Loading message = {"Submitting Request"}/>}
       </div>
-    )    
+    )
   } catch (error) {
     console.error("ERROR! Could not display session: ", error);
   }
 
 }
 
-async function handleUpdateSession(session:session, newFocus:string | null, newDateDone:string, newUserWeight:number, 
-  setEditSession: Dispatch<SetStateAction<boolean>>, setAwaiting: Dispatch<SetStateAction<boolean>>
-  ) {
+async function handleUpdateSession(
+  session: session, newFocus: string | null, newDateDone: string, newUserWeight: number,
+  setEditSession: Dispatch<SetStateAction<boolean>>,
+  setSessionData: Dispatch<SetStateAction<session[]>>,
+  setAwaiting: Dispatch<SetStateAction<boolean>>
+) {
   const newSession: session = {
     sessionId: session.sessionId,
     userId: session.userId,
@@ -152,14 +149,11 @@ async function handleUpdateSession(session:session, newFocus:string | null, newD
     notes: session.notes, //TODO
   }
 
-  if(session != newSession){
-    setAwaiting(true)
-    await updateSession(newSession)
-    setEditSession(false)
-    setAwaiting(false)
-  }else console.log("no changes");
-
-  
+  setAwaiting(true)
+  await updateSession(newSession)
+  setSessionData(prev => prev.map(s => s.sessionId === newSession.sessionId ? newSession : s))
+  setEditSession(false)
+  setAwaiting(false)
 }
 
 function displayDate(date: string): string {
@@ -167,13 +161,21 @@ function displayDate(date: string): string {
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-async function handleDeleteSession(sessionId:string, setAwaiting: Dispatch<SetStateAction<boolean>>, sessionExercises: sessionExercise[] ){
+async function handleDeleteSession(
+  sessionId: string,
+  setSessionData: Dispatch<SetStateAction<session[]>>,
+  setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>,
+  setAwaiting: Dispatch<SetStateAction<boolean>>,
+  sessionExercises: sessionExercise[]
+) {
   setAwaiting(true)
-  await sessionExercises.forEach(sessionExercise => {
-    if(sessionExercise.sessionId === sessionId){
+  sessionExercises.forEach(sessionExercise => {
+    if (sessionExercise.sessionId === sessionId) {
       deleteSessionExercise(sessionExercise.sessionExerciseId)
     }
   });
   await deleteSession(sessionId)
+  setSessionData(prev => prev.filter(s => s.sessionId !== sessionId))
+  setSessionExercises(prev => prev.filter(se => se.sessionId !== sessionId))
   setAwaiting(false)
 }

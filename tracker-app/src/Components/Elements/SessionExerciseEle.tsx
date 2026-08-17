@@ -1,7 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from 'react';
 
 import type { exercise,  sessionExercise } from "../../Helpers/customTypes"
-import { deleteSessionExercise, getSessionExerciseBySession, updateSessionExercise, } from "../../Helpers/APIfunctions";
+import { deleteSessionExercise, updateSessionExercise, } from "../../Helpers/APIfunctions";
 
 import "../../CSS/exSeshEle.css"
 import { FaTrash, FaPen , FaXmark, FaCheck} from "react-icons/fa6";
@@ -11,11 +11,11 @@ import Loading from "./Loading";
 type props = {
   sessionExercise: sessionExercise,
   exercises: exercise[],
-  setSessionSets: React.Dispatch<React.SetStateAction<sessionExercise[]>>
+  setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>
   editSetVisible: boolean
 }
 
-export default function SessionExerciseEle({sessionExercise, exercises, setSessionSets, editSetVisible}: props){
+export default function SessionExerciseEle({sessionExercise, exercises, setSessionExercises, editSetVisible}: props){
   const setEx = getExercise(sessionExercise.exerciseId, exercises);
   
   const [delConfirm, setDelConfirm] = useState(false);
@@ -42,7 +42,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, setSessi
           {editSets? 
             <>
               <button onClick={()=> {handleCancelEdit(setNewSets, sessionExercise, setEditSets)}}><FaXmark/></button> 
-              <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets, setEditSets, setSessionSets, setAwaiting)}} className="green_button"><FaCheck/></button>
+              <button onClick={()=> {handleUpdateSessionExercise(sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, setAwaiting)}} className="green_button"><FaCheck/></button>
             </> 
           : 
             <button onClick={()=>setEditSets(true)}><FaPen/></button>
@@ -50,7 +50,7 @@ export default function SessionExerciseEle({sessionExercise, exercises, setSessi
           {/* <button onClick={()=> {handleCancelEdit(setNewSets, sessionExercise, setEditSets)}}><FaXmark/></button>  */}
           {delConfirm? 
             <>Are you Sure
-              <button onClick={()=>handleDeleteSessionExercise(sessionExercise, setSessionSets, setDelConfirm, setAwaiting)}>Y</button>
+              <button onClick={()=>handleDeleteSessionExercise(sessionExercise, setSessionExercises, setDelConfirm, setAwaiting)}>Y</button>
               <button onClick={()=>setDelConfirm(false)}>N</button>
             </>
           : 
@@ -133,15 +133,14 @@ function getExercise(exerciseId: string, exercises: exercise[]): exercise {
 
 
 async function handleDeleteSessionExercise(sessionExercise:sessionExercise, 
-    setSessionSets: React.Dispatch<React.SetStateAction<sessionExercise[]>>,
+    setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>,
     setDelConfirm: React.Dispatch<React.SetStateAction<boolean>>,
     setAwaiting: React.Dispatch<React.SetStateAction<boolean>>
   ) {
   setAwaiting(true)
   await deleteSessionExercise(sessionExercise.sessionExerciseId)
-  const updatedSessionExercise: sessionExercise[] = await getSessionExerciseBySession(sessionExercise.sessionId)
+  setSessionExercises(prev => prev.filter(s => s.sessionExerciseId !== sessionExercise.sessionExerciseId))
   setDelConfirm(false)
-  setSessionSets(updatedSessionExercise)
   setAwaiting(false)
 }
 
@@ -153,7 +152,7 @@ function handleCancelEdit(setNewSets: Dispatch<SetStateAction<string>>, sessionE
 async function handleUpdateSessionExercise(sessionExercise: sessionExercise, 
     newExercise: string, newSets: string,
     setEditSets: Dispatch<SetStateAction<boolean>>, 
-    setSessionSets: Dispatch<SetStateAction<sessionExercise[]>>,
+    setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>,
     setAwaiting: Dispatch<SetStateAction<boolean>>, 
   ) {
   setAwaiting(true)
@@ -166,8 +165,9 @@ async function handleUpdateSessionExercise(sessionExercise: sessionExercise,
   }
 
   await updateSessionExercise(newSessionExercise)
-  const data = await getSessionExerciseBySession(sessionExercise.sessionId)
-  setSessionSets(data)
+  setSessionExercises(prev => prev.map(s =>
+    s.sessionExerciseId === newSessionExercise.sessionExerciseId ? newSessionExercise : s
+  ))
   setEditSets(false)
   setAwaiting(false)
 }

@@ -28,10 +28,11 @@ type Props = {
   setSessionData: React.Dispatch<React.SetStateAction<session[]>>;
   exercises: exercise[];
   sessionExercises: sessionExercise[];
+  setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
   page:string
 }
 
-export  default function Body({currentUser, sessionData, setSessionData, exercises, sessionExercises,  page}: Props){
+export  default function Body({currentUser, sessionData, setSessionData, exercises, sessionExercises, setSessionExercises,  page}: Props){
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
   const [editSessions, setEditSessions] = useState(false);
 
@@ -74,7 +75,7 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
     <div className="b_content">
       {currentUser && 
         handleDisplay(page,currentUser,
-          sessionData,setSessionData, sessionExercises,
+          sessionData,setSessionData, sessionExercises, setSessionExercises,
           exercises,editSessions,monthFilter,yearFilter, 
           groupFilter, dateSort, progressDisplay
         )  
@@ -93,6 +94,7 @@ export  default function Body({currentUser, sessionData, setSessionData, exercis
 function handleDisplay(
     page:string, currentUser: user, sessionData: session[], 
     setSessionData: Dispatch<SetStateAction<session[]>>, sessionExercises: sessionExercise[], 
+    setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>,
     exercises: exercise[], editSessions: boolean, monthFilter: number, yearFilter: number, 
     groupFilter: string, dateSort: boolean, progressDisplay: string
   ) {
@@ -118,6 +120,7 @@ function handleDisplay(
               setSessionData={setSessionData}
               exercises={exercises}
               sessionExercises={sessionExercises}
+              setSessionExercises={setSessionExercises}
               editSessions={editSessions}
             />
           ))}           
@@ -216,5 +219,3 @@ function contentFilter( page: string, exercises: exercise[],
     </div>
   )
 }
-
-

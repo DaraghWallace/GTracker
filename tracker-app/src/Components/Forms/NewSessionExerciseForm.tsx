@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { sessionExercise, exercise } from "../../Helpers/customTypes";
-import { createSessionExercise, getSessionExerciseBySession } from "../../Helpers/APIfunctions";
+import { createSessionExercise } from "../../Helpers/APIfunctions";
 import NseSetFormEle from "../Elements/NseFormSetEle";
 
 import { FaPlus, FaPen, FaCheck, FaMinus, FaXmark  } from "react-icons/fa6";
@@ -11,11 +11,11 @@ import "../../CSS/form.css"
 type Props = {
   sessionId: string;
   exercises: exercise[];
-  setSessionSets: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
+  setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
   setNewSetFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export default function NewSessionExerciseForm({ sessionId, exercises, setSessionSets, setNewSetFormOpen }: Props) {
+export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, setNewSetFormOpen }: Props) {
   // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
   const [numOfSets, setNumOfSets] = useState(Number);
@@ -54,10 +54,8 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
       await createSessionExercise(newSessionExercise);
       setMessage("Set created!");
       setNewSetFormOpen(false)
-      const data = await getSessionExerciseBySession(sessionId)
-      // setSessionExercises(data)
-      setSessionSets(data)
 
+      setSessionExercises(prev => [...prev, newSessionExercise]);
 
       setAwaiting(false)
     } catch (e: unknown) {

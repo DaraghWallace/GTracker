@@ -109,6 +109,7 @@ export default function App() {
           setSessionData={setSessionData}
           exercises={exercises}
           sessionExercises={sessionExercises}
+          setSessionExercises={setSessionExercises}
           page={page}
         />
       ) : (
