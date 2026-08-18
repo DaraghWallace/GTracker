@@ -3,7 +3,7 @@ import type { sessionExercise, exercise } from "../../Helpers/customTypes";
 import { createSessionExercise } from "../../Helpers/APIfunctions";
 import NseSetFormEle from "../Elements/NseFormSetEle";
 
-import { FaPlus, FaPen, FaCheck, FaMinus, FaXmark  } from "react-icons/fa6";
+import { FaPlus, FaPen, FaCheck, FaMinus, FaXmark } from "react-icons/fa6";
 import Loading from "../Elements/Loading";
 
 import "../../CSS/form.css"
@@ -11,33 +11,46 @@ import "../../CSS/form.css"
 type Props = {
   sessionId: string;
   exercises: exercise[];
-  setSessionExercises: React.Dispatch<React.SetStateAction<sessionExercise[]>>;
+  setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>;
   setNewSetFormOpen: Dispatch<SetStateAction<boolean>>
 }
 
+/*
+  NewSessionExerciseForm
+    handleSubmit: validates that every set row has been completed, then
+    creates the session exercise via the API and adds it into local state.
+    incrementSets/decrementSets: grow/shrink the set rows, keeping setArr
+    in sync so a removed row's leftover value can't sneak into the submission.
+*/
 export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, setNewSetFormOpen }: Props) {
-  // const [query, setQuery] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
-  const [numOfSets, setNumOfSets] = useState(Number);
+  const [numOfSets, setNumOfSets] = useState(0);
   const [setArr, setSetArr] = useState<string[]>([]);
   const [toFailure, setToFailure] = useState(false);
   const [message, setMessage] = useState("");
 
   const [awaiting, setAwaiting] = useState(false);
 
+  function incrementSets() {
+    setNumOfSets(prev => prev + 1);
+  }
 
-  // const filtered = exercises.filter(e =>
-  //   e.name.toLowerCase().includes(query.toLowerCase())
-  // );
+  function decrementSets() {
+    setNumOfSets(prev => prev - 1);
+    // Drop the last row's value too, so an already-completed set doesn't
+    // silently ride along in the submission after its row is removed.
+    setSetArr(prev => prev.slice(0, -1));
+  }
 
   async function handleSubmit() {
     if (!selectedExercise) return setMessage("Select an exercise.");
     if (!numOfSets) return setMessage("Enter Set(s).");
-    if (!setArr) return setMessage("Enter weight(s).");
-    // console.log(setArr);
-    const setArrString  = setArr.toString()
-    if (setArrString === "") return setMessage("Complete sets.");
-    
+
+    const allSetsCompleted = setArr.length === numOfSets && setArr.every(Boolean);
+    if (!allSetsCompleted) return setMessage("Complete all sets.");
+
+    const setArrString = setArr.toString()
+
     const newSessionExercise: sessionExercise = {
       sessionExerciseId: crypto.randomUUID(),
       sessionId: sessionId,
@@ -46,8 +59,6 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
       sets: setArrString, // e.g "Wt(reps),25(10),27(8)"
     };
 
-    console.log(newSessionExercise);
-    
     setAwaiting(true)
 
     try {
@@ -69,7 +80,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
       <div className="f_panel">
         <div className="thick_text">
           {!selectedExercise && "New "}Exercise: {selectedExercise && selectedExercise.name}
-          {selectedExercise && <button onClick={()=>setSelectedExercise(null)}><FaPen/></button>}
+          {selectedExercise && <button aria-label="Change exercise" onClick={() => setSelectedExercise(null)}><FaPen /></button>}
         </div>
 
         {!selectedExercise && (
@@ -82,7 +93,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
                     <button className="f_e_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>
                       {exercise.name}
                     </button>
-                  ))}                  
+                  ))}
                 </div>
               </div>
             ))}
@@ -90,46 +101,46 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
         )}
 
         <div className="f_p_row_snug">
-          <div className="thick_text">Sets: {numOfSets}</div> 
-          <button onClick={()=>setNumOfSets(numOfSets+1)}><FaPlus/></button>
-          {numOfSets >= 1 && <button onClick={()=>setNumOfSets(numOfSets-1)}><FaMinus/></button>}
+          <div className="thick_text">Sets: {numOfSets}</div>
+          <button aria-label="Add set" onClick={incrementSets}><FaPlus /></button>
+          {numOfSets >= 1 && <button aria-label="Remove set" onClick={decrementSets}><FaMinus /></button>}
         </div>
-        
+
         <div className="f_p_sets">
           <div className="sets">
             <div className="set_field">Weight</div>
             <div className="set_field">Reps</div>
             <div className="set_field">Done?</div>
           </div>
-          
-          {displayReps(numOfSets,setArr, setSetArr)}
 
-          <div className="f_p_row_mid"> 
+          {renderSetRows(numOfSets, setArr, setSetArr)}
+
+          <div className="f_p_row_mid">
             <div className="bold_text">To failure?</div>
             <input
               type="checkbox"
+              aria-label="To failure"
               checked={toFailure}
               onChange={e => setToFailure(e.target.checked)}
             />
           </div>
         </div>
-        
+
         {message && <div className="thick_text">{message}</div>}
 
-
         <div className="f_p_row_c">
-          <button onClick={handleSubmit}><FaCheck/></button>
-          <button onClick={() => setNewSetFormOpen(false)}><FaXmark/></button>
+          <button aria-label="Create exercise" onClick={handleSubmit}><FaCheck /></button>
+          <button aria-label="Cancel" onClick={() => setNewSetFormOpen(false)}><FaXmark /></button>
         </div>
 
-        {awaiting && <Loading message = {"Creating Set"}/>}
-      </div>        
-    </div>        
+        {awaiting && <Loading message={"Creating Set"} />}
+      </div>
+    </div>
   );
 }
 
-function displayReps(numOfSets: number, setArr: string[], setSetArr: Dispatch<SetStateAction<string[]>>) {
+function renderSetRows(numOfSets: number, setArr: string[], setSetArr: Dispatch<SetStateAction<string[]>>) {
   return Array.from({ length: numOfSets }, (_, i) => (
-    <NseSetFormEle key={i} index = {i} setArr={setArr} setSetArr={setSetArr} />
+    <NseSetFormEle key={i} index={i} setArr={setArr} setSetArr={setSetArr} />
   ));
 }

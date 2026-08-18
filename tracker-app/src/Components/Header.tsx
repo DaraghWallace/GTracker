@@ -4,33 +4,34 @@ import UserInForm from "./Forms/UserInForm";
 
 import "../CSS/Header.css"
 
-import { FaChartLine, FaDumbbell, FaArrowRightFromBracket,FaArrowRightToBracket , FaFrog , FaCircleQuestion   } from "react-icons/fa6";
+import { FaChartLine, FaDumbbell, FaArrowRightFromBracket, FaArrowRightToBracket, FaFrog, FaCircleQuestion } from "react-icons/fa6";
+
+type Props = {
+  currentUser: user | null;
+  setCurrentUser: Dispatch<SetStateAction<user | null>>;
+  loadUserData: () => Promise<void>;
+  handleSignOut: () => Promise<void>;
+  setPage: Dispatch<SetStateAction<string>>;
+  page: string;
+  setHelpOpen: Dispatch<SetStateAction<boolean>>;
+}
 
 /*
   Header
     Handles sign in and page select
 */
-
-type Props = {
-  currentUser: user | null;
-  setCurrentUser: Dispatch<SetStateAction<user | null>>;
-  loadUserData: (userId: string) => Promise<void>;
-  handleSignOut: () => Promise<void>;
-  setPage: Dispatch<SetStateAction<string>>
-  page: string
-  setHelpOpen: Dispatch<SetStateAction<boolean>>
-}
-
-export default function Header({ currentUser, setCurrentUser, loadUserData,handleSignOut, setPage, page, setHelpOpen }: Props) {
+export default function Header({ currentUser, setCurrentUser, loadUserData, handleSignOut, setPage, page, setHelpOpen }: Props) {
   const [userInFormOpen, setUserInFormOpen] = useState(false);
+
+  const isDeveloper = currentUser?.userType === "developer";
 
   return (
     <div className="Header">
-      {userInFormOpen && 
-        <UserInForm 
-          setCurrentUser = {setCurrentUser}
-          loadUserData = {loadUserData}
-          setUserInFormOpen = {setUserInFormOpen}
+      {userInFormOpen &&
+        <UserInForm
+          setCurrentUser={setCurrentUser}
+          loadUserData={loadUserData}
+          setUserInFormOpen={setUserInFormOpen}
         />
       }
 
@@ -39,21 +40,23 @@ export default function Header({ currentUser, setCurrentUser, loadUserData,handl
       </div>
 
       <div className="h_buttons">
-        <button onClick={()=> setHelpOpen(true)}><FaCircleQuestion/></button>
-        {(currentUser && currentUser.userType == "developer") &&
-          <button  onClick={()=> setPage("dev")}> <FaFrog /> </button>
+        <button aria-label="Help" onClick={() => setHelpOpen(true)}><FaCircleQuestion /></button>
+
+        {currentUser && isDeveloper &&
+          <button aria-label="Dev page" onClick={() => setPage("dev")}><FaFrog /></button>
         }
-        {currentUser && (page == "sessions" ?
-          <button onClick={()=> setPage("progress")}><FaChartLine /></button>
+
+        {currentUser && (page === "sessions" ?
+          <button aria-label="View progress" onClick={() => setPage("progress")}><FaChartLine /></button>
           :
-          <button onClick={()=> setPage("sessions")}><FaDumbbell /></button>
+          <button aria-label="View sessions" onClick={() => setPage("sessions")}><FaDumbbell /></button>
         )}
-        
+
         {currentUser ?
-          <button onClick={handleSignOut}><FaArrowRightFromBracket /></button>
+          <button aria-label="Sign out" onClick={handleSignOut}><FaArrowRightFromBracket /></button>
           :
-          <button onClick={() => setUserInFormOpen(true)}><FaArrowRightToBracket /></button>
-        }          
+          <button aria-label="Sign in" onClick={() => setUserInFormOpen(true)}><FaArrowRightToBracket /></button>
+        }
       </div>
     </div>
   )

@@ -6,25 +6,78 @@ import "../../CSS/form.css"
 import { FaPlus, FaXmark } from "react-icons/fa6";
 import Loading from "../Elements/Loading";
 
+type MuscleGroup = "Arms" | "Shoulders" | "Chest" | "Back" | "Core" | "Legs";
+type PushPull = "push" | "pull";
+
+type TargetOption = { value: string; label: string };
+
+// Each muscle group's target-muscle options (value/label differ for the
+// hip abductor/adductor entries, hence the pair rather than a plain string).
+const TARGET_OPTIONS: Record<MuscleGroup, TargetOption[]> = {
+  Arms: [
+    { value: "Bicep", label: "Bicep" },
+    { value: "Tricep", label: "Tricep" },
+    { value: "Brachialis", label: "Brachialis" },
+    { value: "Fore Arm", label: "Fore Arm" },
+  ],
+  Shoulders: [
+    { value: "Front Delt", label: "Front Delt" },
+    { value: "Side Delt", label: "Side Delt" },
+    { value: "Rear Delt", label: "Rear Delt" },
+  ],
+  Chest: [
+    { value: "Upper Pec", label: "Upper Pec" },
+    { value: "Middle Pec", label: "Middle Pec" },
+    { value: "Lower Pec", label: "Lower Pec" },
+  ],
+  Back: [
+    { value: "Traps", label: "Traps" },
+    { value: "Mid Back", label: "Mid Back" },
+    { value: "Lats", label: "Lats" },
+  ],
+  Core: [
+    { value: "Abs", label: "Abs" },
+    { value: "Obliques", label: "Obliques" },
+  ],
+  Legs: [
+    { value: "Quads", label: "Quads" },
+    { value: "Glutes", label: "Glutes" },
+    { value: "Hamstring", label: "Hamstring" },
+    { value: "Calf", label: "Calf" },
+    { value: "Abductors", label: "Hip Abductors" },
+    { value: "Adductors", label: "Hip Adductors" },
+  ],
+};
+
 type Props = {
-  user:user,
+  user: user,
   setNewExercise: Dispatch<SetStateAction<boolean>>
 }
 
-export default function NewExerciseForm({user, setNewExercise}: Props) {
+/*
+  NewExerciseForm
+    handleSubmit: validates all fields are filled, creates the exercise via
+    the API, then resets the form so another exercise can be added right after.
+*/
+export default function NewExerciseForm({ user, setNewExercise }: Props) {
   const [name, setName] = useState("");
-  const [group, setGroup] = useState("");
+  const [group, setGroup] = useState<MuscleGroup | "">("");
   const [target, setTarget] = useState("");
-  const [ppl, setPpl] = useState("");
-  // const [demoLink, setDemoLink] = useState("");
+  const [ppl, setPpl] = useState<PushPull | "">("");
   const [message, setMessage] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
 
+  function handleGroupChange(nextGroup: MuscleGroup) {
+    setGroup(nextGroup);
+    // The target list is different per group, so a target picked under the
+    // old group is almost never valid for the new one.
+    setTarget("");
+  }
 
   async function handleSubmit() {
-    if (!name || !group || !target) return setMessage("All fields are required.");
-    setIsLoading(true)
+    if (!name || !group || !target || !ppl) return setMessage("All fields are required.");
+
     const newExercise: exercise = {
       exerciseId: crypto.randomUUID(),
       name,
@@ -32,15 +85,19 @@ export default function NewExerciseForm({user, setNewExercise}: Props) {
       target,
       ppl,
       author: user.userId,
-      // demoLink
     };
 
+    setIsLoading(true)
     try {
       await createExercise(newExercise);
       setMessage("Exercise created!");
-      setIsLoading(false)
+      setName("");
+      setGroup("");
+      setTarget("");
+      setPpl("");
     } catch (e: unknown) {
       setMessage(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
       setIsLoading(false)
     }
   }
@@ -48,87 +105,47 @@ export default function NewExerciseForm({user, setNewExercise}: Props) {
   return (
     <div className="form">
       <div className="f_panel">
-      <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
-      
-      <select value={group} onChange={e => setGroup(e.target.value)}>
-        <option hidden>Group</option>
-        <option value="Arms">Arms</option>
-        <option value="Shoulders">Shoulders</option>
-        <option value="Chest">Chest</option>
-        <option value="Back">Back</option>
-        <option value="Core">Core</option>
-        <option value="Legs">Legs</option>
-      </select>
-      
-      {handleTargetMuscle(group, target, setTarget)}
-      
-      <select value={ppl} onChange={e => setPpl(e.target.value)}>
-        <option hidden>Push-Pull?</option>
-        <option value="push">Push</option>
-        <option value="pull">Pull</option>
-      </select>
-      {/* <input placeholder="Demo-Link" value={demoLink} onChange={e => setDemoLink(e.target.value)} /> */}
-      <div>
-        <button onClick={handleSubmit}><FaPlus/></button>
-        <button onClick={()=>setNewExercise(false)}><FaXmark/></button>        
-      </div>
+        <input type="text" placeholder="Name" aria-label="Exercise name" value={name} onChange={e => setName(e.target.value)} />
 
-      {message && <p>{message}</p>}
-      {isLoading && <Loading message = {"Creating Exercise"}/>}
+        <select value={group} aria-label="Muscle group" onChange={e => handleGroupChange(e.target.value as MuscleGroup)}>
+          <option hidden>Group</option>
+          <option value="Arms">Arms</option>
+          <option value="Shoulders">Shoulders</option>
+          <option value="Chest">Chest</option>
+          <option value="Back">Back</option>
+          <option value="Core">Core</option>
+          <option value="Legs">Legs</option>
+        </select>
+
+        {renderTargetMuscleSelect(group, target, setTarget)}
+
+        <select value={ppl} aria-label="Push or pull" onChange={e => setPpl(e.target.value as PushPull)}>
+          <option hidden>Push-Pull?</option>
+          <option value="push">Push</option>
+          <option value="pull">Pull</option>
+        </select>
+
+        <div>
+          <button aria-label="Create exercise" onClick={handleSubmit}><FaPlus /></button>
+          <button aria-label="Cancel" onClick={() => setNewExercise(false)}><FaXmark /></button>
+        </div>
+
+        {message && <p>{message}</p>}
+        {isLoading && <Loading message={"Creating Exercise"} />}
       </div>
     </div>
   );
 }
 
-function handleTargetMuscle(group:string,target: string, setTarget: React.Dispatch<React.SetStateAction<string>>) {
+function renderTargetMuscleSelect(group: MuscleGroup | "", target: string, setTarget: Dispatch<SetStateAction<string>>) {
+  if (!group) return null;
 
-  switch (group) {
-    case "Arms":
-      return <select value={target} onChange={e => setTarget(e.target.value)}>
-        <option hidden>Target</option>
-        <option value="Bicep">Bicep</option>
-        <option value="Tricep">Tricep</option>
-        <option value="Brachialis">Brachialis</option>
-        <option value="Fore Arm">Fore Arm</option>
-      </select>
-    case "Shoulders":
-      return <select value={target} onChange={e => setTarget(e.target.value)}>
-        <option hidden>Target</option>
-        <option value="Front Delt">Front Delt</option>
-        <option value="Side Delt">Side Delt</option>
-        <option value="Rear Delt">Rear Delt</option>
-      </select>
-    case "Chest":
-      return <select value={target} onChange={e => setTarget(e.target.value)}>
-        <option hidden>Target</option>
-        <option value="Upper Pec">Upper Pec</option>
-        <option value="Middle Pec">Middle Pec</option>
-        <option value="Lower Pec">Lower Pec</option>
-      </select>
-    case "Back":
-      return <select value={target} onChange={e => setTarget(e.target.value)}>
-        <option hidden>Target</option>
-        <option value="Traps">Traps</option>
-        <option value="Mid Back">Mid Back</option>
-        <option value="Lats">Lats</option>
-      </select>
-    case "Core":
-      return <select value={target} onChange={e => setTarget(e.target.value)}>
-        <option hidden>Target</option>
-        <option value="Abs">Abs</option>
-        <option value="Obliques">Obliques</option>
-      </select>
-    case "Legs":
-      return <select value={target} onChange={e => setTarget(e.target.value)}>
-        <option hidden>Target</option>
-        <option value="Quads">Quads</option>
-        <option value="Glutes">Glutes</option>
-        <option value="Hamstring">Hamstring</option>
-        <option value="Calf">Calf</option>
-        <option value="Abductors">Hip Abductors</option>
-        <option value="Adductors">Hip Adductors</option>
-      </select>
-    default:
-      break;
-  }
+  return (
+    <select value={target} aria-label="Target muscle" onChange={e => setTarget(e.target.value)}>
+      <option hidden>Target</option>
+      {TARGET_OPTIONS[group].map(opt => (
+        <option key={opt.value} value={opt.value}>{opt.label}</option>
+      ))}
+    </select>
+  );
 }
