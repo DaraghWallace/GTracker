@@ -1,90 +1,113 @@
-.Grid_container{
+.Grid_container {
   overflow-x: auto;
 }
 
-.G_row{
+.G_row {
   display: flex;
   flex-direction: row;
-  width: 100%;  
+  width: fit-content;
+  min-width: 100%;
+  border-top: 1px solid #c8c8ff;
 }
 
-.G_cell_big{
-  border: 1px solid rgb(40, 40, 50);
-  background-color: rgba(0, 200, 255);
-  color:rgb(40, 40, 50);
-  font-weight: bold;
-  padding: 10px;
+.G_row:last-child {
+  border-bottom: 1px solid #c8c8ff;
+}
+
+.G_cell_big,
+.G_cell_date,
+.G_cell,
+.G_cell_small {
+  flex-shrink: 0;
+  padding: 8px;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-right: 1px solid #c8c8ff;
+}
+
+.G_cell_big {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  will-change: transform;
+  border-left: 1px solid #c8c8ff;
   width: 170px;
-  flex-shrink: 0;  
-  text-align: center;
-}
-
-.G_cell_date{
-  border: 1px solid rgb(200, 200, 255);
-  padding: 1px;
+  padding: 8px 10px;
+  background-color: #3c3c46;
+  box-shadow: 2px 0 0 #3c3c46, 4px 0 6px -3px rgba(0, 0, 0, 0.5);
+  color: #f3f4f5;
   font-weight: bold;
-  width: 120px;
-  flex-shrink: 0;  
-  text-align: center;
+  text-align: left;
 }
 
-.G_cell{
-  border: 1px solid rgb(200, 200, 255);
-  padding: 1px;
+.G_cell_date {
   width: 120px;
-  flex-shrink: 0;  
-  text-align: center;
+  background-color: #282832;
+  color: #f3f4f5;
+  font-weight: bold;
+  font-size: 14px;
 }
 
-.G_cell_small{
-  border: 1px solid rgb(200, 200, 255);
-  padding: 1px;
+.G_cell {
+  width: 120px;
+  background-color: #282832;
+  color: #f3f4f5;
+  font-size: 16px;
+}
+
+.G_cell_small {
   width: 80px;
-  flex-shrink: 0;  
-  text-align: center;
+  background-color: #282832;
+  color: #f3f4f5;
+  font-size: 16px;
 }
 
-.Graph_container{
+.Graph_container {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  gap: 10px;
 }
 
-@media (max-width: 750px) {
-  .graph_item{
-    /* border: solid 2px rgb(0, 200, 255); */
-    flex-grow: 100;
+.graph_item {
+  flex-grow: 100;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #3c3c46;
+}
+
+.gi_header {
+  width: 100%;
+  padding: 10px;
+  background-color: #282832;
+  color: #f3f4f5;
+  font-weight: 600;
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  text-align: center;
+}
+
+.gi_chart_wrap {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  padding: 10px;
+}
+
+@media (max-width: 749px) {
+  .graph_item {
     width: 100%;
-    height: 500px;
-    display: grid;
-    grid-template-rows: auto 1fr; /* header takes its content height, chart takes the rest */
-    margin-bottom: 10px;
+    height: 450px;
   }
 }
 
 @media (min-width: 750px) {
-  .graph_item{
-    border: solid 2px rgb(0, 200, 255);
-    flex-grow: 100;
-    width: 50%;
-    height: 600px;
-    display: grid;
-    grid-template-rows: auto 1fr; /* header takes its content height, chart takes the rest */
+  .graph_item {
+    width: calc(50% - 5px);
+    height: 550px;
+    border: 1px solid #282832;
   }
-}
-
-
-
-.gi_header{
-  background-color: rgb(60, 60, 70);
-  width: 100%;
-  font-size: 35px;
-  font-weight: bold;
-  text-align: center;
-}
-
-.gi_chart_wrap{
-  position: relative; /* required — Chart.js measures this to size the canvas */
-  min-height: 0;
-  min-width: 0;
 }

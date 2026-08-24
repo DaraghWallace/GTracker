@@ -45,6 +45,7 @@ type DeleteSessionArgs = {
     Displays a single session (header, its sets, hide/show toggle) and,
     when editSessions is on, the edit/delete controls and add-set form for it.
 */
+
 export default function SessionEle({ session, setSessionData, exercises, sessionExercises, setSessionExercises, editSessions }: Props) {
   const sessionSets = sessionExercises.filter(set => set.sessionId === session.sessionId);
 

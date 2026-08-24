@@ -87,7 +87,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
           <div className="f_p_exercises" >
             {[...new Set(exercises.map(e => e.group))].map(group => (
               <div key={group}>
-                <div className="f_p_e_sub_header">{group}:</div>
+                <div className="f_p_e_header">{group}:</div>
                 <div className="f_e_cont">
                   {exercises.filter(e => e.group === group).map(exercise => (
                     <button className="f_e_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>

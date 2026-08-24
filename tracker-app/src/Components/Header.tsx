@@ -4,7 +4,7 @@ import UserInForm from "./Forms/UserInForm";
 
 import "../CSS/Header.css"
 
-import { FaChartLine, FaDumbbell, FaArrowRightFromBracket, FaArrowRightToBracket, FaFrog, FaCircleQuestion } from "react-icons/fa6";
+import { FaChartLine, FaDumbbell, FaArrowRightFromBracket, FaArrowRightToBracket, FaFrog, FaCircleQuestion, FaXmark, FaCheck, } from "react-icons/fa6";
 
 type Props = {
   currentUser: user | null;
@@ -22,10 +22,12 @@ type Props = {
 */
 export default function Header({ currentUser, setCurrentUser, loadUserData, handleSignOut, setPage, page, setHelpOpen }: Props) {
   const [userInFormOpen, setUserInFormOpen] = useState(false);
+  const [userOutConfirm, setUserOutConfirm] = useState(false);
 
   const isDeveloper = currentUser?.userType === "developer";
 
   return (
+
     <div className="Header">
       {userInFormOpen &&
         <UserInForm
@@ -35,7 +37,7 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, hand
         />
       }
 
-      <div className="h_hello">
+      <div className="h_hello" onClick={() => console.log(currentUser)}>
         Hey {currentUser?.nickname}
       </div>
 
@@ -53,7 +55,14 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, hand
         )}
 
         {currentUser ?
-          <button aria-label="Sign out" onClick={handleSignOut}><FaArrowRightFromBracket /></button>
+          userOutConfirm ? 
+            <>
+              <button onClick={handleSignOut}><FaCheck/></button>
+              <button onClick={()=>setUserOutConfirm(false)}><FaXmark/></button>          
+            </>
+            :
+            <button aria-label="Sign out" onClick={()=>setUserOutConfirm(true)}><FaArrowRightFromBracket /></button>
+                    
           :
           <button aria-label="Sign in" onClick={() => setUserInFormOpen(true)}><FaArrowRightToBracket /></button>
         }

@@ -156,6 +156,7 @@ select{
 .f_p_e_header{
   font-weight: bold;
   font-size: 23px;
+  text-align: center;
 }
 
 .f_p_e_sub_header{
@@ -218,6 +219,7 @@ select{
   margin: 5px;
   font-size: 20px;
   width: fit-content;
+  flex-grow: 1;
 }
 .f_e_button:hover{
   background-color: rgb(30, 30, 40);

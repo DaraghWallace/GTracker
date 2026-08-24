@@ -1,6 +1,8 @@
 @media (min-width: 750px) {
   .Session{
-    border: solid 2px rgb(0, 200, 255);
+    border: solid 1px rgb(0, 200, 255);
+    /* background-color: rgb(30, 30, 40); */
+    padding: 1px;
     width: 300px;
     max-width: 400px;
     flex-grow: 4;
@@ -81,7 +83,7 @@ input[type=text] {
   .Session{
     border: solid 1px rgb(0, 200, 255);
     /* border-bottom: solid 1px rgb(0, 200, 255); */
-    margin: 10px;
+    margin-top: 10px;
   }
 
   .seshEx_container{
@@ -147,7 +149,6 @@ input[type=text] {
 
   .hide_button{
     border-top: solid 1px rgb(40, 40, 50);
-    border-bottom: solid 3px rgb(40, 40, 50);
     background-color: rgb(60, 60, 70);
     color: white;
     font-weight: bold;
