@@ -1,15 +1,37 @@
-.Header{
-  background-color: rgb(40, 40, 50);
-  border-bottom: solid 3px rgb(0, 200, 255);;
+@media (min-width: 750px) {
+  .Header{
+    background-color: rgb(40, 40, 50);
+    border-bottom: solid 3px rgb(0, 200, 255);;
 
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  
-  padding: 4px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    
+    padding-bottom: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .h_hello{
+    font-size: 25px;
+    padding-top: 4px;
+  }  
 }
+@media (max-width: 750px) {
+  .Header{
+    background-color: rgb(40, 40, 50);
+    border-bottom: solid 3px rgb(0, 200, 255);;
 
-.h_hello{
-  font-size: 25px;
-  padding-top: 4px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .h_hello{
+    font-size: 20px;
+    padding-top: 4px;
+  }  
 }

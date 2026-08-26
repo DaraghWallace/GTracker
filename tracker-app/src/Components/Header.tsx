@@ -5,7 +5,7 @@ import UserInForm from "./Forms/UserInForm";
 import "../CSS/Header.css"
 
 import { FaChartLine, FaDumbbell, FaArrowRightFromBracket, FaArrowRightToBracket, FaFrog, FaCircleQuestion, FaXmark, FaCheck, } from "react-icons/fa6";
-
+import { GiFrog } from "react-icons/gi";
 type Props = {
   currentUser: user | null;
   setCurrentUser: Dispatch<SetStateAction<user | null>>;
@@ -45,7 +45,7 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, hand
         <button aria-label="Help" onClick={() => setHelpOpen(true)}><FaCircleQuestion /></button>
 
         {currentUser && isDeveloper &&
-          <button aria-label="Dev page" onClick={() => setPage("dev")}><FaFrog /></button>
+          <button aria-label="Dev page" onClick={() => setPage("dev")}>{page == "dev"? <GiFrog/> : <FaFrog />}</button>
         }
 
         {currentUser && (page === "sessions" ?

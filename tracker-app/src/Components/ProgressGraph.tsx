@@ -20,11 +20,11 @@ import "../CSS/progress.css";
 const CHART_OPTIONS: ChartOptions<"line"> = {
   responsive: true,
   maintainAspectRatio: false,
-  color: "#b2bac9",
+  color: "#dddddd",
   font: { size: 18 },
   scales: {
-    x: { grid: { color: "#b2bac9", lineWidth: 1 } },
-    y: { grid: { color: "#b2bac9", lineWidth: 1 } },
+    x: { grid: { color: "#dddddd", lineWidth: 1 } },
+    y: { grid: { color: "#dddddd", lineWidth: 1 } },
   },
   elements: {
     point: {
@@ -37,8 +37,8 @@ const CHART_OPTIONS: ChartOptions<"line"> = {
 };
 
 const PALETTE = [
-  "#00c8ff", "#00ff88", "#33ff00", "#9dff00", "#ffc400", "#ff1e00",
-  "#0059ff", "#b700ff", "#ff008c",
+  "#ff0000", "#ff7300", "#fbff00", "#73ff00", "#00ffbf", "#00c8ff", "#cc00ff", 
+  "#ff006a", "#00aa17",
 ];
 
 type Props = {

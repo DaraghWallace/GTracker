@@ -4,7 +4,7 @@
     /* background-color: rgb(30, 30, 40); */
     padding: 1px;
     width: 300px;
-    max-width: 400px;
+    max-width: 600px;
     flex-grow: 4;
   }
   .seshEx_container{
@@ -81,7 +81,8 @@ input[type=text] {
 
 @media (max-width: 750px) {
   .Session{
-    border: solid 1px rgb(0, 200, 255);
+    border-top: solid 1px rgb(0, 200, 255);
+    border-bottom: solid 1px rgb(0, 200, 255);
     /* border-bottom: solid 1px rgb(0, 200, 255); */
     margin-top: 10px;
   }
