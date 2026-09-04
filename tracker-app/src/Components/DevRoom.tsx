@@ -5,6 +5,9 @@ import type { exercise, user } from "../Helpers/customTypes";
 import { FaPlus, FaPen, FaTrash, FaAddressBook  } from "react-icons/fa6";
 import { LuBicepsFlexed } from "react-icons/lu";
 
+import "../CSS/dev.css"
+import "../CSS/progress.css"
+
 type Props = {
   user: user;
   exercises: exercise[];
@@ -15,7 +18,7 @@ export default function DevRoom({user, exercises}: Props) {
   const [display, setDisplay] = useState("exercises");
   
 
-  return <div >
+  return <div className="dev_cont">
     {display != "exercises" && <div>
       <button onClick={() => setDisplay("exercises")}><LuBicepsFlexed/></button> 
     </div>}

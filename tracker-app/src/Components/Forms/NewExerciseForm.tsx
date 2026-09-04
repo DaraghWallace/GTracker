@@ -6,7 +6,7 @@ import "../../CSS/form.css"
 import { FaPlus, FaXmark } from "react-icons/fa6";
 import Loading from "../Elements/Loading";
 
-type MuscleGroup = "Arms" | "Shoulders" | "Chest" | "Back" | "Core" | "Legs";
+type MuscleGroup = "Arms" | "Shoulders" | "Chest" | "Back" | "Core" | "Legs" | "Cardio";
 type PushPull = "push" | "pull";
 
 type TargetOption = { value: string; label: string };
@@ -46,7 +46,16 @@ const TARGET_OPTIONS: Record<MuscleGroup, TargetOption[]> = {
     { value: "Calf", label: "Calf" },
     { value: "Abductors", label: "Hip Abductors" },
     { value: "Adductors", label: "Hip Adductors" },
-  ],
+  ],Cardio: [ //Pace
+    { value: "Slow walk", label: "Quads" },
+    { value: "Walk", label: "Quads" },
+    { value: "Fast walk", label: "Quads" },
+    { value: "Slow run", label: "Quads" },
+    { value: "run", label: "Quads" },
+    { value: "Fast run", label: "Quads" },
+    { value: "Sprint", label: "Quads" },
+
+  ]
 };
 
 type Props = {
@@ -64,6 +73,7 @@ export default function NewExerciseForm({ user, setNewExercise }: Props) {
   const [group, setGroup] = useState<MuscleGroup | "">("");
   const [target, setTarget] = useState("");
   const [ppl, setPpl] = useState<PushPull | "">("");
+  
   const [message, setMessage] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -76,8 +86,9 @@ export default function NewExerciseForm({ user, setNewExercise }: Props) {
   }
 
   async function handleSubmit() {
-    if (!name || !group || !target || !ppl) return setMessage("All fields are required.");
-
+    if (group != "Cardio")
+      if (!name || !group || !target || !ppl) return setMessage("All fields are required.");
+    else setTarget(""); setPpl("")
     const newExercise: exercise = {
       exerciseId: crypto.randomUUID(),
       name,
@@ -115,17 +126,20 @@ export default function NewExerciseForm({ user, setNewExercise }: Props) {
           <option value="Back">Back</option>
           <option value="Core">Core</option>
           <option value="Legs">Legs</option>
+          <option value="Cardio">Cardio</option>
         </select>
 
-        {renderTargetMuscleSelect(group, target, setTarget)}
+        {group != "Cardio" && renderTargetMuscleSelect(group, target, setTarget)}
+        
+        {group != "Cardio" &&
+          <select value={ppl} aria-label="Push or pull" onChange={e => setPpl(e.target.value as PushPull)}>
+            <option hidden>Push-Pull?</option>
+            <option value="push">Push</option>
+            <option value="pull">Pull</option>
+          </select>
+        }
 
-        <select value={ppl} aria-label="Push or pull" onChange={e => setPpl(e.target.value as PushPull)}>
-          <option hidden>Push-Pull?</option>
-          <option value="push">Push</option>
-          <option value="pull">Pull</option>
-        </select>
-
-        <div>
+        <div className="f_p_row_c">
           <button aria-label="Create exercise" onClick={handleSubmit}><FaPlus /></button>
           <button aria-label="Cancel" onClick={() => setNewExercise(false)}><FaXmark /></button>
         </div>
@@ -138,6 +152,7 @@ export default function NewExerciseForm({ user, setNewExercise }: Props) {
 }
 
 function renderTargetMuscleSelect(group: MuscleGroup | "", target: string, setTarget: Dispatch<SetStateAction<string>>) {
+  if (!group) return null;
   if (!group) return null;
 
   return (

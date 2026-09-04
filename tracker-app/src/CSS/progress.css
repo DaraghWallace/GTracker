@@ -30,9 +30,8 @@
 .G_cell_big {
   position: sticky;
   left: 0;
-  z-index: 2;
   will-change: transform;
-  border-left: 1px solid #c8c8ff;
+  border-bottom: 1px solid #c8c8ff;
   width: 170px;
   padding: 8px 10px;
   background-color: #3c3c46;

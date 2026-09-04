@@ -148,7 +148,51 @@ export async function getExercises() {
   return JSON.parse(text);
 }
 // U
+export async function updateExercise(newExercise: exercise) {
+	const token = await getToken()
+	const url = `${API_URL}exercises/${newExercise.exerciseId}`;
+
+	try {
+		console.log("updating exercise...");
+
+		const response = await fetch(url, {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": token ?? "",
+			},
+			body: JSON.stringify(newExercise),
+		});
+
+		const text = await response.text();
+		console.log("RAW RESPONSE:", text);
+
+		const result = JSON.parse(text);
+
+		console.log("Exercise Updated:", result);
+		return result;
+	} catch (error) {
+		console.error("Failed to PUT:", error);
+		throw error;
+	}
+}
 // D
+export const deleteExercise = async (exerciseId: string) => {
+    const token = await getToken()
+    if (!token) throw new Error("No auth token");
+
+    const response = await fetch(`${API_URL}exercises/${exerciseId}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": token ?? "",
+        },
+    });
+
+    if (!response.ok) {
+        console.log(response.json());
+        throw new Error("Failed to delete exercise");
+    } else console.log("Exercise Deleted");
+};
 //#endregion
 
 //#region: SessionExercise
