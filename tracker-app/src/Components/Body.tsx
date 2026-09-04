@@ -187,35 +187,38 @@ function renderFilters({
     <div className="b_h_filters">
       <div className="b_h_filter"> {/* Date Filter */}
         <div className="b_h_f_text">Date Filter: </div>
-        <select onChange={(e) => setMonthFilter(Number(e.target.value))} value={monthFilter}>
-          <option value={0}>All of</option>
-          <option value={1}>Jan</option>
-          <option value={2}>Feb</option>
-          <option value={3}>Mar</option>
-          <option value={4}>Apr</option>
-          <option value={5}>May</option>
-          <option value={6}>Jun</option>
-          <option value={7}>Jul</option>
-          <option value={8}>Aug</option>
-          <option value={9}>Sep</option>
-          <option value={10}>Oct</option>
-          <option value={11}>Nov</option>
-          <option value={12}>Dec</option>
-          {page === "progress" && <option value={MONTH_FILTER_MONTHLY}>Monthly</option>}
-          {page === "progress" && <option value={MONTH_FILTER_YEARLY}>Yearly</option>}
-        </select>
-        {monthFilter !== MONTH_FILTER_YEARLY &&
-          <select onChange={(e) => setYearFilter(Number(e.target.value))} value={yearFilter}>
-            {YEAR_OPTIONS.map(year => <option value={year} key={year}>{year}</option>)}
+        <div>
+          <select onChange={(e) => setMonthFilter(Number(e.target.value))} value={monthFilter}>
+            <option value={0}>All of</option>
+            <option value={1}>Jan</option>
+            <option value={2}>Feb</option>
+            <option value={3}>Mar</option>
+            <option value={4}>Apr</option>
+            <option value={5}>May</option>
+            <option value={6}>Jun</option>
+            <option value={7}>Jul</option>
+            <option value={8}>Aug</option>
+            <option value={9}>Sep</option>
+            <option value={10}>Oct</option>
+            <option value={11}>Nov</option>
+            <option value={12}>Dec</option>
+            {page === "progress" && <option value={MONTH_FILTER_MONTHLY}>Monthly</option>}
+            {page === "progress" && <option value={MONTH_FILTER_YEARLY}>Yearly</option>}
           </select>
-        }
+          {monthFilter !== MONTH_FILTER_YEARLY &&
+            <select onChange={(e) => setYearFilter(Number(e.target.value))} value={yearFilter}>
+              {YEAR_OPTIONS.map(year => <option value={year} key={year}>{year}</option>)}
+            </select>
+          }          
+        </div>
+
       </div>
       {page === "sessions" &&
         <div className="b_h_filter">  {/* Sort by date */}
           <div className="b_h_f_text">Sort by: </div>
 
           <button className="filter_button" onClick={() => setDateSort(!dateSort)}>
-            {!dateSort ? "Dec to Jan" : "Jan to Dec"}
+            {!dateSort ? "Decending" : "Ascending"}
           </button>
         </div>
       }

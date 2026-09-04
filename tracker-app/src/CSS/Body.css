@@ -111,12 +111,13 @@
 
   .b_h_filter{
     background-color: rgb(60, 60, 70);
-    max-width: 300px;
-    padding: 10px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
-    font-size: 20px;
+    font-size: 16px;
+
+    padding-left: 5px;
+    padding-right: 5px;
   }
 
   .b_h_buttons{
@@ -127,7 +128,7 @@
   }
 
   .b_h_f_text{
-    margin-top: 4px;
+    margin-top: 5px;
     font-size: 16px;
   }
 
@@ -136,6 +137,7 @@
     margin-top: 5px;
     border: 0;
     background-color: rgb(40, 40, 50);
+    margin: 0;
   }
 
   option{
