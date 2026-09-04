@@ -11,10 +11,6 @@ import "../CSS/form.css"
 import { FaPlus, FaPen, FaXmark, FaChartLine, FaTableList } from "react-icons/fa6";
 import DevRoom from "./DevRoom";
 
-// TODO: ideally export this from customTypes.ts and share it with
-// App.tsx/Header.tsx instead of redefining a near-identical union here.
-
-// Month select also offers two aggregate views on the progress page.
 const MONTH_FILTER_MONTHLY = 13;
 const MONTH_FILTER_YEARLY = 14;
 
@@ -190,7 +186,7 @@ function renderFilters({
   return (
     <div className="b_h_filters">
       <div className="b_h_filter"> {/* Date Filter */}
-        <div>Date Filter: </div>
+        <div className="b_h_f_text">Date Filter: </div>
         <select onChange={(e) => setMonthFilter(Number(e.target.value))} value={monthFilter}>
           <option value={0}>All of</option>
           <option value={1}>Jan</option>
@@ -216,6 +212,8 @@ function renderFilters({
       </div>
       {page === "sessions" &&
         <div className="b_h_filter">  {/* Sort by date */}
+          <div className="b_h_f_text">Sort by: </div>
+
           <button className="filter_button" onClick={() => setDateSort(!dateSort)}>
             {!dateSort ? "Dec to Jan" : "Jan to Dec"}
           </button>

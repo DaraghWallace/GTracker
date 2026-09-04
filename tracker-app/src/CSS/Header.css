@@ -6,15 +6,10 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    
-    padding-bottom: 4px;
-    padding-left: 4px;
-    padding-right: 4px;
   }
 
   .h_hello{
     font-size: 25px;
-    padding-top: 4px;
   }  
 }
 @media (max-width: 750px) {
@@ -32,6 +27,5 @@
 
   .h_hello{
     font-size: 20px;
-    padding-top: 4px;
   }  
 }
