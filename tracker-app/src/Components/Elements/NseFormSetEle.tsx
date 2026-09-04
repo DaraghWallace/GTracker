@@ -1,4 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
+import { FaLock, FaLockOpen } from "react-icons/fa6";
 
 import "../../CSS/form.css";
 
@@ -11,69 +12,69 @@ type Props = {
 /*
   NseSetFormEle
     One row of the "add sets" form for a new session exercise. Collects a
-    weight/reps pair, then locks itself in as read-only once submitted,
-    writing "weightXreps" into setArr at this row's index.
+    weight/reps pair and writes "weightXreps" into setArr at this row's
+    index when locked. Locking is reversible: unlocking clears this row's
+    slot in setArr (back to "") so an edited-but-not-relocked set can't
+    sneak into submission, and the row becomes editable again.
 */
 
 export default function NseSetFormEle({ index, setSetArr }: Props) {
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
-  const [completed, setCompleted] = useState(false);
+  const [locked, setLocked] = useState(false);
 
-  function completeSet() {
+  function lockSet() {
     if (weight === "" || reps === "") return;
-    if (completed) return;
+    if (locked) return;
 
     setSetArr(prev => {
       const updated = [...prev];
       updated[index] = `${weight}x${reps}`;
       return updated;
     });
-    setCompleted(true);
+    setLocked(true);
+  }
+
+  function unlockSet() {
+    if (!locked) return;
+
+    setSetArr(prev => {
+      const updated = [...prev];
+      updated[index] = "";
+      return updated;
+    });
+    setLocked(false);
   }
 
   return (
-    !completed ?
-      <div className="sets">
-        <div className="set_field">
-          <input
-            type="number"
-            placeholder="Kgs"
-            aria-label="Weight"
-            value={weight}
-            onChange={e => setWeight(e.target.value)}
-          />
-        </div>
-        <div className="set_field">
-          <input
-            type="number"
-            placeholder="#"
-            aria-label="Reps"
-            value={reps}
-            onChange={e => setReps(e.target.value)}
-          />
-        </div>
-        <div className="set_field">
-          <input
-            type="checkbox"
-            aria-label="Complete set"
-            checked={completed}
-            onChange={() => completeSet()}
-          />
-        </div>
+    <div className="sets">
+      <div className="set_field">
+        <input
+          type="number"
+          placeholder="Kgs"
+          aria-label="Weight"
+          value={weight}
+          disabled={locked}
+          onChange={e => setWeight(e.target.value)}
+        />
       </div>
-      :
-      <div className="sets">
-        <div className="set_field">{weight}</div>
-        <div className="set_field">{reps}</div>
-        <div className="set_field">
-          <input
-            type="checkbox"
-            aria-label="Set completed"
-            checked={completed}
-            disabled
-          />
-        </div>
+      <div className="set_field">
+        <input
+          type="number"
+          placeholder="#"
+          aria-label="Reps"
+          value={reps}
+          disabled={locked}
+          onChange={e => setReps(e.target.value)}
+        />
       </div>
+      <div className="set_field">
+        {locked ?
+          <button aria-label="Unlock set" onClick={unlockSet}><FaLock /></button>
+          :
+          <button aria-label="Lock in set" onClick={lockSet}><FaLockOpen /></button>
+        }
+      </div>
+    </div>
   );
 }

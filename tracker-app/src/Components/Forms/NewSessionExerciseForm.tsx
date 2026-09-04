@@ -36,10 +36,18 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
   }
 
   function decrementSets() {
+    // The row being removed is always the highest-indexed one (numOfSets - 1),
+    // capture that now since setNumOfSets below won't update numOfSets in time.
+    const removedIndex = numOfSets - 1;
+
     setNumOfSets(prev => prev - 1);
-    // Drop the last row's value too, so an already-completed set doesn't
-    // silently ride along in the submission after its row is removed.
-    setSetArr(prev => prev.slice(0, -1));
+    // Drop that row's slot specifically, by index - not just whatever the
+    // last physical entry in setArr happens to be. setArr only gets an entry
+    // once a row is locked, so if an earlier row was locked while this later
+    // row wasn't, setArr is shorter than numOfSets and its last element
+    // belongs to an earlier, still-visible row. Slicing by position would
+    // silently wipe that row's locked value instead of the removed row's.
+    setSetArr(prev => prev.slice(0, removedIndex));
   }
 
   async function handleSubmit() {
