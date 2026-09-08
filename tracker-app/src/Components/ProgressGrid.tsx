@@ -72,8 +72,6 @@ function renderWeightRow(buckets: Bucket[], weightProgArr: WeightRowItm[]) {
 function renderExerciseRows(buckets: Bucket[], strengthProgArr: StrengthRowItm[], groupFilter: string) {
   return strengthProgArr
     .filter(itm => groupFilter === "All" || itm.group === groupFilter)
-    // Best rep per bucket, computed once per exercise so the "has any data"
-    // filter below and the row rendering don't call bestRep twice each.
     .map(itm => ({
       itm,
       repsByBucket: buckets.map(b => bestRep(itm.TopReps.filter(r => b.matches(r.date)))),

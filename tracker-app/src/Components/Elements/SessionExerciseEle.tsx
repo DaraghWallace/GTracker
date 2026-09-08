@@ -67,7 +67,7 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
   const [awaiting, setAwaiting] = useState(false);
 
   return <div className="EsSesh">
-    <div className="es_header">
+    <div className="es_header" onClick={()=> console.log(sessionExercise)}>
       {(editSets && editSetVisible) ?
         <select value={newExercise} onChange={(e) => setNewExercise(e.target.value)}>
           {exercises.map((exercise) => {
@@ -136,16 +136,7 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
                 {set.distance}
                 {" km | RPE "}
                 {set.rpe} {" | "}
-                {(() => {
-                  const totalSeconds = set.hours * 3600 + set.minutes * 60 + set.seconds;
-                  if (!set.distance) return "--:--";
-
-                  const paceSeconds = totalSeconds / set.distance;
-                  const paceMin = Math.floor(paceSeconds / 60);
-                  const paceSec = Math.round(paceSeconds % 60);
-
-                  return `${paceMin}:${String(paceSec).padStart(2, "0")}/km`;
-                })()}
+                {formatPace(set.hours,set.minutes,set.seconds,set.distance)}
               </div>
             }
           </div>
@@ -283,4 +274,21 @@ async function handleUpdateSessionExercise({
   } finally {
     setAwaiting(false)
   }
+}
+
+function formatPace(hours: number, minutes: number, seconds: number, distanceKm: number): string {
+  if (!distanceKm ) return "--:--";
+
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  const paceSeconds = totalSeconds / distanceKm;
+
+  let paceMin = Math.floor(paceSeconds / 60);
+  let paceSec = Math.round(paceSeconds % 60);
+
+  if (paceSec === 60) {
+    paceMin += 1;
+    paceSec = 0;
+  }
+
+  return `${paceMin}:${String(paceSec).padStart(2, "0")}/km`;
 }

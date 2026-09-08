@@ -23,8 +23,24 @@ const CHART_OPTIONS: ChartOptions<"line"> = {
   color: "#dddddd",
   font: { size: 18 },
   scales: {
-    x: { grid: { color: "#dddddd", lineWidth: 1 } },
-    y: { grid: { color: "#dddddd", lineWidth: 1 } },
+    x: {
+      grid: { color: "#dddddd", lineWidth: 2 },
+      ticks: { color: "#dddddd", font: { size: 18 } },
+    },
+    y: {
+      grid: { color: "#dddddd", lineWidth: 1 },
+      ticks: { color: "#dddddd", font: { size: 18 } },
+      min: 0,
+    },
+  },
+  plugins: {
+    legend: {
+      labels: { color: "#dddddd", font: { size: 18 } },
+    },
+    tooltip: {
+      titleColor: "#dddddd",
+      bodyColor: "#dddddd",
+    },
   },
   elements: {
     point: {
@@ -34,6 +50,7 @@ const CHART_OPTIONS: ChartOptions<"line"> = {
       borderWidth: 2,
     },
   },
+  borderColor: "#dddddd",
 };
 
 const PALETTE = [
