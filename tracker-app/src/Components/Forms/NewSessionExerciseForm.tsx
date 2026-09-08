@@ -36,17 +36,8 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
   }
 
   function decrementSets() {
-    // The row being removed is always the highest-indexed one (numOfSets - 1),
-    // capture that now since setNumOfSets below won't update numOfSets in time.
     const removedIndex = numOfSets - 1;
-
     setNumOfSets(prev => prev - 1);
-    // Drop that row's slot specifically, by index - not just whatever the
-    // last physical entry in setArr happens to be. setArr only gets an entry
-    // once a row is locked, so if an earlier row was locked while this later
-    // row wasn't, setArr is shorter than numOfSets and its last element
-    // belongs to an earlier, still-visible row. Slicing by position would
-    // silently wipe that row's locked value instead of the removed row's.
     setSetArr(prev => prev.slice(0, removedIndex));
   }
 
@@ -91,7 +82,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
           {selectedExercise && <button aria-label="Change exercise" onClick={() => setSelectedExercise(null)}><FaPen /></button>}
         </div>
 
-        {!selectedExercise && (
+        {!selectedExercise && ( //Exercise Select
           <div className="f_p_exercises" >
             {[...new Set(exercises.map(e => e.group))].map(group => (
               <div key={group}>
@@ -108,38 +99,66 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
           </div>
         )}
 
+
+
         <div className="f_p_row_snug">
           <div className="thick_text">Sets: {numOfSets}</div>
           <button aria-label="Add set" onClick={incrementSets}><FaPlus /></button>
           {numOfSets >= 1 && <button aria-label="Remove set" onClick={decrementSets}><FaMinus /></button>}
         </div>
 
-        <div className="f_p_sets">
-          <div className="sets">
-            <div className="set_field">Weight</div>
-            <div className="set_field">Reps</div>
-            <div className="set_field">Done?</div>
-          </div>
 
-          {renderSetRows(numOfSets, setArr, setSetArr)}
+        {selectedExercise?.group == "Cardio" ? 
+          <div className="f_p_sets">
+            <div className="sets">
+              <div className="set_field_wide">Time</div>
+              <div className="set_field">Distance (km)</div>
+              <div className="set_field">RPE (1-10)</div>
+              <div className="set_field">Done?</div>
+            </div>
 
-          <div className="f_p_row_mid">
-            <div className="bold_text">To failure?</div>
-            <input
-              type="checkbox"
-              aria-label="To failure"
-              checked={toFailure}
-              onChange={e => setToFailure(e.target.checked)}
-            />
-          </div>
-        </div>
+            {renderSetRows(numOfSets, setArr, setSetArr, selectedExercise?.group)}
+
+            <div className="f_p_row_mid">
+              <div className="bold_text">To failure?</div>
+              <input
+                type="checkbox"
+                aria-label="To failure"
+                checked={toFailure}
+                onChange={e => setToFailure(e.target.checked)}
+              />
+            </div>
+          </div> :
+          <div className="f_p_sets">
+            <div className="sets">
+              <div className="set_field">Weight</div>
+              <div className="set_field">Reps</div>
+              <div className="set_field">Done?</div>
+            </div>
+
+            {renderSetRows(numOfSets, setArr, setSetArr, selectedExercise?.group)}
+
+            <div className="f_p_row_mid">
+              <div className="bold_text">To failure?</div>
+              <input
+                type="checkbox"
+                aria-label="To failure"
+                checked={toFailure}
+                onChange={e => setToFailure(e.target.checked)}
+              />
+            </div>
+          </div>          
+        }
+
+
 
         {message && <div className="thick_text">{message}</div>}
 
         <div className="f_p_row_c">
           <button aria-label="Create exercise" onClick={handleSubmit}><FaCheck /></button>
           <button aria-label="Cancel" onClick={() => setNewSetFormOpen(false)}><FaXmark /></button>
-        </div>
+        </div>        
+
 
         {awaiting && <Loading message={"Creating Set"} />}
       </div>
@@ -147,8 +166,8 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
   );
 }
 
-function renderSetRows(numOfSets: number, setArr: string[], setSetArr: Dispatch<SetStateAction<string[]>>) {
+function renderSetRows(numOfSets: number, setArr: string[], setSetArr: Dispatch<SetStateAction<string[]>>, group: string | undefined) {
   return Array.from({ length: numOfSets }, (_, i) => (
-    <NseSetFormEle key={i} index={i} setArr={setArr} setSetArr={setSetArr} />
+    <NseSetFormEle key={i} index={i} setArr={setArr} setSetArr={setSetArr} group={group} />
   ));
 }

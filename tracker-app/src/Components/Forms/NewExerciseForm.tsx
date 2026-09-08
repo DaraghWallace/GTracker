@@ -9,66 +9,13 @@ import Loading from "../Elements/Loading";
 type MuscleGroup = "Arms" | "Shoulders" | "Chest" | "Back" | "Core" | "Legs" | "Cardio";
 type PushPull = "push" | "pull";
 
-type TargetOption = { value: string; label: string };
-
-// Each muscle group's target-muscle options (value/label differ for the
-// hip abductor/adductor entries, hence the pair rather than a plain string).
-const TARGET_OPTIONS: Record<MuscleGroup, TargetOption[]> = {
-  Arms: [
-    { value: "Bicep", label: "Bicep" },
-    { value: "Tricep", label: "Tricep" },
-    { value: "Brachialis", label: "Brachialis" },
-    { value: "Fore Arm", label: "Fore Arm" },
-  ],
-  Shoulders: [
-    { value: "Front Delt", label: "Front Delt" },
-    { value: "Side Delt", label: "Side Delt" },
-    { value: "Rear Delt", label: "Rear Delt" },
-  ],
-  Chest: [
-    { value: "Upper Pec", label: "Upper Pec" },
-    { value: "Middle Pec", label: "Middle Pec" },
-    { value: "Lower Pec", label: "Lower Pec" },
-  ],
-  Back: [
-    { value: "Traps", label: "Traps" },
-    { value: "Mid Back", label: "Mid Back" },
-    { value: "Lats", label: "Lats" },
-  ],
-  Core: [
-    { value: "Abs", label: "Abs" },
-    { value: "Obliques", label: "Obliques" },
-  ],
-  Legs: [
-    { value: "Quads", label: "Quads" },
-    { value: "Glutes", label: "Glutes" },
-    { value: "Hamstring", label: "Hamstring" },
-    { value: "Calf", label: "Calf" },
-    { value: "Abductors", label: "Hip Abductors" },
-    { value: "Adductors", label: "Hip Adductors" },
-  ],Cardio: [ //Pace
-    { value: "Slow walk", label: "Quads" },
-    { value: "Walk", label: "Quads" },
-    { value: "Fast walk", label: "Quads" },
-    { value: "Slow run", label: "Quads" },
-    { value: "run", label: "Quads" },
-    { value: "Fast run", label: "Quads" },
-    { value: "Sprint", label: "Quads" },
-
-  ]
-};
-
 type Props = {
   user: user,
   setNewExercise: Dispatch<SetStateAction<boolean>>
+  exercises: exercise[];
 }
 
-/*
-  NewExerciseForm
-    handleSubmit: validates all fields are filled, creates the exercise via
-    the API, then resets the form so another exercise can be added right after.
-*/
-export default function NewExerciseForm({ user, setNewExercise }: Props) {
+export default function NewExerciseForm({ user, setNewExercise,exercises }: Props) {
   const [name, setName] = useState("");
   const [group, setGroup] = useState<MuscleGroup | "">("");
   const [target, setTarget] = useState("");
@@ -80,8 +27,6 @@ export default function NewExerciseForm({ user, setNewExercise }: Props) {
 
   function handleGroupChange(nextGroup: MuscleGroup) {
     setGroup(nextGroup);
-    // The target list is different per group, so a target picked under the
-    // old group is almost never valid for the new one.
     setTarget("");
   }
 
@@ -129,16 +74,18 @@ export default function NewExerciseForm({ user, setNewExercise }: Props) {
           <option value="Cardio">Cardio</option>
         </select>
 
-        {group != "Cardio" && renderTargetMuscleSelect(group, target, setTarget)}
+        <input type="text" placeholder="Target" aria-label="Target muscle" value={target} onChange={e => setTarget(e.target.value)} />
+        {renderTargetMuscleSelect(group, setTarget, exercises)}
         
-        {group != "Cardio" &&
+        {group != "Cardio" && 
           <select value={ppl} aria-label="Push or pull" onChange={e => setPpl(e.target.value as PushPull)}>
-            <option hidden>Push-Pull?</option>
+            <option hidden>Push-Pull-Hold?</option>
             <option value="push">Push</option>
-            <option value="pull">Pull</option>
+            <option value="pull">Pull</option>            
+            <option value="pull">Hold</option>            
           </select>
         }
-
+        
         <div className="f_p_row_c">
           <button aria-label="Create exercise" onClick={handleSubmit}><FaPlus /></button>
           <button aria-label="Cancel" onClick={() => setNewExercise(false)}><FaXmark /></button>
@@ -151,16 +98,27 @@ export default function NewExerciseForm({ user, setNewExercise }: Props) {
   );
 }
 
-function renderTargetMuscleSelect(group: MuscleGroup | "", target: string, setTarget: Dispatch<SetStateAction<string>>) {
-  if (!group) return null;
+function renderTargetMuscleSelect(group: MuscleGroup | "", setTarget: Dispatch<SetStateAction<string>>, exercises: exercise[]) {
   if (!group) return null;
 
+  const exerciseTargets: string[] = [];
+  exercises
+    .filter(exercise => exercise.group === group)
+    .forEach(exercise => {
+      if (!exerciseTargets.includes(exercise.target)) exerciseTargets.push(exercise.target);
+    });
+
   return (
-    <select value={target} aria-label="Target muscle" onChange={e => setTarget(e.target.value)}>
-      <option hidden>Target</option>
-      {TARGET_OPTIONS[group].map(opt => (
-        <option key={opt.value} value={opt.value}>{opt.label}</option>
+    <div className="f_e_cont">
+      {exerciseTargets.map(targVar => (
+        <button className="f_e_button"
+          type="button"
+          key={targVar}
+          onClick={() => setTarget(targVar)}
+        >
+          {targVar}
+        </button>
       ))}
-    </select>
+    </div>
   );
 }

@@ -5,6 +5,7 @@ import { deleteSessionExercise, updateSessionExercise } from "../../Helpers/APIf
 
 import "../../CSS/exSeshEle.css"
 import { FaTrash, FaPen, FaXmark, FaCheck } from "react-icons/fa6";
+
 import Loading from "./Loading";
 
 
@@ -15,8 +16,9 @@ type Props = {
   editSetVisible: boolean;
 }
 
-type SetObj = { weight: number; reps: number };
-type SetKey = "weight" | "reps";
+type WeightSet = { weight: number; reps: number };
+type CardioSet = { hours: number; minutes: number; seconds: number; distance: number; rpe: number };
+type SetKey = "weight" | "reps" | "hours" | "minutes" | "seconds" | "distance" | "rpe";
 
 type UpdateSessionExerciseArgs = {
   sessionExercise: sessionExercise;
@@ -40,15 +42,21 @@ type UpdateSetOfRepsArgs = {
   value: string;
   newSets: string;
   setNewSets: Dispatch<SetStateAction<string>>;
+  isCardio: boolean;
 }
 
 /*
   SessionExerciseEle
     Displays a single exercise within a session (its name and sets) and,
     when editSetVisible is on, lets it be edited or deleted in place.
+    Sets are stored as a comma-separated string whose per-entry shape
+    depends on the exercise's group: weight/reps exercises use
+    "weightxreps" (e.g. "16x12,18x10"), Cardio exercises use
+    "h:m:sxdistancexrpe" (e.g. "0:32:15x5.2x7").
 */
 export default function SessionExerciseEle({ sessionExercise, exercises, setSessionExercises, editSetVisible }: Props) {
   const setEx = getExercise(sessionExercise.exerciseId, exercises);
+  const isCardio = setEx.group === "Cardio";
 
   const [delConfirm, setDelConfirm] = useState(false);
 
@@ -96,25 +104,71 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
     </div>
 
     <div className="es_reps">
-      {displaySet(sessionExercise.sets).map((set, index) => {
-        return (
+      {isCardio ?
+        displayCardioSets(sessionExercise.sets).map((set, index) => (
+          <div className="es_rep" key={index}>
+            {( editSets && editSetVisible) ?
+              <div>
+                <input type="number" placeholder={String(set.hours)}
+                  onChange={(e) => handleUpdateSetOfReps({ index, key: "hours", value: e.target.value, newSets, setNewSets, isCardio })}
+                />:
+                <input type="number" placeholder={String(set.minutes)}
+                  onChange={(e) => handleUpdateSetOfReps({ index, key: "minutes", value: e.target.value, newSets, setNewSets, isCardio })}
+                />:
+                <input type="number" placeholder={String(set.seconds)}
+                  onChange={(e) => handleUpdateSetOfReps({ index, key: "seconds", value: e.target.value, newSets, setNewSets, isCardio })}
+                />
+                /
+                <input type="number" placeholder={String(set.distance)}
+                  onChange={(e) => handleUpdateSetOfReps({ index, key: "distance", value: e.target.value, newSets, setNewSets, isCardio })}
+                />
+                km / RPE
+                <input type="number" placeholder={String(set.rpe)}
+                  onChange={(e) => handleUpdateSetOfReps({ index, key: "rpe", value: e.target.value, newSets, setNewSets, isCardio })}
+                />
+              </div>
+              :
+              <div className="s_e_s_w_num">
+                {set.hours}{":"}
+                {String(set.minutes).padStart(2, "0")}{":"}
+                {String(set.seconds).padStart(2, "0")}
+                {" | "}
+                {set.distance}
+                {" km | RPE "}
+                {set.rpe} {" | "}
+                {(() => {
+                  const totalSeconds = set.hours * 3600 + set.minutes * 60 + set.seconds;
+                  if (!set.distance) return "--:--";
+
+                  const paceSeconds = totalSeconds / set.distance;
+                  const paceMin = Math.floor(paceSeconds / 60);
+                  const paceSec = Math.round(paceSeconds % 60);
+
+                  return `${paceMin}:${String(paceSec).padStart(2, "0")}/km`;
+                })()}
+              </div>
+            }
+          </div>
+        ))
+        :
+        displayWeightSets(sessionExercise.sets).map((set, index) => (
           <div className="es_rep" key={index}>
             {(editSets && editSetVisible) ?
               <div>
                 <input type="number" placeholder={String(set.weight)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "weight", value: e.target.value, newSets, setNewSets })}
+                  onChange={(e) => handleUpdateSetOfReps({ index, key: "weight", value: e.target.value, newSets, setNewSets, isCardio })}
                 />
                 Kgs x
                 <input type="number" placeholder={String(set.reps)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "reps", value: e.target.value, newSets, setNewSets })}
+                  onChange={(e) => handleUpdateSetOfReps({ index, key: "reps", value: e.target.value, newSets, setNewSets, isCardio })}
                 />
               </div>
               :
               <div className="s_e_s_w_num">{set.weight}kg x {set.reps}</div>
             }
           </div>
-        )
-      })}
+        ))
+      }
     </div>
 
     {awaiting && <Loading message={"Sending Request"} />}
@@ -122,22 +176,55 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
   </div>
 }
 
-// A session exercise's `sets` field is stored as a comma-separated string of
-// "weight x reps" pairs, e.g. "16x12,18x10,20x8" - this parses it for display/editing.
-function displaySet(sets: string): SetObj[] {
-  return sets.split(',').map(weightStr => {
-    const [weight, reps] = weightStr.split('x');
+// Weight/reps sets: "weightxreps" pairs, e.g. "16x12,18x10,20x8"
+function displayWeightSets(sets: string): WeightSet[] {
+  if (!sets) return [];
+  return sets.split(',').map(entry => {
+    const [weight, reps] = entry.split('x');
     return { weight: Number(weight), reps: Number(reps) };
   });
 }
 
-function handleUpdateSetOfReps({ index, key, value, newSets, setNewSets }: UpdateSetOfRepsArgs) {
-  const setsArr = newSets.split(",").map(s => s.split("x"));
-  setsArr[index][key === "weight" ? 0 : 1] = value;
+// Cardio sets: "h:m:sxdistancexrpe", e.g. "0:32:15x5.2x7"
+function displayCardioSets(sets: string): CardioSet[] {
+  if (!sets) return [];
+  return sets.split(',').map(entry => {
+    const [time, distance, rpe] = entry.split('x');
+    const [hours, minutes, seconds] = time.split(':');
+    return {
+      hours: Number(hours),
+      minutes: Number(minutes),
+      seconds: Number(seconds),
+      distance: Number(distance),
+      rpe: Number(rpe),
+    };
+  });
+}
 
-  // output e.g. "16x12,18x10,20x8"
-  const updatedSets = setsArr.map(([weight, reps]) => `${weight}x${reps}`).join(",");
-  setNewSets(updatedSets);
+function handleUpdateSetOfReps({ index, key, value, newSets, setNewSets, isCardio }: UpdateSetOfRepsArgs) {
+  const entries = newSets.split(",");
+
+  if (isCardio) {
+    const [time = "0:0:0", distance = "0", rpe = "0"] = (entries[index] ?? "").split("x");
+    let [h, m, s] = time.split(":");
+
+    if (key === "hours") h = value;
+    else if (key === "minutes") m = value;
+    else if (key === "seconds") s = value;
+
+    const newDistance = key === "distance" ? value : distance;
+    const newRpe = key === "rpe" ? value : rpe;
+
+    entries[index] = `${h}:${m}:${s}x${newDistance}x${newRpe}`;
+  } else {
+    const [weight = "0", reps = "0"] = (entries[index] ?? "").split("x");
+    const newWeight = key === "weight" ? value : weight;
+    const newReps = key === "reps" ? value : reps;
+
+    entries[index] = `${newWeight}x${newReps}`;
+  }
+
+  setNewSets(entries.join(","));
 }
 
 function getExercise(exerciseId: string, exercises: exercise[]): exercise {

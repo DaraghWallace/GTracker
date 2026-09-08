@@ -14,6 +14,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
   let key: Record<string, string> | undefined;
   let checkOwnerManually = false;
+  let trackOwner = true;
 
   switch (process.env.TABLE_NAME) {
     case "Sessions":
@@ -24,12 +25,13 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     case "SessionExercises":
       if (event.pathParameters?.sessionExerciseId) {
         key = { sessionExerciseId: event.pathParameters.sessionExerciseId };
-        checkOwnerManually = true; // no userId in this table's key
+        checkOwnerManually = true;
       }
       break;
     case "Exercises":
-      if (event.pathParameters?.exerciseId && callerSub) {
-        key = { exerciseId: event.pathParameters.exerciseId, userId: callerSub };
+      if (event.pathParameters?.exerciseId) {
+        key = { exerciseId: event.pathParameters.exerciseId };
+        trackOwner = false;
       }
       break;
     default:
@@ -65,7 +67,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
   await docClient.send(new PutCommand({
     TableName: process.env.TABLE_NAME!,
-    Item: { ...safeBody, ...key, userId: callerSub },
+    Item: trackOwner
+      ? { ...safeBody, ...key, userId: callerSub }
+      : { ...safeBody, ...key },
   }));
 
   return {

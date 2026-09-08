@@ -23,7 +23,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       break;
     case "Exercises":
       if(!event.pathParameters?.exerciseId) {break}
-      key = { exerciseId: event.pathParameters?.exerciseId, userId: callerSub }
+      key = { exerciseId: event.pathParameters?.exerciseId }
       break;
     default:
         return {

@@ -32,16 +32,17 @@ export class Exercises extends Construct {
 
     table.grantWriteData(createFn);
     table.grantReadData(scanFn);
-    table.grantWriteData(updateFn);
-    table.grantWriteData(deleteFn);
+    table.grantReadWriteData(updateFn);
+    table.grantReadWriteData(deleteFn);
 
     // --- Routes ---
-    const exercises    = api.root.addResource("exercises");
+    const exercises = api.root.addResource("exercises");
+    const exercise = exercises.addResource("{exerciseId}");
 
     this.addMethod(exercises, "POST", createFn, authorizer);
     this.addMethod(exercises, "GET", scanFn,   authorizer);
-    this.addMethod(exercises, "PUT", updateFn, authorizer);
-    this.addMethod(exercises, "DELETE", deleteFn, authorizer);
+    this.addMethod(exercise, "PUT", updateFn, authorizer);
+    this.addMethod(exercise, "DELETE", deleteFn, authorizer);
   }
 
   private fn(id: string, entry: string, tableName: string) {

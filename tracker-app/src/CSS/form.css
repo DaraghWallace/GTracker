@@ -193,6 +193,12 @@ select{
   text-align: center;
 }
 
+.set_field_wide{
+  border: solid 1px rgb(0, 200, 255);
+  width: 200px;
+  text-align: center;
+}
+
 .f_wide_button{
   height: 30px;
   padding: 3px;
@@ -220,8 +226,7 @@ select{
   font-size: 20px;
   width: fit-content;
   flex-grow: 1;
-}
-.f_e_button:hover{
+}.f_e_button:hover{
   background-color: rgb(30, 30, 40);
   border: solid 1px rgb(0, 200, 255);
   color: rgb(243, 244, 245);
