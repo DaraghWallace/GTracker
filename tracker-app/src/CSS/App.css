@@ -16,6 +16,8 @@
 
     padding-top: 7px;
     margin: 0;
+    margin-left: 5px;
+    margin-right: 5px;
 
     color: var(--color-bg-primary);
     font-size: 25px;
@@ -92,9 +94,13 @@
     border-radius: var(--radius-sm);
     height: 30px;
     width: 30px;
+    
+    padding-top: 2px;
 
     margin: 0;
-    padding-top: 2px;
+    margin-top: 3px;
+    margin-left: 3px;
+    margin-right: 3px;
 
     color: var(--color-bg-primary);
     font-size: 18px;

@@ -41,12 +41,6 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
     setSetArr(prev => prev.slice(0, removedIndex));
   }
 
-  function selectExercise(exercise: exercise) {
-    setSelectedExercise(exercise);
-    setNumOfSets(exercise.group === "Cardio" ? 1 : 0);
-    setSetArr([]);
-  }
-
   async function handleSubmit() {
     if (!selectedExercise) return setMessage("Select an exercise.");
     if (!numOfSets) return setMessage("Enter Set(s).");
@@ -95,7 +89,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
                 <div className="f_p_e_header">{group}:</div>
                 <div className="f_e_cont">
                   {exercises.filter(e => e.group === group).map(exercise => (
-                    <button className="f_e_button" key={exercise.exerciseId} onClick={() => selectExercise(exercise)}>
+                    <button className="f_e_button" key={exercise.exerciseId} onClick={() => setSelectedExercise(exercise)}>
                       {exercise.name}
                     </button>
                   ))}
@@ -108,17 +102,9 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
 
 
         <div className="f_p_row_snug">
-          {selectedExercise?.group == "Cardio" ? (
-            <>
-              <div className="thick_text">1 set</div>
-            </>
-          ) : (
-            <>
-              <div className="thick_text">Sets: {numOfSets}</div>
-              <button aria-label="Add set" onClick={incrementSets}><FaPlus /></button>
-              {numOfSets >= 1 && <button aria-label="Remove set" onClick={decrementSets}><FaMinus /></button>}
-            </>
-          )}
+          <div className="thick_text">Sets: {numOfSets}</div>
+          <button aria-label="Add set" onClick={incrementSets}><FaPlus /></button>
+          {numOfSets >= 1 && <button aria-label="Remove set" onClick={decrementSets}><FaMinus /></button>}
         </div>
 
 

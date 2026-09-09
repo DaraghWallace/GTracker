@@ -67,7 +67,7 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
   const [awaiting, setAwaiting] = useState(false);
 
   return <div className="EsSesh">
-    <div className="es_header" onClick={()=> console.log(sessionExercise)}>
+    <div className="es_header" > 
       {(editSets && editSetVisible) ?
         <select value={newExercise} onChange={(e) => setNewExercise(e.target.value)}>
           {exercises.map((exercise) => {
