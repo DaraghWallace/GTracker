@@ -111,7 +111,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
         {selectedExercise?.group == "Cardio" ? 
           <div className="f_p_sets">
             <div className="sets">
-              <div className="set_field_wide">Time</div>
+              <div className="set_field_wide">Time (hh:mm:ss)</div>
               <div className="set_field">Distance (km)</div>
               <div className="set_field">RPE (1-10)</div>
               <div className="set_field">Done?</div>

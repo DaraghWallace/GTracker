@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import type { exercise, session, sessionExercise } from "../Helpers/customTypes";
 import {
   buildStrengthProgArr,
@@ -14,44 +15,90 @@ ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip,
 
 import "../CSS/progress.css";
 
+// Matches the breakpoint used throughout the app's CSS (see progress.css,
+// Body.css, etc.) so the chart and its surrounding layout switch together.
+const MOBILE_BREAKPOINT = 750;
+
+// Tracks whether we're below the breakpoint and re-renders on resize/rotate.
+function useIsMobile(breakpoint = MOBILE_BREAKPOINT): boolean {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < breakpoint
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    const handleChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", handleChange);
+    return () => mql.removeEventListener("change", handleChange);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 // Scoped to this component's charts (passed via `options`, not
 // ChartJS.defaults) so it can't leak styling into charts rendered elsewhere
 // in the app, e.g. ProgressGrid, if either ever adds its own Chart.js usage.
-const CHART_OPTIONS: ChartOptions<"line"> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  color: "#dddddd",
-  font: { size: 18 },
-  scales: {
-    x: {
-      grid: { color: "#dddddd", lineWidth: 2 },
-      ticks: { color: "#dddddd", font: { size: 18 } },
+function getChartOptions(isMobile: boolean): ChartOptions<"line"> {
+  const fontSize = isMobile ? 15 : 18;
+  const gridColor = isMobile ? "#dddddd33" : "#dddddd"; // faint on mobile, solid on desktop
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    color: "#dddddd",
+    font: { size: fontSize },
+    scales: {
+      x: {
+        grid: { color: gridColor, lineWidth: isMobile ? 1 : 2 },
+        ticks: {
+          color: "#dddddd",
+          font: { size: fontSize },
+          maxRotation: 0,
+          autoSkip: true,
+          maxTicksLimit: isMobile ? 4 : undefined,
+        },
+      },
+      y: {
+        grid: { color: gridColor, lineWidth: 1 },
+        ticks: {
+          color: "#dddddd",
+          font: { size: fontSize },
+          maxTicksLimit: isMobile ? 5 : undefined,
+        },
+        min: 0,
+      },
     },
-    y: {
-      grid: { color: "#dddddd", lineWidth: 1 },
-      ticks: { color: "#dddddd", font: { size: 18 } },
-      min: 0,
+    plugins: {
+      legend: {
+        labels: {
+          color: "#dddddd",
+          font: { size: fontSize },
+          boxWidth: isMobile ? 10 : 20,
+          boxHeight: isMobile ? 10 : 12,
+          padding: isMobile ? 8 : 10,
+        },
+      },
+      tooltip: {
+        titleColor: "#dddddd",
+        bodyColor: "#dddddd",
+        titleFont: { size: fontSize },
+        bodyFont: { size: fontSize },
+      },
     },
-  },
-  plugins: {
-    legend: {
-      labels: { color: "#dddddd", font: { size: 18 } },
+    elements: {
+      point: {
+        pointStyle: "star",
+        radius: isMobile ? 4 : 8,
+        hoverRadius: isMobile ? 6 : 8,
+        borderWidth: isMobile ? 1 : 2,
+      },
+      line: {
+        borderWidth: isMobile ? 1.5 : 2,
+      },
     },
-    tooltip: {
-      titleColor: "#dddddd",
-      bodyColor: "#dddddd",
-    },
-  },
-  elements: {
-    point: {
-      pointStyle: "star",
-      radius: 8,
-      hoverRadius: 8,
-      borderWidth: 2,
-    },
-  },
-  borderColor: "#dddddd",
-};
+    borderColor: "#dddddd",
+  };
+}
 
 const PALETTE = [
   "#ff0000", "#ff7300", "#fbff00", "#73ff00", "#00ffbf", "#00c8ff", "#cc00ff", 
@@ -73,6 +120,9 @@ type Props = {
     month/year filter. Groups/exercises with no data in range are skipped.
 */
 export default function ProgressGraph({ exercises, sessionData, sessionExercises, monthFilter, yearFilter }: Props) {
+  const isMobile = useIsMobile();
+  const chartOptions = useMemo(() => getChartOptions(isMobile), [isMobile]);
+
   const dateArr = sessionData.map(s => s.dateDone);
   const strengthProgArr = buildStrengthProgArr(exercises, sessionData, sessionExercises);
   const buckets = getBuckets(monthFilter, yearFilter, dateArr);
@@ -110,7 +160,7 @@ export default function ProgressGraph({ exercises, sessionData, sessionExercises
             <div className="gi_chart_wrap">
               <Line
                 data={toChartJsData(chartData, activeExercises.map(e => e.exerciseName))}
-                options={CHART_OPTIONS}
+                options={chartOptions}
               />
             </div>
           </div>

@@ -83,7 +83,7 @@ export default function NseSetFormEle({ index, setSetArr, group }: Props) {
         <div className="set_field_wide"> {/* Time */}
           <input
             type="number"
-            placeholder="Hrs"
+            placeholder="00"
             aria-label="hours"
             value={hours}
             disabled={locked}
@@ -91,7 +91,7 @@ export default function NseSetFormEle({ index, setSetArr, group }: Props) {
           />:
           <input
             type="number"
-            placeholder="Min"
+            placeholder="00"
             aria-label="minutes"
             value={minutes}
             disabled={locked}
@@ -101,7 +101,7 @@ export default function NseSetFormEle({ index, setSetArr, group }: Props) {
           :
           <input
             type="number"
-            placeholder="scn"
+            placeholder="00"
             aria-label="seconds"
             value={seconds}
             disabled={locked}

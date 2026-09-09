@@ -2,6 +2,8 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 
 import { FaPlus, FaPen, FaCheck, FaXmark, FaTrash, FaDumbbell, FaChartLine, FaTableList } from "react-icons/fa6";
 
+import "../../CSS/help.css"
+
 import newSession from "../../assets/helpNewSession.png"
 import sessionForm from "../../assets/helpSessionForm.png"
 import editSession from "../../assets/helpEditSession.png"
@@ -31,10 +33,10 @@ export default function HelpWindow({ setHelpOpen }: Props) {
   const [subPage, setSubPage] = useState<SubPageKey>("1");
 
   return (
-    <div className="form">
-      <div className="f_panel">
+    <div className="help">
+      <div className="h_panel">
         <div className="f_p_row_c">
-          <button onClick={() => setPage("sessions")} className="f_wide_button"><FaDumbbell aria-hidden="true" /> Sessions</button>
+          <button onClick={() => setPage("sessions")} className="f_wide_button"><FaDumbbell /> Sessions</button>
           <button onClick={() => setPage("graphs")} className="f_wide_button"><FaChartLine aria-hidden="true" /> Graphs</button>
         </div>
 
@@ -53,7 +55,10 @@ export default function HelpWindow({ setHelpOpen }: Props) {
             <button onClick={() => setSubPage("2")} className="f_wide_button"><FaChartLine aria-hidden="true" /> Graphs</button>
           </div>
         }
-        {renderHelpContent(page, subPage)}
+
+        <div className="help_content">
+          {renderHelpContent(page, subPage)}
+        </div>
 
         <button className="corner_button" aria-label="Close help" onClick={() => setHelpOpen(false)}> <FaXmark /> </button>
       </div>
