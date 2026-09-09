@@ -1,6 +1,7 @@
 .Grid_container {
   overflow-x: auto;
   overflow-y: auto;
+  border-radius: var(--radius-md);
 }
 
 .G_row {
@@ -20,7 +21,7 @@
 .G_cell,
 .G_cell_small {
   flex-shrink: 0;
-  padding: 8px;
+  padding: var(--space-xs);
   text-align: center;
   overflow: hidden;
   white-space: nowrap;
@@ -34,34 +35,34 @@
   will-change: transform;
   border-bottom: 1px solid var(--color-border-subtle);
   width: 170px;
-  padding: 8px 10px;
+  padding: var(--space-xs) var(--space-sm);
   background-color: var(--color-bg-secondary);
   box-shadow: 2px 0 0 var(--color-bg-secondary), 4px 0 6px -3px rgba(0, 0, 0, 0.5);
   color: var(--color-text-light);
-  font-weight: bold;
+  font-weight: 600;
   text-align: left;
 }
 
 .G_cell_date {
   width: 120px;
   background-color: var(--color-bg-primary);
-  color: var(--color-text-light);
-  font-weight: bold;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 13px;
 }
 
 .G_cell {
   width: 120px;
   background-color: var(--color-bg-primary);
   color: var(--color-text-light);
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .G_cell_small {
   width: 80px;
   background-color: var(--color-bg-primary);
   color: var(--color-text-light);
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .Graph_container {
@@ -69,24 +70,28 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
 }
 
 .graph_item {
   flex-grow: 100;
   display: grid;
   grid-template-rows: auto 1fr;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background-color: var(--color-bg-secondary);
+  box-shadow: var(--shadow-sm);
 }
 
 .gi_header {
   width: 100%;
-  padding: 10px;
+  padding: var(--space-sm);
   background-color: var(--color-bg-primary);
   color: var(--color-text-light);
+  font-family: var(--font-display);
   font-weight: 600;
+  letter-spacing: 0.01em;
   font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
   text-align: center;
 }
@@ -95,7 +100,7 @@
   position: relative;
   min-height: 0;
   min-width: 0;
-  padding: 10px;
+  padding: var(--space-sm);
 }
 
 @media (max-width: 749px) {

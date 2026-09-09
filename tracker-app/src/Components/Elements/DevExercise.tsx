@@ -3,14 +3,14 @@ import type { exercise } from "../../Helpers/customTypes";
 
 import { FaPen, FaTrash, FaXmark, FaCheck } from "react-icons/fa6";
 import { deleteExercise, updateExercise } from "../../Helpers/APIfunctions";
-import Loading from "./Loading";
+// import Loading from "./Loading";
 
 type Props = {
   exercise: exercise;
 }
 
 export default function DevExercise({exercise}: Props){
-  const [awaiting, setAwaiting] = useState(false);
+  // const [awaiting, setAwaiting] = useState(false);
   const [editExercise, setEditExercise] = useState(false);
   const [deleteExercise, setDeleteExercise] = useState(false);
 
@@ -69,7 +69,7 @@ export default function DevExercise({exercise}: Props){
       
       <div className="G_cell">
           {deleteExercise?
-            <button onClick={()=> handleDelete(exercise.exerciseId, setAwaiting)}><FaCheck/></button>:
+            <button onClick={()=> handleDelete(exercise.exerciseId, setEditExercise)}><FaCheck/></button>:
             <button onClick={()=> setEditExercise(!editExercise)}>{editExercise? <FaXmark/> : <FaPen/>}</button>
           }
           
@@ -81,7 +81,7 @@ export default function DevExercise({exercise}: Props){
               target: exTarget,
               ppl: exPpl,
               author: exercise.author,
-              }, setAwaiting )}>
+              }, setEditExercise )}>
                 <FaCheck/>
             </button> :
             
@@ -91,13 +91,13 @@ export default function DevExercise({exercise}: Props){
           }
       </div>
 
-      {awaiting && <Loading message= {`Actioning ${exName}`}/>}
+      {/* {awaiting && <Loading message= {`Actioning ${exName}`}/>} */}
     </div>
   )
 }
 
-function handleSubmit(newExercise:exercise, setAwaiting: Dispatch<SetStateAction<boolean>>) {
-  setAwaiting(true)
+function handleSubmit(newExercise:exercise, setEditExercise: Dispatch<SetStateAction<boolean>>) {
+  // setAwaiting(true)
   try {
     updateExercise(newExercise)
     // setSessionExercises(prev => prev.map(s =>
@@ -106,17 +106,18 @@ function handleSubmit(newExercise:exercise, setAwaiting: Dispatch<SetStateAction
   } catch (error) {
     console.error(`Failed to update exercise ${newExercise.exerciseId}:`, error);
   } finally {
-    setAwaiting(false)
+    setEditExercise(false)
   }
 }
 
-function handleDelete(exerciseId:string, setAwaiting: Dispatch<SetStateAction<boolean>>) {
-  setAwaiting(true)
+function handleDelete(exerciseId:string, setEditExercise: Dispatch<SetStateAction<boolean>>) {
+  // setAwaiting(true)
   try {
     deleteExercise(exerciseId)
   } catch (error) {
     console.error(`Failed to Delete exercise ${exerciseId}:`, error);
   }finally {
-    setAwaiting(false)
+    setEditExercise(false)
+    // setAwaiting(false)
   }
 }

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap');
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -11,36 +13,104 @@
   -moz-osx-font-smoothing: grayscale;
 
   /* ------------------------------------------------------------
-   * Color variables
-   * Centralised here so future palette/theme changes only need
-   * to happen in one place. Values are unchanged from before -
-   * this is purely a find/replace of literals with variables.
+   * Design tokens
+   * Centralised here so future visual changes - a new accent,
+   * tighter spacing, a different type scale - only need to
+   * happen in one place.
    * ------------------------------------------------------------ */
 
-  /* Backgrounds, darkest to lightest */
-  --color-bg-primary: rgb(40, 40, 50);     /* main app/body background (was also #282832) */
-  --color-bg-tertiary: rgb(30, 30, 40);    /* hover states, help panels */
-  --color-bg-secondary: rgb(60, 60, 70);   /* headers, panels, cards (was also #3c3c46) */
-  --color-bg-elevated: rgb(50, 50, 60);    /* modals, button hover backgrounds */
+  /* Type */
+  --font-display: 'Oswald', 'Arial Narrow', sans-serif;   /* headers, big numbers - condensed, athletic */
+  --font-body: system-ui, Avenir, Helvetica, Arial, sans-serif;
 
-  /* Accent */
-  --color-accent: rgb(0, 200, 255);        /* brand cyan - borders, buttons, highlights */
+  /* Backgrounds - elevation scale, deepest to lightest */
+  --color-bg-primary: #17171f;     /* app shell / base canvas (was rgb(40,40,50)) */
+  --color-bg-tertiary: #101014;    /* recessed panels, hover wells (was rgb(30,30,40)) */
+  --color-bg-secondary: #24242e;   /* cards, headers, chips (was rgb(60,60,70)) */
+  --color-bg-elevated: #2f2f3a;    /* modals, popovers, button hover (was rgb(50,50,60)) */
+
+  /* Accent - the brand cyan, used with restraint */
+  --color-accent: rgb(0, 200, 255);
+  --color-accent-strong: #4fe0ff;              /* hover/active state of accent surfaces */
+  --color-accent-soft: rgba(0, 200, 255, 0.14); /* subtle fills, focus rings */
 
   /* Text */
-  --color-text-light: rgb(243, 244, 245);  /* light text on dark/accent surfaces (was also #f3f4f5) */
-  --color-text-input: rgb(240, 240, 250);  /* input field text */
+  --color-text-light: rgb(243, 244, 245);   /* primary text on dark surfaces */
+  --color-text-secondary: #9a9daa;          /* labels, captions, secondary info */
+  --color-text-input: rgb(240, 240, 250);
   --color-white: white;
 
   /* Borders */
-  --color-border-subtle: #c8c8ff;          /* progress grid borders */
+  --color-border-subtle: rgba(200, 200, 255, 0.35); /* was solid #c8c8ff - softer on dark bg */
+  --color-border-hairline: rgba(255, 255, 255, 0.08); /* neutral dividers, input borders */
 
   /* Overlays */
-  --color-overlay: rgba(0, 40, 50, 0.6);   /* modal/loading screen backdrop */
+  --color-overlay: rgba(8, 10, 14, 0.75); /* modal/loading screen backdrop */
+
+  /* Spacing scale */
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Radius scale */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 0 1px var(--color-accent-soft), 0 0 24px rgba(0, 200, 255, 0.12);
+
+  /* Motion */
+  --transition-fast: 140ms ease;
+  --transition-base: 220ms ease;
 }
-body{
+
+body {
   margin: 0;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-light);
+  font-family: var(--font-body);
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+/* Accessible, on-brand keyboard focus - replaces the browser default outline
+   everywhere, since several native controls below remove it explicitly. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Thin, dark-mode-friendly scrollbars (WebKit) so the app's own surfaces
+   don't get interrupted by a default light scrollbar track. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-bg-elevated);
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-accent);
+  background-clip: content-box;
+}
+
+::selection {
+  background-color: var(--color-accent-soft);
+  color: var(--color-text-light);
 }

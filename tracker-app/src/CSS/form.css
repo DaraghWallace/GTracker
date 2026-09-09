@@ -18,7 +18,9 @@
     margin-top: 100px;
 
     background-color: var(--color-bg-elevated);
-    border: solid 5px var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md), var(--shadow-glow);
     
     
     min-width: 400px;
@@ -33,8 +35,7 @@
     justify-content: space-between;
 
     overflow-y: auto;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: var(--space-sm) var(--space-md);
 
     -webkit-animation: slide-top 0.5s ease-in reverse forwards;
             animation: slide-top 0.5s ease-in reverse forwards;
@@ -51,7 +52,9 @@
     height: 100%;
 
     background-color: var(--color-bg-elevated);
-    border: solid 2px var(--color-accent);
+    border: 0;
+    border-bottom: 1px solid var(--color-accent);
+    box-shadow: var(--shadow-md);
     
     height: fit-content;
     max-height: 100%;
@@ -62,9 +65,7 @@
     justify-content: space-between;
 
     overflow-y: scroll;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: var(--space-md) var(--space-sm) var(--space-sm);
 
     -webkit-animation: slide-top 0.5s ease-in reverse forwards;
             animation: slide-top 0.5s ease-in reverse forwards;
@@ -106,65 +107,114 @@
 }
 
 .bold_text{
-  font-weight: bold;
+  font-weight: 600;
   text-align: center;
 }
 
 .thick_text{
   /* margin-top: 15px; */
-  font-size: 28px;
-  font-weight: bold;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   text-align: center;
 }
 
 input[type = text]{
-  height: 30px;
-  font-size: 20px;
-  margin-bottom: 5px;
+  height: 34px;
+  font-size: 16px;
+  margin-bottom: var(--space-xs);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-input);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 input[type = date]{
-  height: 30px;
-  font-size: 20px;
-  margin-bottom: 5px;
+  height: 34px;
+  font-size: 16px;
+  margin-bottom: var(--space-xs);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-input);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 input[type = Number]{
-  height: 30px;
-  font-size: 20px;
-  margin-bottom: 5px;
+  height: 34px;
+  font-size: 16px;
+  margin-bottom: var(--space-xs);
   text-align: right;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-input);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 input[type = password]{
-  height: 25px;
-  font-size: 16px;
-  margin-bottom: 5px;
+  height: 30px;
+  font-size: 15px;
+  margin-bottom: var(--space-xs);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-input);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 input[type = checkbox]{
-  height: 30px;
+  height: 18px;
+  width: 18px;
   border: 0;
+  accent-color: var(--color-accent);
+}
+
+input:focus{
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
 
 select{
-  height: 30px;
-  font-size: 20px;
-  margin-bottom: 5px;
+  height: 34px;
+  font-size: 16px;
+  margin-bottom: var(--space-xs);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-light);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-xs);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+select:hover, select:focus-visible {
+  border-color: var(--color-accent);
 }
 
 .f_p_e_header{
-  font-weight: bold;
-  font-size: 23px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-size: 21px;
   text-align: center;
 }
 
 .f_p_e_sub_header{
-  font-size: 20px;
+  font-size: 16px;
+  color: var(--color-text-secondary);
 }
 
 .f_p_exercises{
-  background-color: var(--color-bg-secondary);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   max-height: 700px;
@@ -173,7 +223,8 @@ select{
 }
 
 .f_p_sets{
-  background-color: var(--color-bg-secondary);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   max-height: 500px;
@@ -188,23 +239,30 @@ select{
 }
 
 .set_field{
-  border: solid 1px var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
   width: 100px;
+  padding: var(--space-3xs) 0;
   text-align: center;
 }
 
 .set_field_wide{
-  border: solid 1px var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
   width: 200px;
+  padding: var(--space-3xs) 0;
   text-align: center;
 }
 
 .f_wide_button{
-  height: 30px;
-  padding: 3px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  padding: 3px var(--space-xs);
   margin: 0;
-  font-size: 22px;
+  font-size: 18px;
   width: fit-content;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 .f_wide_button:hover{
   background-color: var(--color-bg-elevated);
@@ -216,16 +274,20 @@ select{
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  gap: var(--space-2xs);
   align-content: flex-start;
 }
 
 .f_e_button{
-  height: 30px;
-  padding: 3px;
-  margin: 5px;
-  font-size: 20px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  padding: 3px var(--space-xs);
+  margin: 0;
+  font-size: 16px;
   width: fit-content;
   flex-grow: 1;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }.f_e_button:hover{
   background-color: var(--color-bg-tertiary);
   border: solid 1px var(--color-accent);
@@ -233,27 +295,31 @@ select{
 }
 
 .help_header{
-  margin-top: 20px;
-  font-size: 38px;
-  font-weight: bold;
+  margin-top: var(--space-lg);
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   text-align: center;
 }
 
 .help_fields{
   background-color: var(--color-bg-tertiary);
-  border: solid 3px var(--color-accent);
-  margin-bottom: 20px;
-  font-size: 20px;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-lg);
+  font-size: 16px;
   display: flex;
   flex-direction: column;
   max-width: 600px;
+  overflow: hidden;
 }
 
 .help_text_feilds{
-  margin-top: 20px;
-  padding: 10px;
-  /* background-color: var(--color-bg-secondary); */
-  border-top: solid 1px var(--color-accent);
+  margin-top: var(--space-lg);
+  padding: var(--space-xs);
+  border-top: 1px solid var(--color-accent);
 }
 
 .corner_button{
@@ -265,7 +331,8 @@ select{
 }
 
 img{
-  margin: 5px;
+  margin: var(--space-2xs);
+  border-radius: var(--radius-sm);
 }
 
 /* ----------------------------------------------

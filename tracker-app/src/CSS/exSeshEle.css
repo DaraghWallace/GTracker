@@ -1,14 +1,16 @@
 .EsSesh{
   display: flex;
   flex-direction: column;
-  border-bottom: solid 1px var(--color-accent);
+  border-bottom: 1px solid var(--color-accent);
 }
 
 .es_header{
   background-color: var(--color-bg-secondary);
-  padding: 5px;
-  font-weight: bold;
-  font-size: 18px;
+  padding: var(--space-xs) var(--space-sm);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-size: 17px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -18,21 +20,20 @@
 .es_reps{
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
   justify-content: space-around;
+  padding: var(--space-2xs);
 
 }
 
 .es_rep{
   background-color: var(--color-accent);
-  border-left: 1px solid var(--color-bg-primary);
-  border-right: 1px solid var(--color-bg-primary);
+  border-radius: var(--radius-pill);
 
   color: var(--color-bg-primary);
-  font-weight: bold;
-  font-size: 16px;
+  font-weight: 600;
+  font-size: 15px;
 
-  padding-top: 3px;
-  padding-left: 3px;
-  padding-right: 3px;
-  padding-bottom: 0;
+  padding: var(--space-3xs) var(--space-sm);
 }

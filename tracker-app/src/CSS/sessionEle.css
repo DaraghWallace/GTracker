@@ -1,7 +1,9 @@
 @media (min-width: 750px) {
   .Session{
-    border: solid 1px var(--color-accent);
-    /* background-color: var(--color-bg-tertiary); */
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
     padding: 1px;
     width: 350px;
     max-width: 500px;
@@ -14,16 +16,18 @@
 
   .s_header{
     background-color: var(--color-bg-secondary);
-    border-bottom: solid 2px var(--color-accent);
-    font-size: 25px;
-    font-weight: bold;
-    padding-left: 3px;
-    padding-right: 3px;
+    border-bottom: 1px solid var(--color-accent);
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: var(--space-xs) var(--space-sm);
   }
 
   .s_header_form{
     display: flex;
     flex-direction: column;
+    gap: var(--space-2xs);
   }
 
   .s_header_text{
@@ -39,27 +43,38 @@
 
 input[type=text] {
     background-color: var(--color-bg-primary);
-    border: 0;
+    border: 1px solid var(--color-border-hairline);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-xs);
 
     color: var(--color-text-input);
-    font-size: 18px;
+    font-size: 16px;
   }
 
   input[type=date] {
     background-color: var(--color-bg-primary);
-    border: 0;
+    border: 1px solid var(--color-border-hairline);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-xs);
 
     color: var(--color-text-input);
-    font-size: 18px;
+    font-size: 16px;
   }
 
   input[type=number] {
     background-color: var(--color-bg-primary);
-    border: 0;
+    border: 1px solid var(--color-border-hairline);
+    border-radius: var(--radius-sm);
     width:50px;
     color: var(--color-text-input);
-    font-size: 18px;
+    font-size: 16px;
     -moz-appearance: textfield;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
   }
 
   input::-webkit-outer-spin-button,
@@ -81,10 +96,9 @@ input[type=text] {
 
 @media (max-width: 750px) {
   .Session{
-    border-top: solid 1px var(--color-accent);
-    border-bottom: solid 1px var(--color-accent);
-    /* border-bottom: solid 1px var(--color-accent); */
-    margin-top: 10px;
+    border-top: 1px solid var(--color-accent);
+    border-bottom: 1px solid var(--color-accent);
+    margin-top: var(--space-sm);
   }
 
   .seshEx_container{
@@ -94,15 +108,18 @@ input[type=text] {
 
   .s_header{
     background-color: var(--color-bg-secondary);
-    border-bottom: solid 1px var(--color-accent);
-    font-size: 20px;
-    font-weight: bold;
-    padding: 3px;
+    border-bottom: 1px solid var(--color-accent);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: var(--space-xs);
   }
 
   .s_header_form{
     display: flex;
     flex-direction: column;
+    gap: var(--space-2xs);
   }
 
  .s_header_text{
@@ -119,27 +136,38 @@ input[type=text] {
   input[type=text] {
     background-color: var(--color-bg-primary);
     width: 200px;
-    border: 0;
+    border: 1px solid var(--color-border-hairline);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-xs);
 
     color: var(--color-text-input);
-    font-size: 18px;
+    font-size: 16px;
   }
 
   input[type=date] {
     background-color: var(--color-bg-primary);
-    border: 0;
+    border: 1px solid var(--color-border-hairline);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-xs);
 
     color: var(--color-text-input);
-    font-size: 18px;
+    font-size: 16px;
   }
 
   input[type=number] {
     background-color: var(--color-bg-primary);
-    border: 0;
+    border: 1px solid var(--color-border-hairline);
+    border-radius: var(--radius-sm);
     width: 50px;
     color: var(--color-text-input);
-    font-size: 18px;
+    font-size: 16px;
     -moz-appearance: textfield;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
   }
 
   input::-webkit-outer-spin-button,
@@ -149,12 +177,19 @@ input[type=text] {
   }
 
   .hide_button{
-    border-top: solid 1px var(--color-bg-primary);
+    border-top: 1px solid var(--color-bg-primary);
     background-color: var(--color-bg-secondary);
     color: var(--color-white);
-    font-weight: bold;
+    font-weight: 600;
     width: 100%;
+    padding: var(--space-2xs) 0;
     margin: 0;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+  }
+
+  .hide_button:hover{
+    background-color: var(--color-bg-elevated);
   }
 
   .filter_button{
@@ -163,4 +198,3 @@ input[type=text] {
     padding: 0;
   }  
 }
-

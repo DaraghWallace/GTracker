@@ -1,4 +1,4 @@
-  @media (min-width: 750px) {
+@media (min-width: 750px) {
   .App {
     position: fixed;
     top: 0; bottom: 0; left: 10%; right: 10%;
@@ -10,6 +10,7 @@
   button{
     background-color: var(--color-accent);
     border: 0;
+    border-radius: var(--radius-md);
     height: 40px;
     width: 40px;
 
@@ -18,6 +19,8 @@
 
     color: var(--color-bg-primary);
     font-size: 25px;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
   }button:hover{
     background-color: var(--color-bg-elevated);
     border: solid 1px var(--color-accent);
@@ -27,6 +30,7 @@
   .wide_button{
     background-color: var(--color-accent);
     border: 0;
+    border-radius: var(--radius-md);
     height: 40px;
     width: fit-content;
 
@@ -35,14 +39,17 @@
 
     color: var(--color-bg-primary);
     font-size: 25px;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
 
     margin-left: 3px;
   }
 
   .hello {
     background-color: var(--color-bg-secondary);
-    padding: 10px;
-    font-size: 25px;
+    padding: var(--space-md);
+    font-size: 20px;
+    line-height: 1.6;
     overflow-y: auto;
     height: 100%;      
     box-sizing: border-box; 
@@ -52,12 +59,15 @@
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    font-weight: bold;
+    font-weight: 600;
+    color: var(--color-text-secondary);
   }
   .dt_img{
     width: 100%;
     margin-top: 15px;
-    border-bottom: 5px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    border-bottom: 3px solid var(--color-accent);
+    box-shadow: var(--shadow-md);
   }
 
   .mob_img{
@@ -67,7 +77,6 @@
 
 @media (max-width: 750px) {
   .App {
-    /* background-color: var(--color-accent); */
     position: fixed;
     top: 0;   
     bottom: 0; 
@@ -80,6 +89,7 @@
   button{
     background-color: var(--color-accent);
     border: 0;
+    border-radius: var(--radius-sm);
     height: 30px;
     width: 30px;
 
@@ -88,12 +98,15 @@
 
     color: var(--color-bg-primary);
     font-size: 18px;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
   }
 
   .hello {
     background-color: var(--color-bg-secondary);
-    padding: 10px;
-    font-size: 20px;
+    padding: var(--space-md);
+    font-size: 16px;
+    line-height: 1.6;
     overflow-y: auto;
     height: 100%;        
     box-sizing: border-box;  
@@ -104,11 +117,11 @@
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    font-weight: bold;
+    font-weight: 600;
+    color: var(--color-text-secondary);
   }
 
   .dt_img{
     display: none;
   }
 }
-

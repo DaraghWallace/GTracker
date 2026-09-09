@@ -7,8 +7,10 @@
 }
 
 .b_header {
-  background-color: var(--color-bg-primary);
-  border-bottom: solid 1px var(--color-accent);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-accent);
+  box-shadow: 0 1px 16px rgba(0, 200, 255, 0.15);
+  padding: var(--space-xs) var(--space-sm);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -31,13 +33,14 @@
 
 
 @media (min-width: 750px) {
-  .sessions { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+  .sessions { flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm); }
   .b_h_filters { width: 50%; }
 
   .b_h_filters {
     display: flex;
     flex-direction: row;
     width: 50%;
+    gap: var(--space-xs);
 
     display: flex;
     flex-direction: row;
@@ -45,30 +48,42 @@
   }
 
   .b_h_filter{
-    background-color: var(--color-bg-secondary);
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-right: 10px;
+    background-color: var(--color-bg-tertiary);
+    border-radius: var(--radius-pill);
+    padding-left: var(--space-sm);
+    padding-right: var(--space-sm);
+    margin-right: 0;
     display: flex;
     flex-direction: row;
+    align-items: center;
     /* justify-content: space-between; */
     /* font-size: 20px; */
   }
 
   .b_h_f_text{
-    margin-top: 4px;
-    font-size: 20px;
+    margin-top: 0;
+    font-size: 16px;
+    color: var(--color-text-secondary);
   }
 
   select{
-    font-size: 20px;
-    margin-top: 5px;
-    border: 0;
+    font-size: 16px;
+    margin-top: 0;
+    border: 1px solid var(--color-border-hairline);
+    border-radius: var(--radius-sm);
     background-color: var(--color-bg-primary);
+    color: var(--color-text-light);
+    padding: var(--space-3xs) var(--space-xs);
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+  }
+
+  select:hover, select:focus-visible {
+    border-color: var(--color-accent);
   }
 
   option{
-    font-size: 18px;
+    font-size: 15px;
     border: 0;
     background-color: var(--color-bg-primary);
   }
@@ -77,7 +92,7 @@
 
 @media (max-width: 750px) {
   .sessions { flex-direction: column; }
-  .b_h_filter { flex-direction: column; font-size: 16px; }
+  .b_h_filter { flex-direction: column; font-size: 14px; }
   
   .b_h_buttons{
     background-color: var(--color-bg-secondary);
@@ -96,14 +111,16 @@
   }
 
   .b_h_filter{
-    background-color: var(--color-bg-secondary);
+    background-color: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    font-size: 16px;
+    font-size: 14px;
+    color: var(--color-text-secondary);
 
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: var(--space-xs);
+    padding-right: var(--space-xs);
   }
 
   .b_h_buttons{
@@ -114,20 +131,23 @@
   }
 
   .b_h_f_text{
-    margin-top: 5px;
-    font-size: 16px;
+    margin-top: var(--space-2xs);
+    font-size: 14px;
+    color: var(--color-text-secondary);
   }
 
   select{
-    font-size: 16px;
-    margin-top: 5px;
-    border: 0;
+    font-size: 14px;
+    margin-top: var(--space-2xs);
+    border: 1px solid var(--color-border-hairline);
+    border-radius: var(--radius-sm);
     background-color: var(--color-bg-primary);
+    color: var(--color-text-light);
     margin: 0;
   }
 
   option{
-    font-size: 14px;
+    font-size: 13px;
     border: 0;
     background-color: var(--color-bg-primary);
   }

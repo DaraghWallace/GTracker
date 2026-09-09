@@ -15,10 +15,12 @@
 }
 
 .L_panel{
-  border: solid 1px var(--color-accent);
-  /* border-radius: 30%; */
-  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  background-color: var(--color-bg-elevated);
   width: 200px;
+  padding: var(--space-md) 0;
 
   text-align: center;
 
@@ -29,15 +31,20 @@
 }
 
 .L_p_text{
-  font-size: 25px;
+  font-family: var(--font-display);
+  font-size: 20px;
   align-items: center;
-  font-weight: bold;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .weightSlide {
-  font-size: 80px;
+  font-family: var(--font-display);
+  font-size: 76px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--color-accent);
-  margin-top: 60px;
+  margin-top: var(--space-lg);
 	animation: L_slide_top 1s cubic-bezier(0.860, 0.000, 0.070, 1.000) infinite alternate ;
 }
 
