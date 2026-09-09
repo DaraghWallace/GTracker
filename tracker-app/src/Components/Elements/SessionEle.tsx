@@ -10,8 +10,8 @@ import NewSessionExerciseForm from "../Forms/NewSessionExerciseForm";
 import "../../CSS/sessionEle.css"
 import "../../CSS/form.css"
 
-import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash, FaAngleDown, FaAngleUp } from "react-icons/fa6";
-
+import { FaPlus, FaPen, FaXmark, FaCheck, FaTrash, FaAngleDown, FaAngleUp,  } from "react-icons/fa6";
+// import { FaSortNumericDown } from "react-icons/fa";
 
 type Props = {
   session: session;
@@ -101,7 +101,10 @@ export default function SessionEle({ session, setSessionData, exercises, session
             {!newSetFormOpen && <button aria-label="Add exercise" onClick={() => setNewSetFormOpen(true)}><FaPlus /></button>}
             {newSetFormOpen && <button aria-label="Close add-exercise form" onClick={() => setNewSetFormOpen(false)}><FaXmark /></button>}
             {editSetVisible ?
-              <button aria-label="Stop editing exercises" onClick={() => setEditSetVisible(false)}><FaXmark /></button>
+              <>
+                <button aria-label="Stop editing exercises" onClick={() => setEditSetVisible(false)}><FaXmark /></button>
+                {/* <button aria-label="Reorder Exercises"><FaSortNumericDown /></button> */}
+              </>
               :
               <button aria-label="Edit exercises" onClick={() => setEditSetVisible(true)}><FaPen /></button>
             }
@@ -123,14 +126,16 @@ export default function SessionEle({ session, setSessionData, exercises, session
 
       {showSession &&
         <div className="seshEx_container">
-          {sessionSets.map((sessionExercise) => (
-            <SessionExerciseEle key={sessionExercise.sessionExerciseId}
-              sessionExercise={sessionExercise}
-              exercises={exercises}
-              setSessionExercises={setSessionExercises}
-              editSetVisible={editSetVisible}
-            />
-          ))}
+          {[...sessionSets]
+            .sort((a, b) => a.exerciseIndex - b.exerciseIndex)
+            .map((sessionExercise) => (
+              <SessionExerciseEle key={sessionExercise.sessionExerciseId}
+                sessionExercise={sessionExercise}
+                exercises={exercises}
+                setSessionExercises={setSessionExercises}
+                editSetVisible={editSetVisible}
+              />
+            ))}
         </div>
       }
 

@@ -45,11 +45,12 @@ export default function NseSetFormEle({ index, setSetArr, group }: Props) {
       const h = hours || "0";
       const m = minutes || "0";
       const s = seconds || "0";
+      const w = weight || "0";
       const r = rpe || "0";
 
       setSetArr(prev => {
         const updated = [...prev];
-        updated[index] = `${h}:${m}:${s}x${distance}x${r}`;
+        updated[index] = `${h}:${m}:${s}x${distance}x${w}x${r}`;
         return updated;
       });
     } else {
@@ -117,7 +118,17 @@ export default function NseSetFormEle({ index, setSetArr, group }: Props) {
             value={distance}
             disabled={locked}
             onChange={e => setDistance(e.target.value)}
-          />Kms        
+          />Km
+        </div>
+        <div className="set_field">
+          <input
+            type="number"
+            placeholder="Kgs"
+            aria-label="Weight"
+            value={weight}
+            disabled={locked}
+            onChange={e => setWeight(e.target.value)}
+          />
         </div>
         <div className="set_field"> {/* RPE */}
           <input

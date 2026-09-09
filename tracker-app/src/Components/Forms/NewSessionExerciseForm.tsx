@@ -116,6 +116,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
               <div className="set_field_wide">Time (hh:mm:ss)</div>
               <div className="set_field">Distance (km)</div>
               <div className="set_field">RPE (1-10)</div>
+              <div className="set_field">Weight (Kgs)</div>
               <div className="set_field">Done?</div>
             </div>
 

@@ -17,13 +17,14 @@ type Props = {
 }
 
 type WeightSet = { weight: number; reps: number };
-type CardioSet = { hours: number; minutes: number; seconds: number; distance: number; rpe: number };
+type CardioSet = { hours: number; minutes: number; seconds: number; distance: number; rpe: number , weight: number};
 type SetKey = "weight" | "reps" | "hours" | "minutes" | "seconds" | "distance" | "rpe";
 
 type UpdateSessionExerciseArgs = {
   sessionExercise: sessionExercise;
   newExercise: string;
   newSets: string;
+  newIndex: number;
   setEditSets: Dispatch<SetStateAction<boolean>>;
   setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>;
   setAwaiting: Dispatch<SetStateAction<boolean>>;
@@ -61,6 +62,7 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
   const [delConfirm, setDelConfirm] = useState(false);
 
   const [editSets, setEditSets] = useState(false);
+  const [newIndex, setNewIndex] = useState(sessionExercise.exerciseIndex);
   const [newExercise, setNewExercise] = useState(sessionExercise.exerciseId);
   const [newSets, setNewSets] = useState(sessionExercise.sets);
 
@@ -69,11 +71,14 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
   return <div className="EsSesh">
     <div className="es_header" > 
       {(editSets && editSetVisible) ?
-        <select value={newExercise} onChange={(e) => setNewExercise(e.target.value)}>
-          {exercises.map((exercise) => {
-            return <option key={exercise.exerciseId} value={exercise.exerciseId}>{exercise.name}</option>
-          })}
-        </select>
+        <div>
+          <input type='number' value={newIndex} defaultValue={sessionExercise.exerciseIndex} onChange={(e)=> setNewIndex(Number(e.target.value))}/>:
+          <select value={newExercise} onChange={(e) => setNewExercise(e.target.value)}>
+            {exercises.map((exercise) => {
+              return <option key={exercise.exerciseId} value={exercise.exerciseId}>{exercise.name}</option>
+            })}
+          </select>
+        </div>
         :
         <div>{sessionExercise.exerciseIndex && `${sessionExercise.exerciseIndex}:`} {setEx.name}</div>
       }
@@ -81,9 +86,12 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
         <div>
           {editSets ?
             <>
-              <button aria-label="Cancel edit" onClick={() => handleCancelEdit(setNewSets, sessionExercise, setEditSets)}><FaXmark /></button>
+              <button aria-label="Cancel edit" onClick={() => handleCancelEdit(
+                setNewSets, setNewIndex, setNewExercise, sessionExercise, setEditSets
+              )}><FaXmark /></button>
+
               <button aria-label="Save exercise" onClick={() => handleUpdateSessionExercise({
-                sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, setAwaiting
+                sessionExercise, newExercise, newIndex, newSets, setEditSets, setSessionExercises, setAwaiting
               })} className="green_button"><FaCheck /></button>
             </>
             :
@@ -109,20 +117,24 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
           <div className="es_rep" key={index}>
             {( editSets && editSetVisible) ?
               <div>
-                <input type="number" placeholder={String(set.hours)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "hours", value: e.target.value, newSets, setNewSets, isCardio })}
-                />:
-                <input type="number" placeholder={String(set.minutes)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "minutes", value: e.target.value, newSets, setNewSets, isCardio })}
-                />:
-                <input type="number" placeholder={String(set.seconds)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "seconds", value: e.target.value, newSets, setNewSets, isCardio })}
-                />
-                /
+                <div>
+                  <input type="number" placeholder={String(set.hours)}
+                    onChange={(e) => handleUpdateSetOfReps({ index, key: "hours", value: e.target.value, newSets, setNewSets, isCardio })}
+                  />:
+                  <input type="number" placeholder={String(set.minutes)}
+                    onChange={(e) => handleUpdateSetOfReps({ index, key: "minutes", value: e.target.value, newSets, setNewSets, isCardio })}
+                  />:
+                  <input type="number" placeholder={String(set.seconds)}
+                    onChange={(e) => handleUpdateSetOfReps({ index, key: "seconds", value: e.target.value, newSets, setNewSets, isCardio })}
+                  />
+                </div>
+                |
                 <input type="number" placeholder={String(set.distance)}
                   onChange={(e) => handleUpdateSetOfReps({ index, key: "distance", value: e.target.value, newSets, setNewSets, isCardio })}
-                />
-                km / RPE
+                /> km | 
+                <input type="number" placeholder={String(set.distance)}
+                  onChange={(e) => handleUpdateSetOfReps({ index, key: "weight", value: e.target.value, newSets, setNewSets, isCardio })}
+                />Kgs| RPE
                 <input type="number" placeholder={String(set.rpe)}
                   onChange={(e) => handleUpdateSetOfReps({ index, key: "rpe", value: e.target.value, newSets, setNewSets, isCardio })}
                 />
@@ -136,6 +148,7 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
                 {set.distance}
                 {" km | RPE "}
                 {set.rpe} {" | "}
+                {set.weight >=0 && `${set.weight} Kgs | `}
                 {formatPace(set.hours,set.minutes,set.seconds,set.distance)}
               </div>
             }
@@ -180,7 +193,7 @@ function displayWeightSets(sets: string): WeightSet[] {
 function displayCardioSets(sets: string): CardioSet[] {
   if (!sets) return [];
   return sets.split(',').map(entry => {
-    const [time, distance, rpe] = entry.split('x');
+    const [time, distance, rpe, weight] = entry.split('x');
     const [hours, minutes, seconds] = time.split(':');
     return {
       hours: Number(hours),
@@ -188,6 +201,7 @@ function displayCardioSets(sets: string): CardioSet[] {
       seconds: Number(seconds),
       distance: Number(distance),
       rpe: Number(rpe),
+      weight: Number(weight),
     };
   });
 }
@@ -196,7 +210,7 @@ function handleUpdateSetOfReps({ index, key, value, newSets, setNewSets, isCardi
   const entries = newSets.split(",");
 
   if (isCardio) {
-    const [time = "0:0:0", distance = "0", rpe = "0"] = (entries[index] ?? "").split("x");
+    const [time = "0:0:0", distance = "0", rpe = "0", weight = 0] = (entries[index] ?? "").split("x");
     let [h, m, s] = time.split(":");
 
     if (key === "hours") h = value;
@@ -204,9 +218,10 @@ function handleUpdateSetOfReps({ index, key, value, newSets, setNewSets, isCardi
     else if (key === "seconds") s = value;
 
     const newDistance = key === "distance" ? value : distance;
+    const newWeight = key === "weight" ? value : weight;
     const newRpe = key === "rpe" ? value : rpe;
 
-    entries[index] = `${h}:${m}:${s}x${newDistance}x${newRpe}`;
+    entries[index] = `${h}:${m}:${s}x${newDistance}x${newWeight}x${newRpe}`;
   } else {
     const [weight = "0", reps = "0"] = (entries[index] ?? "").split("x");
     const newWeight = key === "weight" ? value : weight;
@@ -246,19 +261,27 @@ async function handleDeleteSessionExercise({ sessionExercise, setSessionExercise
   }
 }
 
-function handleCancelEdit(setNewSets: Dispatch<SetStateAction<string>>, sessionExercise: sessionExercise, setEditSets: Dispatch<SetStateAction<boolean>>) {
+function handleCancelEdit(
+  setNewSets: Dispatch<SetStateAction<string>>,
+  setNewIndex: Dispatch<SetStateAction<number>>,
+  setNewExercise: Dispatch<SetStateAction<string>>,
+  sessionExercise: sessionExercise,
+  setEditSets: Dispatch<SetStateAction<boolean>>
+) {
   setNewSets(sessionExercise.sets)
+  setNewIndex(sessionExercise.exerciseIndex)
+  setNewExercise(sessionExercise.exerciseId)
   setEditSets(false)
 }
 
 async function handleUpdateSessionExercise({
-  sessionExercise, newExercise, newSets, setEditSets, setSessionExercises, setAwaiting
+  sessionExercise, newExercise, newIndex, newSets, setEditSets, setSessionExercises, setAwaiting
 }: UpdateSessionExerciseArgs) {
   setAwaiting(true)
   const newSessionExercise = {
     sessionExerciseId: sessionExercise.sessionExerciseId,
     sessionId: sessionExercise.sessionId,
-    exerciseIndex: sessionExercise.exerciseIndex,
+    exerciseIndex: newIndex,
     exerciseId: newExercise,
     toFailure: sessionExercise.toFailure,
     sets: newSets,
@@ -293,3 +316,7 @@ function formatPace(hours: number, minutes: number, seconds: number, distanceKm:
 
   return `${paceMin}:${String(paceSec).padStart(2, "0")}/km`;
 }
+
+// function handleIndex(params:type) {
+  
+// }
