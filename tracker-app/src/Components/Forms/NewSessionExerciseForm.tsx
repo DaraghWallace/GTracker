@@ -13,6 +13,7 @@ type Props = {
   exercises: exercise[];
   setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>;
   setNewSetFormOpen: Dispatch<SetStateAction<boolean>>
+  sessionSets: sessionExercise[]
 }
 
 /*
@@ -22,7 +23,7 @@ type Props = {
     incrementSets/decrementSets: grow/shrink the set rows, keeping setArr
     in sync so a removed row's leftover value can't sneak into the submission.
 */
-export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, setNewSetFormOpen }: Props) {
+export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, setNewSetFormOpen, sessionSets }: Props) {
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
   const [numOfSets, setNumOfSets] = useState(0);
   const [setArr, setSetArr] = useState<string[]>([]);
@@ -53,6 +54,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
     const newSessionExercise: sessionExercise = {
       sessionExerciseId: crypto.randomUUID(),
       sessionId: sessionId,
+      exerciseIndex: sessionSets.length + 1,
       exerciseId: selectedExercise.exerciseId,
       toFailure: toFailure,
       sets: setArrString, // e.g "Wt(reps),25(10),27(8)"

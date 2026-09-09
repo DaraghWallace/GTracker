@@ -75,7 +75,7 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
           })}
         </select>
         :
-        <div>{setEx.name}</div>
+        <div>{sessionExercise.exerciseIndex && `${sessionExercise.exerciseIndex}:`} {setEx.name}</div>
       }
       {editSetVisible && // toggle edit / delete && confirm delete / edit
         <div>
@@ -258,6 +258,7 @@ async function handleUpdateSessionExercise({
   const newSessionExercise = {
     sessionExerciseId: sessionExercise.sessionExerciseId,
     sessionId: sessionExercise.sessionId,
+    exerciseIndex: sessionExercise.exerciseIndex,
     exerciseId: newExercise,
     toFailure: sessionExercise.toFailure,
     sets: newSets,

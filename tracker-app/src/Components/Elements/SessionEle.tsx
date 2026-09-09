@@ -116,6 +116,7 @@ export default function SessionEle({ session, setSessionData, exercises, session
             exercises={exercises}
             setSessionExercises={setSessionExercises}
             setNewSetFormOpen={setNewSetFormOpen}
+            sessionSets={sessionSets}
           />
         </div>
       }

@@ -31,6 +31,7 @@ export type exercise = {
 export type sessionExercise = {
   sessionExerciseId: string // PK - uuid
   sessionId: string
+  exerciseIndex: number
   exerciseId: string
   toFailure: boolean
   sets: string
