@@ -10,7 +10,32 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  
+  /* ------------------------------------------------------------
+   * Color variables
+   * Centralised here so future palette/theme changes only need
+   * to happen in one place. Values are unchanged from before -
+   * this is purely a find/replace of literals with variables.
+   * ------------------------------------------------------------ */
+
+  /* Backgrounds, darkest to lightest */
+  --color-bg-primary: rgb(40, 40, 50);     /* main app/body background (was also #282832) */
+  --color-bg-tertiary: rgb(30, 30, 40);    /* hover states, help panels */
+  --color-bg-secondary: rgb(60, 60, 70);   /* headers, panels, cards (was also #3c3c46) */
+  --color-bg-elevated: rgb(50, 50, 60);    /* modals, button hover backgrounds */
+
+  /* Accent */
+  --color-accent: rgb(0, 200, 255);        /* brand cyan - borders, buttons, highlights */
+
+  /* Text */
+  --color-text-light: rgb(243, 244, 245);  /* light text on dark/accent surfaces (was also #f3f4f5) */
+  --color-text-input: rgb(240, 240, 250);  /* input field text */
+  --color-white: white;
+
+  /* Borders */
+  --color-border-subtle: #c8c8ff;          /* progress grid borders */
+
+  /* Overlays */
+  --color-overlay: rgba(0, 40, 50, 0.6);   /* modal/loading screen backdrop */
 }
 body{
   margin: 0;

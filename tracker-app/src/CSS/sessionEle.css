@@ -1,7 +1,7 @@
 @media (min-width: 750px) {
   .Session{
-    border: solid 1px rgb(0, 200, 255);
-    /* background-color: rgb(30, 30, 40); */
+    border: solid 1px var(--color-accent);
+    /* background-color: var(--color-bg-tertiary); */
     padding: 1px;
     width: 350px;
     max-width: 500px;
@@ -13,8 +13,8 @@
   }
 
   .s_header{
-    background-color: rgb(60, 60, 70);
-    border-bottom: solid 2px rgb(0, 200, 255);
+    background-color: var(--color-bg-secondary);
+    border-bottom: solid 2px var(--color-accent);
     font-size: 25px;
     font-weight: bold;
     padding-left: 3px;
@@ -38,26 +38,26 @@
   } */
 
 input[type=text] {
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
     border: 0;
 
-    color: rgb(240, 240, 250);
+    color: var(--color-text-input);
     font-size: 18px;
   }
 
   input[type=date] {
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
     border: 0;
 
-    color: rgb(240, 240, 250);
+    color: var(--color-text-input);
     font-size: 18px;
   }
 
   input[type=number] {
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
     border: 0;
     width:50px;
-    color: rgb(240, 240, 250);
+    color: var(--color-text-input);
     font-size: 18px;
     -moz-appearance: textfield;
   }
@@ -81,9 +81,9 @@ input[type=text] {
 
 @media (max-width: 750px) {
   .Session{
-    border-top: solid 1px rgb(0, 200, 255);
-    border-bottom: solid 1px rgb(0, 200, 255);
-    /* border-bottom: solid 1px rgb(0, 200, 255); */
+    border-top: solid 1px var(--color-accent);
+    border-bottom: solid 1px var(--color-accent);
+    /* border-bottom: solid 1px var(--color-accent); */
     margin-top: 10px;
   }
 
@@ -93,8 +93,8 @@ input[type=text] {
   }
 
   .s_header{
-    background-color: rgb(60, 60, 70);
-    border-bottom: solid 1px rgb(0, 200, 255);
+    background-color: var(--color-bg-secondary);
+    border-bottom: solid 1px var(--color-accent);
     font-size: 20px;
     font-weight: bold;
     padding: 3px;
@@ -117,27 +117,27 @@ input[type=text] {
   } */
 
   input[type=text] {
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
     width: 200px;
     border: 0;
 
-    color: rgb(240, 240, 250);
+    color: var(--color-text-input);
     font-size: 18px;
   }
 
   input[type=date] {
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
     border: 0;
 
-    color: rgb(240, 240, 250);
+    color: var(--color-text-input);
     font-size: 18px;
   }
 
   input[type=number] {
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
     border: 0;
     width: 50px;
-    color: rgb(240, 240, 250);
+    color: var(--color-text-input);
     font-size: 18px;
     -moz-appearance: textfield;
   }
@@ -149,9 +149,9 @@ input[type=text] {
   }
 
   .hide_button{
-    border-top: solid 1px rgb(40, 40, 50);
-    background-color: rgb(60, 60, 70);
-    color: white;
+    border-top: solid 1px var(--color-bg-primary);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-white);
     font-weight: bold;
     width: 100%;
     margin: 0;

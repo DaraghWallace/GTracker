@@ -1,7 +1,7 @@
 @media (min-width: 750px) {
   .Header{
-    background-color: rgb(40, 40, 50);
-    border-bottom: solid 3px rgb(0, 200, 255);;
+    background-color: var(--color-bg-primary);
+    border-bottom: solid 3px var(--color-accent);;
 
     display: flex;
     flex-direction: row;
@@ -24,8 +24,8 @@
 
 @media (max-width: 750px) {
   .Header{
-    background-color: rgb(40, 40, 50);
-    border-bottom: solid 3px rgb(0, 200, 255);;
+    background-color: var(--color-bg-primary);
+    border-bottom: solid 3px var(--color-accent);;
 
     display: flex;
     flex-direction: row;

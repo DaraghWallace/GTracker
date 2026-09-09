@@ -1,5 +1,5 @@
 .form{
-  background-color: rgba(0, 40, 50, 0.6);
+  background-color: var(--color-overlay);
   position: fixed;
   left: 0;
   top: 0;
@@ -17,8 +17,8 @@
   .f_panel{
     margin-top: 100px;
 
-    background-color: rgb(50, 50, 60);
-    border: solid 5px rgb(0, 200, 255);
+    background-color: var(--color-bg-elevated);
+    border: solid 5px var(--color-accent);
     
     
     min-width: 400px;
@@ -50,8 +50,8 @@
     width: 100%;
     height: 100%;
 
-    background-color: rgb(50, 50, 60);
-    border: solid 2px rgb(0, 200, 255);
+    background-color: var(--color-bg-elevated);
+    border: solid 2px var(--color-accent);
     
     height: fit-content;
     max-height: 100%;
@@ -164,7 +164,7 @@ select{
 }
 
 .f_p_exercises{
-  background-color: rgb(60, 60, 70);
+  background-color: var(--color-bg-secondary);
   display: flex;
   flex-direction: column;
   max-height: 700px;
@@ -173,7 +173,7 @@ select{
 }
 
 .f_p_sets{
-  background-color: rgb(60, 60, 70);
+  background-color: var(--color-bg-secondary);
   display: flex;
   flex-direction: column;
   max-height: 500px;
@@ -188,13 +188,13 @@ select{
 }
 
 .set_field{
-  border: solid 1px rgb(0, 200, 255);
+  border: solid 1px var(--color-accent);
   width: 100px;
   text-align: center;
 }
 
 .set_field_wide{
-  border: solid 1px rgb(0, 200, 255);
+  border: solid 1px var(--color-accent);
   width: 200px;
   text-align: center;
 }
@@ -207,9 +207,9 @@ select{
   width: fit-content;
 }
 .f_wide_button:hover{
-  background-color: rgb(50, 50, 60);
-  border: solid 1px rgb(0, 200, 255);
-  color: rgb(243, 244, 245);
+  background-color: var(--color-bg-elevated);
+  border: solid 1px var(--color-accent);
+  color: var(--color-text-light);
 }
 
 .f_e_cont{
@@ -227,9 +227,9 @@ select{
   width: fit-content;
   flex-grow: 1;
 }.f_e_button:hover{
-  background-color: rgb(30, 30, 40);
-  border: solid 1px rgb(0, 200, 255);
-  color: rgb(243, 244, 245);
+  background-color: var(--color-bg-tertiary);
+  border: solid 1px var(--color-accent);
+  color: var(--color-text-light);
 }
 
 .help_header{
@@ -240,8 +240,8 @@ select{
 }
 
 .help_fields{
-  background-color: rgb(30, 30, 40);
-  border: solid 3px rgb(0, 200, 255);
+  background-color: var(--color-bg-tertiary);
+  border: solid 3px var(--color-accent);
   margin-bottom: 20px;
   font-size: 20px;
   display: flex;
@@ -252,8 +252,8 @@ select{
 .help_text_feilds{
   margin-top: 20px;
   padding: 10px;
-  /* background-color: rgb(60, 60, 70); */
-  border-top: solid 1px rgb(0, 200, 255);
+  /* background-color: var(--color-bg-secondary); */
+  border-top: solid 1px var(--color-accent);
 }
 
 .corner_button{

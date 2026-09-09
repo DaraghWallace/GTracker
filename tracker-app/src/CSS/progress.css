@@ -8,11 +8,11 @@
   flex-direction: row;
   width: fit-content;
   /* min-width: 100%; */
-  border-top: 1px solid #c8c8ff;
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .G_row:last-child {
-  border-bottom: 1px solid #c8c8ff;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .G_cell_big,
@@ -25,42 +25,42 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  border-right: 1px solid #c8c8ff;
+  border-right: 1px solid var(--color-border-subtle);
 }
 
 .G_cell_big {
   position: sticky;
   left: 0;
   will-change: transform;
-  border-bottom: 1px solid #c8c8ff;
+  border-bottom: 1px solid var(--color-border-subtle);
   width: 170px;
   padding: 8px 10px;
-  background-color: #3c3c46;
-  box-shadow: 2px 0 0 #3c3c46, 4px 0 6px -3px rgba(0, 0, 0, 0.5);
-  color: #f3f4f5;
+  background-color: var(--color-bg-secondary);
+  box-shadow: 2px 0 0 var(--color-bg-secondary), 4px 0 6px -3px rgba(0, 0, 0, 0.5);
+  color: var(--color-text-light);
   font-weight: bold;
   text-align: left;
 }
 
 .G_cell_date {
   width: 120px;
-  background-color: #282832;
-  color: #f3f4f5;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-light);
   font-weight: bold;
   font-size: 14px;
 }
 
 .G_cell {
   width: 120px;
-  background-color: #282832;
-  color: #f3f4f5;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-light);
   font-size: 16px;
 }
 
 .G_cell_small {
   width: 80px;
-  background-color: #282832;
-  color: #f3f4f5;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-light);
   font-size: 16px;
 }
 
@@ -78,14 +78,14 @@
   grid-template-rows: auto 1fr;
   border-radius: 10px;
   overflow: hidden;
-  background-color: #3c3c46;
+  background-color: var(--color-bg-secondary);
 }
 
 .gi_header {
   width: 100%;
   padding: 10px;
-  background-color: #282832;
-  color: #f3f4f5;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-light);
   font-weight: 600;
   font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
   text-align: center;
@@ -109,6 +109,6 @@
   .graph_item {
     width: calc(50% - 5px);
     height: 550px;
-    border: 1px solid #282832;
+    border: 1px solid var(--color-bg-primary);
   }
 }

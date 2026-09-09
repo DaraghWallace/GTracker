@@ -1,6 +1,6 @@
 
 .Loading{
-  background-color: rgba(0, 40, 50, 0.6);
+  background-color: var(--color-overlay);
   position: fixed;
   left: 0;
   top: 0;
@@ -15,9 +15,9 @@
 }
 
 .L_panel{
-  border: solid 1px rgb(0, 200, 255);
+  border: solid 1px var(--color-accent);
   /* border-radius: 30%; */
-  background-color: rgb(40, 40, 50);
+  background-color: var(--color-bg-primary);
   width: 200px;
 
   text-align: center;
@@ -36,7 +36,7 @@
 
 .weightSlide {
   font-size: 80px;
-  color: rgb(0, 200, 255);
+  color: var(--color-accent);
   margin-top: 60px;
 	animation: L_slide_top 1s cubic-bezier(0.860, 0.000, 0.070, 1.000) infinite alternate ;
 }

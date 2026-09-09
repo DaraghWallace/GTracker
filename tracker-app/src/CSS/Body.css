@@ -3,12 +3,12 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background-color: rgb(40, 40, 50);
+  background-color: var(--color-bg-primary);
 }
 
 .b_header {
-  background-color: rgb(40, 40, 50);
-  border-bottom: solid 1px rgb(0, 200, 255);
+  background-color: var(--color-bg-primary);
+  border-bottom: solid 1px var(--color-accent);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -45,7 +45,7 @@
   }
 
   .b_h_filter{
-    background-color: rgb(60, 60, 70);
+    background-color: var(--color-bg-secondary);
     padding-left: 10px;
     padding-right: 10px;
     margin-right: 10px;
@@ -64,13 +64,13 @@
     font-size: 20px;
     margin-top: 5px;
     border: 0;
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
   }
 
   option{
     font-size: 18px;
     border: 0;
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
   }
 }
 
@@ -80,7 +80,7 @@
   .b_h_filter { flex-direction: column; font-size: 16px; }
   
   .b_h_buttons{
-    background-color: rgb(60, 60, 70);
+    background-color: var(--color-bg-secondary);
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -96,7 +96,7 @@
   }
 
   .b_h_filter{
-    background-color: rgb(60, 60, 70);
+    background-color: var(--color-bg-secondary);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -107,7 +107,7 @@
   }
 
   .b_h_buttons{
-    background-color: rgb(60, 60, 70);
+    background-color: var(--color-bg-secondary);
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -122,13 +122,13 @@
     font-size: 16px;
     margin-top: 5px;
     border: 0;
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
     margin: 0;
   }
 
   option{
     font-size: 14px;
     border: 0;
-    background-color: rgb(40, 40, 50);
+    background-color: var(--color-bg-primary);
   }
 }
