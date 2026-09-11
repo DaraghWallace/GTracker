@@ -38,7 +38,7 @@ function useIsMobile(breakpoint = MOBILE_BREAKPOINT): boolean {
 // Scoped to this component's charts (passed via `options`, not
 // ChartJS.defaults) so it can't leak styling into charts rendered elsewhere
 // in the app, e.g. ProgressGrid, if either ever adds its own Chart.js usage.
-function getChartOptions(isMobile: boolean): ChartOptions<"line"> {
+function getLineChartOptions(isMobile: boolean): ChartOptions<"line"> {
   const fontSize = isMobile ? 15 : 18;
   const gridColor = isMobile ? "#dddddd33" : "#dddddd"; // faint on mobile, solid on desktop
 
@@ -102,7 +102,7 @@ function getChartOptions(isMobile: boolean): ChartOptions<"line"> {
 
 const PALETTE = [
   "#ff0000", "#ff7300", "#fbff00", "#73ff00", "#00ffbf", "#00c8ff", "#cc00ff", 
-  "#ff006a", "#00aa17",
+  "#ff80b5", "#ffbb83", "#bfffc7", "#00aa17", "#4586ff",
 ];
 
 type Props = {
@@ -121,7 +121,7 @@ type Props = {
 */
 export default function ProgressGraph({ exercises, sessionData, sessionExercises, monthFilter, yearFilter }: Props) {
   const isMobile = useIsMobile();
-  const chartOptions = useMemo(() => getChartOptions(isMobile), [isMobile]);
+  const chartOptions = useMemo(() => getLineChartOptions(isMobile), [isMobile]);
 
   const dateArr = sessionData.map(s => s.dateDone);
   const strengthProgArr = buildStrengthProgArr(exercises, sessionData, sessionExercises);
@@ -154,17 +154,20 @@ export default function ProgressGraph({ exercises, sessionData, sessionExercises
           return point;
         });
 
-        return (
-          <div className="graph_item" key={group}>
-            <div className="gi_header">{group}</div>
-            <div className="gi_chart_wrap">
-              <Line
-                data={toChartJsData(chartData, activeExercises.map(e => e.exerciseName))}
-                options={chartOptions}
-              />
+        if (group != "Cardio") {
+          return (
+            <div className="graph_item" key={group}>
+              <div className="gi_header">{group}</div>
+              <div className="gi_chart_wrap">
+                <Line
+                  data={toChartJsData(chartData, activeExercises.map(e => e.exerciseName))}
+                  options={chartOptions}
+                />
+              </div>
             </div>
-          </div>
-        );
+          );          
+        }
+
       })}
     </div>
   );

@@ -4,8 +4,10 @@ import UserInForm from "./Forms/UserInForm";
 
 import "../CSS/Header.css"
 
-import { FaChartLine, FaDumbbell, FaArrowRightFromBracket, FaArrowRightToBracket, FaFrog, FaCircleQuestion, FaXmark, FaCheck, } from "react-icons/fa6";
+import { FaChartLine, FaDumbbell, FaArrowRightFromBracket, FaArrowRightToBracket, FaFrog, FaCircleQuestion, FaXmark, FaCheck, FaHandshakeAngle } from "react-icons/fa6";
 import { GiFrog } from "react-icons/gi";
+
+
 type Props = {
   currentUser: user | null;
   setCurrentUser: Dispatch<SetStateAction<user | null>>;
@@ -48,11 +50,19 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, hand
           <button aria-label="Dev page" onClick={() => setPage("dev")}>{page == "dev"? <GiFrog/> : <FaFrog />}</button>
         }
 
-        {currentUser && (page === "sessions" ?
+        {currentUser && (page != "progress" &&
           <button aria-label="View progress" onClick={() => setPage("progress")}><FaChartLine /></button>
-          :
+        )}
+
+        {currentUser && (page != "sessions" &&
           <button aria-label="View sessions" onClick={() => setPage("sessions")}><FaDumbbell /></button>
         )}
+
+        {currentUser && isDeveloper &&
+          currentUser && (page != "coaching" &&
+            <button aria-label="View coaching" onClick={() => setPage("coaching")}><FaHandshakeAngle /></button>
+          )
+        }
 
         {currentUser ?
           userOutConfirm ? 

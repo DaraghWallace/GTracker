@@ -141,14 +141,19 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
               </div>
               :
               <div className="s_e_s_w_num">
-                {set.hours}{":"}
-                {String(set.minutes).padStart(2, "0")}{":"}
-                {String(set.seconds).padStart(2, "0")}
-                {" | "}
+                {(set.hours !== 0 || set.minutes !== 0 || set.seconds !== 0) &&
+                  <>
+                    {set.hours}{":"}
+                    {String(set.minutes).padStart(2, "0")}{":"}
+                    {String(set.seconds).padStart(2, "0")}
+                    {" | "}
+                  </>
+                }
+
                 {set.distance}
                 {" km | RPE "}
                 {set.rpe} {" | "}
-                {set.weight >=0 && `${set.weight} Kgs | `}
+                {(set.weight >=0 ) && `${set.weight}Kgs | `}
                 {formatPace(set.hours,set.minutes,set.seconds,set.distance)}
               </div>
             }
@@ -221,7 +226,7 @@ function handleUpdateSetOfReps({ index, key, value, newSets, setNewSets, isCardi
     const newWeight = key === "weight" ? value : weight;
     const newRpe = key === "rpe" ? value : rpe;
 
-    entries[index] = `${h}:${m}:${s}x${newDistance}x${newWeight}x${newRpe}`;
+    entries[index] = `${h}:${m}:${s}x${newDistance}x${newRpe}x${newWeight}`;
   } else {
     const [weight = "0", reps = "0"] = (entries[index] ?? "").split("x");
     const newWeight = key === "weight" ? value : weight;
@@ -316,7 +321,3 @@ function formatPace(hours: number, minutes: number, seconds: number, distanceKm:
 
   return `${paceMin}:${String(paceSec).padStart(2, "0")}/km`;
 }
-
-// function handleIndex(params:type) {
-  
-// }

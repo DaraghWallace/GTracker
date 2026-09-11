@@ -71,6 +71,7 @@ function renderWeightRow(buckets: Bucket[], weightProgArr: WeightRowItm[]) {
 
 function renderExerciseRows(buckets: Bucket[], strengthProgArr: StrengthRowItm[], groupFilter: string) {
   return strengthProgArr
+    .filter(itm => itm.group !== "Cardio")
     .filter(itm => groupFilter === "All" || itm.group === groupFilter)
     .map(itm => ({
       itm,

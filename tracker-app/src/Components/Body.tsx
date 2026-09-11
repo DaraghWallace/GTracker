@@ -10,6 +10,7 @@ import "../CSS/form.css"
 
 import { FaPlus, FaPen, FaXmark, FaChartLine, FaTableList } from "react-icons/fa6";
 import DevRoom from "./DevRoom";
+import Coaching from "./Coaching";
 
 const MONTH_FILTER_MONTHLY = 13;
 const MONTH_FILTER_YEARLY = 14;
@@ -74,7 +75,7 @@ export default function Body({ currentUser, sessionData, setSessionData, exercis
   const [progressDisplay, setProgressDisplay] = useState<string>("grid");
 
   return (<div className="Body">
-    {page !== "dev" &&
+    {(page !== "dev" && page !== "coaching")&&
       <div className="b_header">
         {renderFilters({
           page, exercises, setMonthFilter, monthFilter, setYearFilter, yearFilter,
@@ -172,6 +173,8 @@ function renderPageContent({
       )
     case "dev":
       return <DevRoom user={currentUser} exercises={exercises} />
+    case "coaching":
+      return <Coaching user={currentUser} />
     default:
       return null;
   }
@@ -227,7 +230,9 @@ function renderFilters({
           <div>Group Filter: </div>
           <select onChange={(e) => setGroupFilter(e.target.value)} value={groupFilter}>
             <option value="All">All</option>
-            {mGroupList.map(group => <option value={group} key={group}>{group}</option>)}
+            {mGroupList
+              .filter(group => group !== "Cardio")
+              .map(group => <option value={group} key={group}>{group}</option>)}
           </select>
         </div>
       }
