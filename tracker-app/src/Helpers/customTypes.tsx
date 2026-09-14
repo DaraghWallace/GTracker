@@ -3,7 +3,6 @@ export type user = {
   email: string
   nickname: string
   userType: string
-  CurrentCoachId: string | null,
   // height_cm: number,
   cur_weight: number
   tar_weight: number
@@ -11,12 +10,14 @@ export type user = {
 }
 
 export type session = {
-  sessionId: string;
-  userId: string;
-  date: string;
-  focus?: string;
+  sessionId: string // PK
+  userId: string
+  userWeight: number
+  dateDone: string
+  focus: string | null
+  notes: string | null
   createdBy?: string;
-};
+}
 
 export type exercise = {
   exerciseId: string // PK - uuid
