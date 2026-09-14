@@ -15,7 +15,10 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   const groups = event.requestContext.authorizer?.claims?.["cognito:groups"] ?? "";
-  if (!groups.includes("trainers")) {
+  const userType = event.requestContext.authorizer?.claims?.["custom:userType"];
+  const isTrainer = groups.includes("trainers") || userType === "developer";
+
+  if (!isTrainer) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not a trainer" }) };
   }
 
