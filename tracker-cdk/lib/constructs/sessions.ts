@@ -8,6 +8,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 interface SessionsProps {
   api: apigateway.RestApi;
   authorizer: apigateway.CognitoUserPoolsAuthorizer;
+  userProfilesTable: dynamodb.Table;
 }
 
 export class Sessions extends Construct {
@@ -15,7 +16,7 @@ export class Sessions extends Construct {
   constructor(scope: Construct, id: string, props: SessionsProps) {
     super(scope, id);
 
-    const { api, authorizer } = props;
+    const { api, authorizer, userProfilesTable  } = props;
 
     // --- Table ---
     this.table = new dynamodb.Table(this, "Table", {
@@ -43,6 +44,16 @@ export class Sessions extends Construct {
     this.table.grantReadWriteData(updateFn);
     this.table.grantReadWriteData(deleteFn);
 
+    const createForClientFn = new NodejsFunction(this, "CreateForClientFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/coachClients/createSessionForClient.ts",
+      environment: {
+        SESSIONS_TABLE: this.table.tableName,
+        USER_PROFILES_TABLE: userProfilesTable.tableName,
+      },
+      bundling: { forceDockerBundling: false },
+    });
+
     // --- Routes ---
     const sessions = api.root.addResource("sessions");
     const sessionById = sessions.addResource("{sessionId}");
@@ -52,6 +63,8 @@ export class Sessions extends Construct {
     this.addMethod(sessionById, "PUT",    updateFn, authorizer);
     this.addMethod(sessionById, "DELETE", deleteFn, authorizer);
   }
+
+  
 
   private fn(id: string, entry: string, tableName: string) {
     return new NodejsFunction(this, id, {

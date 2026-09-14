@@ -29,12 +29,17 @@ export class TrackerCdkStack extends cdk.Stack {
     new cdk.CfnOutput(this, "UserPoolClientId", { value: auth.userPoolClient.userPoolClientId });
 
     //table,
-    new UserProfiles(this, 'UserProfiles', { userPool: auth.userPool });
+    const userProfiles = new UserProfiles(this, 'UserProfiles', {
+      userPool: auth.userPool,
+      api,
+      authorizer: auth.authorizer,
+    });
 
     //table, (c-r-u-d)
-    const sessions = new Sessions(this, 'Sessions', { 
-      api, 
-      authorizer: auth.authorizer 
+    const sessions = new Sessions(this, 'Sessions', {
+      api,
+      authorizer: auth.authorizer,
+      userProfilesTable: userProfiles.table,
     });
 
     //table, Lamda(c-r-u-d)

@@ -3,6 +3,7 @@ export type user = {
   email: string
   nickname: string
   userType: string
+  CurrentCoachId: string | null,
   // height_cm: number,
   cur_weight: number
   tar_weight: number

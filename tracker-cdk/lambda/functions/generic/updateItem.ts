@@ -15,6 +15,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   let key: Record<string, string> | undefined;
   let checkOwnerManually = false;
   let trackOwner = true;
+  let requireDeveloper = false;
 
   switch (process.env.TABLE_NAME) {
     case "Sessions":
@@ -32,6 +33,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       if (event.pathParameters?.exerciseId) {
         key = { exerciseId: event.pathParameters.exerciseId };
         trackOwner = false;
+        requireDeveloper = true;
       }
       break;
     default:
@@ -61,6 +63,13 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
   if (checkOwnerManually && existing.Item.userId !== callerSub) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Forbidden" }) };
+  }
+
+  if (requireDeveloper) {
+    const userType = event.requestContext.authorizer?.claims?.["custom:userType"];
+    if (userType !== "developer") {
+      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Forbidden" }) };
+    }
   }
 
   const { userId, ...safeBody } = JSON.parse(event.body);
