@@ -287,7 +287,7 @@ function MemberView({ user }: { user: user }) {
         {sessions.length === 0 && <div>No sessions logged yet.</div>}
         <ul>
           {sessions.map((s) => (
-            <li key={s.sessionId}>{s.date} — {s.focus ?? "Session"}</li>
+            <li key={s.sessionId}>{s.dateDone} — {s.focus ?? "Session"}</li>
           ))}
         </ul>
       </div>
