@@ -58,11 +58,11 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, hand
           <button aria-label="View sessions" onClick={() => setPage("sessions")}><FaDumbbell /></button>
         )}
 
-        {currentUser && isDeveloper &&
-          currentUser && (page != "coaching" &&
+        {/* {currentUser && isDeveloper && */}
+{          currentUser && (page != "coaching" &&
             <button aria-label="View coaching" onClick={() => setPage("coaching")}><FaHandshakeAngle /></button>
-          )
-        }
+          )}
+        {/* } */}
 
         {currentUser ?
           userOutConfirm ? 
