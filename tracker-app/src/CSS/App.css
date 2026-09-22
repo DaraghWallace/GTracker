@@ -1,5 +1,7 @@
 @media (min-width: 750px) {
   .App {
+    border-left: 1px solid var(--color-accent);
+    border-right: 1px solid var(--color-accent);
     position: fixed;
     top: 0; bottom: 0; left: 10%; right: 10%;
     display: flex;
@@ -50,12 +52,14 @@
   .hello {
     background-color: var(--color-bg-secondary);
     padding: var(--space-md);
-    font-size: 20px;
+    font-size: 25px;
     line-height: 1.6;
     overflow-y: auto;
     height: 100%;      
     box-sizing: border-box; 
+    text-align: center;
   }
+
   .imgs{
     display: flex;
     flex-direction: column;
@@ -64,12 +68,14 @@
     font-weight: 600;
     color: var(--color-text-secondary);
   }
+  
   .dt_img{
     width: 100%;
     margin-top: 15px;
     border-radius: var(--radius-lg);
     border-bottom: 3px solid var(--color-accent);
     box-shadow: var(--shadow-md);
+    border-radius: var(--radius-md);
   }
 
   .mob_img{

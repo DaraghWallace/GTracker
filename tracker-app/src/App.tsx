@@ -93,6 +93,7 @@ export default function App() {
             email: attrs.email as string,
             nickname: attrs.nickname as string,
             userType: attrs.userType as string,
+            height_cm: 0,
             cur_weight: 0,
             tar_weight: 0,
           };
@@ -144,7 +145,6 @@ export default function App() {
           </div>
 
           And keep an eye out for new features and updates like:
-          <div>- Cardio tracking</div>
           <div>- Trainer / client features</div>
         </div>
       )}

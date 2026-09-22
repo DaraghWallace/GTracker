@@ -3,7 +3,7 @@ export type user = {
   email: string
   nickname: string
   userType: string
-  // height_cm: number,
+  height_cm: number,
   cur_weight: number
   tar_weight: number
   // clients: string[] //if member type is trainer

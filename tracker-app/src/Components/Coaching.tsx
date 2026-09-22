@@ -2,14 +2,14 @@ import { useState, useEffect } from "react";
 import type { user } from "../Helpers/customTypes";
 import { apiGet, apiPost } from "../Helpers/api";
 
+import "../CSS/Coaching.css";
+import { FaUserPlus , FaXmark, FaMagnifyingGlass , FaHourglassHalf } from "react-icons/fa6";
+import CoachClientcard from "./Elements/CoachClientCard";
+
 type Props = {
   user: user;
 }
 
-type Client = {
-  userId: string;
-  nickname: string;
-};
 
 type FoundUser = {
   userId: string;
@@ -18,8 +18,9 @@ type FoundUser = {
 
 export default function Coaching({ user }: Props) {
   switch (user.userType) {
-    case "trainer":
     case "developer":
+      return <TrainerView />;
+    case "trainer":
       return <TrainerView />;
     case "member":
       return <div>Coaching features coming soon.</div>;
@@ -31,7 +32,7 @@ export default function Coaching({ user }: Props) {
 
 function TrainerView() {
   const [findClientOpen, setFindClientOpen] = useState(false);
-  const [clients, setClients] = useState<Client[]>([]);
+  const [clients, setClients] = useState<user[]>([]);
   const [loadingClients, setLoadingClients] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,33 +62,35 @@ function TrainerView() {
   }
 
   return (
-    <div>
-      {error && <div style={{ color: "red" }}>{error}</div>}
+    <div className="Coaching">
+      <div className="tr_header">
+        <div>Clients</div>
 
-      <button onClick={() => setFindClientOpen(!findClientOpen)}>
-        {findClientOpen ? "x" : "+"}
-      </button>
-      {findClientOpen && (
-        <FindClientForm
-          onAdded={() => {
-            setFindClientOpen(false);
-            loadClients();
-          }}
-        />
-      )}
+        {error && <div style={{ color: "red" }}>{error}</div>}
 
-      <div>
-        <h3>Clients</h3>
+        <button onClick={() => setFindClientOpen(!findClientOpen)}>
+          {findClientOpen ? <FaXmark/> : <FaUserPlus/>}
+        </button>
+      </div>
+
+      <div className="tr_client_search">
+        {findClientOpen && (
+          <FindClientForm
+            onAdded={() => {
+              setFindClientOpen(false);
+              loadClients();
+            }}
+          />
+        )}        
+      </div>
+
+
+      <div className="c_content">
         {loadingClients && <div>Loading...</div>}
         {!loadingClients && clients.length === 0 && <div>No clients yet.</div>}
-        <ul>
-          {clients.map((c) => (
-            <li key={c.userId}>
-              {c.nickname}
-              <button onClick={() => handleRemove(c.userId)}>Remove</button>
-            </li>
-          ))}
-        </ul>
+        {clients.map((client) => (
+          <CoachClientcard key={client.userId} client={client} handleRemove={handleRemove}/>
+        ))}
       </div>
     </div>
   );
@@ -125,18 +128,18 @@ function FindClientForm({ onAdded }: { onAdded: () => void }) {
   }
 
   return (
-    <div>
+    <div className="tr_cs_input">
       {error && <div style={{ color: "red" }}>{error}</div>}
       Email: <input value={email} onChange={(e) => setEmail(e.target.value)} />
       <button onClick={handleFind} disabled={searching}>
-        {searching ? "..." : "?"}
+        {searching ? <FaHourglassHalf /> : <FaMagnifyingGlass/>}
       </button>
 
       {found && (
         <div>
           Is this your client — <strong>{found.nickname}</strong>?
-          <button onClick={handleConfirmAdd}>Confirm & Add</button>
-          <button onClick={() => setFound(null)}>Cancel</button>
+          <button onClick={handleConfirmAdd}><FaUserPlus/></button>
+          <button onClick={() => setFound(null)}><FaXmark/></button>
         </div>
       )}
     </div>

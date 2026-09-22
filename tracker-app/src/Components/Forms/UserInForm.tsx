@@ -23,10 +23,15 @@ type Props = {
 */
 export default function UserInForm({ setCurrentUser, loadUserData, setUserInFormOpen }: Props) {
   const [tab, setTab] = useState<Tab>("login");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
+  const [currentWeight, setCurrentWeight] = useState(0);
+  const [targetWeight, setTargetWeight] = useState(0);
+  const [height, setHeight] = useState(0);
   const [userType, setUserType] = useState<UserType>("member");
+  
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
@@ -45,6 +50,7 @@ export default function UserInForm({ setCurrentUser, loadUserData, setUserInForm
         email: attrs.email as string,
         nickname: attrs.nickname as string,
         userType: attrs.userType as string,
+        height_cm: 0,
         cur_weight: 0,
         tar_weight: 0,
       });
@@ -57,7 +63,7 @@ export default function UserInForm({ setCurrentUser, loadUserData, setUserInForm
 
   async function handleSignUp() {
     try {
-      await register(email, password, nickname, userType);
+      await register(email, password, nickname, height, currentWeight, targetWeight, userType);
       setPendingEmail(email);
       switchTab("confirm");
     } catch (e: unknown) {
@@ -88,7 +94,7 @@ export default function UserInForm({ setCurrentUser, loadUserData, setUserInForm
         {tab === "login" && (
           <div className="f_p_col">
             <div className="thick_text">Welcome Back</div>
-            <input type="email" placeholder="Email" aria-label="Email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
+            <input type="text" placeholder="Email" aria-label="Email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
             <input type="password" placeholder="Password" aria-label="Password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} />
 
             <div className="f_p_row_c">
@@ -101,9 +107,15 @@ export default function UserInForm({ setCurrentUser, loadUserData, setUserInForm
         {tab === "signup" && (
           <div className="f_p_col">
             <div className="thick_text">Welcome</div>
-            <input type="email" placeholder="Email" aria-label="Email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
+            <input type="text" placeholder="Email" aria-label="Email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
             <input type="text" placeholder="Nickname" aria-label="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} />
             <input placeholder="Password" type="password" aria-label="Password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} />
+
+            <div>Height (cm): <input type="number" placeholder="000" value={currentWeight} onChange={e => setHeight(Number(e.target.value))}/>cm</div>
+
+            <div>Current Weight: <input type="number" placeholder="000" value={currentWeight} onChange={e => setCurrentWeight(Number(e.target.value))}/>Kgs</div>
+            <div>Target Weight: <input type="number" placeholder="000" value={targetWeight} onChange={e => setTargetWeight(Number(e.target.value))}/>Kgs</div>
+
             <select value={userType} onChange={e => setUserType(e.target.value as UserType)}>
               <option value="member">Member</option>
               <option value="trainer">Trainer</option>

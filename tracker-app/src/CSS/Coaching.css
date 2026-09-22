@@ -1,0 +1,71 @@
+.Coaching{
+}
+
+/* Trainer */
+.tr_header{
+  font-size: 20px;
+
+  padding: var(--space-xs) var(--space-md);
+
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  font-size: 24px;
+
+  border-bottom: 1px solid var(--color-accent);
+
+  display: flex;
+  justify-content: space-between;
+}
+
+.tr_client_search{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.tr_cs_input{
+  background-color: rgb(59, 59, 59);
+}
+
+.c_content{
+  padding: var(--space-xs) var(--space-md);
+}
+
+.client_card{
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  width: 350px;
+  max-width: 500px;
+  flex-grow: 4;
+}
+
+.cc_header{
+  width: 100%;
+  display: flex;
+  padding-left: var(--space-xs);
+  padding-right: var(--space-xs);
+  
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: var(--color-accent);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-size: 24px;
+  color: var(--color-bg-primary);
+}
+
+.cc_content{
+  padding: var(--space-xs) var(--space-md);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.content_field{
+  
+  border-bottom: 1px solid var(--color-accent);
+
+}
