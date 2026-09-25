@@ -30,6 +30,8 @@ export async function register(email: string, password: string, nickname: string
         "height_cm": String(height),
         "cur_weight": String(currentWeight),
         "tar_weight": String(targetWeight),
+        // "currentTrainerId": currentTrainerId,
+        // "goal": goal,
         "custom:userType": userType,
       }
     }

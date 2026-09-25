@@ -53,6 +53,8 @@ export default function UserInForm({ setCurrentUser, loadUserData, setUserInForm
         height_cm: 0,
         cur_weight: 0,
         tar_weight: 0,
+        currentTrainerId: attrs.userType as string,
+        goal: attrs.userType as string,
       });
       await loadUserData();
       setUserInFormOpen(false)

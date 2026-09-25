@@ -15,6 +15,9 @@ interface UserProfilesProps {
 
 export class UserProfiles extends Construct {
   public readonly table: dynamodb.Table;
+  public readonly clientsResource: apigateway.Resource;
+  public readonly coachingResource: apigateway.Resource;
+
 
   constructor(scope: Construct, id: string, props: UserProfilesProps) {
     super(scope, id);
@@ -98,7 +101,12 @@ export class UserProfiles extends Construct {
     this.addMethod(coaching.addResource('find-user'), 'GET', findByEmailFn, authorizer);
     this.addMethod(coaching.addResource('add-client'), 'POST', addClientFn, authorizer);
     this.addMethod(coaching.addResource('remove-client'), 'POST', removeClientFn, authorizer);
-    this.addMethod(coaching.addResource('clients'), 'GET', listClientsFn, authorizer);
+    // this.addMethod(coaching.addResource('clients'), 'GET', listClientsFn, authorizer);
+
+    const clientsResource = coaching.addResource('clients');
+    this.addMethod(clientsResource, 'GET', listClientsFn, authorizer);
+    this.clientsResource = clientsResource;
+    this.coachingResource = coaching;
   }
 
   private addMethod(

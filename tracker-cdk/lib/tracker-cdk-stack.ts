@@ -40,6 +40,7 @@ export class TrackerCdkStack extends cdk.Stack {
       api,
       authorizer: auth.authorizer,
       userProfilesTable: userProfiles.table,
+      clientsResource: userProfiles.clientsResource,
     });
 
     //table, Lamda(c-r-u-d)
@@ -52,7 +53,9 @@ export class TrackerCdkStack extends cdk.Stack {
     new SessionExercises(this, 'SessionExercises', { 
       api, 
       authorizer: auth.authorizer,
-      sessionsTable: sessions.table
+      sessionsTable: sessions.table,
+      userProfilesTable: userProfiles.table,
+      coachingResource: userProfiles.coachingResource,
     });
   }
 }

@@ -28,3 +28,7 @@ export async function apiPost(path: string, data: unknown) {
   if (!res.ok) throw new Error(body?.error ?? `Request failed (${res.status})`);
   return body;
 }
+
+export async function getClientLatestSession(clientId: string) {
+  return apiGet(`/coaching/clients/${clientId}/latest-session`);
+}

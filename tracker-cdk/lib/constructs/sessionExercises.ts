@@ -9,13 +9,15 @@ interface SessionExercisesProps {
   api: apigateway.RestApi;
   authorizer: apigateway.CognitoUserPoolsAuthorizer;
   sessionsTable: dynamodb.Table;
+  userProfilesTable: dynamodb.Table;
+  coachingResource: apigateway.Resource;
 }
 
 export class SessionExercises extends Construct {
   constructor(scope: Construct, id: string, props: SessionExercisesProps) {
     super(scope, id);
-    const { api, authorizer, sessionsTable } = props;
-
+    const { api, authorizer, sessionsTable, userProfilesTable, coachingResource } = props;
+    
     const table = new dynamodb.Table(this, "Table", {
       tableName: "SessionExercises",
       partitionKey: { name: "sessionExerciseId", type: dynamodb.AttributeType.STRING },
@@ -40,6 +42,21 @@ export class SessionExercises extends Construct {
     table.grantReadWriteData(updateFn);
     table.grantReadWriteData(deleteFn);
 
+    const getClientSessionExercisesFn = new NodejsFunction(this, "GetClientSessionExercisesFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/coachClients/getClientSessionExercises.ts",
+      environment: {
+        SESSION_EXERCISES_TABLE: table.tableName,
+        SESSIONS_TABLE: sessionsTable.tableName,
+        USER_PROFILES_TABLE: userProfilesTable.tableName,
+      },
+      bundling: { forceDockerBundling: false },
+    });
+
+    table.grantReadData(getClientSessionExercisesFn);
+    sessionsTable.grantReadData(getClientSessionExercisesFn);
+    userProfilesTable.grantReadData(getClientSessionExercisesFn);
+
     // --- Routes ---
     const sessionExercises = api.root.addResource("sessionExercises");
     const sessionExerciseById = sessionExercises.addResource("{sessionExerciseId}");
@@ -48,8 +65,14 @@ export class SessionExercises extends Construct {
     this.addMethod(sessionExercises,    "GET",    getFn,    authorizer);
     this.addMethod(sessionExerciseById, "PUT",    updateFn, authorizer);
     this.addMethod(sessionExerciseById, "DELETE", deleteFn, authorizer);
+
+    const coachingSessions = coachingResource.addResource("sessions");
+    const coachingSessionById = coachingSessions.addResource("{sessionId}");
+    this.addMethod(coachingSessionById.addResource("exercises"), "GET", getClientSessionExercisesFn, authorizer);
   }
 
+
+  
   private fn(id: string, entry: string, tableName: string, otherTableName?: string) {
     return new NodejsFunction(this, id, {
       runtime: lambda.Runtime.NODEJS_22_X,

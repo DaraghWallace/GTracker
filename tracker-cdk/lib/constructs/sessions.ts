@@ -9,6 +9,7 @@ interface SessionsProps {
   api: apigateway.RestApi;
   authorizer: apigateway.CognitoUserPoolsAuthorizer;
   userProfilesTable: dynamodb.Table;
+  clientsResource: apigateway.Resource;
 }
 
 export class Sessions extends Construct {
@@ -16,7 +17,7 @@ export class Sessions extends Construct {
   constructor(scope: Construct, id: string, props: SessionsProps) {
     super(scope, id);
 
-    const { api, authorizer, userProfilesTable  } = props;
+    const { api, authorizer, userProfilesTable, clientsResource  } = props;
 
     // --- Table ---
     this.table = new dynamodb.Table(this, "Table", {
@@ -53,6 +54,21 @@ export class Sessions extends Construct {
       },
       bundling: { forceDockerBundling: false },
     });
+    const getLatestSessionFn = new NodejsFunction(this, "GetLatestSessionFn", {
+    runtime: lambda.Runtime.NODEJS_22_X,
+    entry: "lambda/functions/coachClients/getClientLatestSession.ts",
+    environment: {
+      SESSIONS_TABLE: this.table.tableName,
+      USER_PROFILES_TABLE: userProfilesTable.tableName,
+    },
+    bundling: { forceDockerBundling: false },
+  });
+
+  this.table.grantReadData(getLatestSessionFn);
+  userProfilesTable.grantReadData(getLatestSessionFn);
+
+  const clientById = clientsResource.addResource("{clientId}");
+  this.addMethod(clientById.addResource("latest-session"), "GET", getLatestSessionFn, authorizer);
 
     // --- Routes ---
     const sessions = api.root.addResource("sessions");
@@ -63,8 +79,6 @@ export class Sessions extends Construct {
     this.addMethod(sessionById, "PUT",    updateFn, authorizer);
     this.addMethod(sessionById, "DELETE", deleteFn, authorizer);
   }
-
-  
 
   private fn(id: string, entry: string, tableName: string) {
     return new NodejsFunction(this, id, {
@@ -87,3 +101,4 @@ export class Sessions extends Construct {
     });
   }
 }
+

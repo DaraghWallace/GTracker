@@ -6,7 +6,8 @@ export type user = {
   height_cm: number,
   cur_weight: number
   tar_weight: number
-  // clients: string[] //if member type is trainer
+  currentTrainerId: string
+  goal: string
 }
 
 export type session = {

@@ -86,7 +86,6 @@ export default function App() {
     fetchAuthSession()
       .then(session => {
         if (!session.tokens) return;
-
         getUserAttributes().then(async attrs => {
           const user: user = {
             userId: attrs.userId as string,
@@ -96,6 +95,8 @@ export default function App() {
             height_cm: 0,
             cur_weight: 0,
             tar_weight: 0,
+            currentTrainerId: "",
+            goal: "",
           };
           setCurrentUser(user);
           await loadUserData();
