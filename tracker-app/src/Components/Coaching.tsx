@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { user } from "../Helpers/customTypes";
+import type { exercise, user } from "../Helpers/customTypes";
 import { apiGet, apiPost } from "../Helpers/api";
 
 import "../CSS/Coaching.css";
@@ -8,6 +8,7 @@ import CoachClientcard from "./Elements/CoachClientCard";
 
 type Props = {
   user: user;
+  exercises: exercise[]
 }
 
 
@@ -16,12 +17,12 @@ type FoundUser = {
   nickname: string;
 };
 
-export default function Coaching({ user }: Props) {
+export default function Coaching({ user, exercises }: Props) {
   switch (user.userType) {
     case "developer":
-      return <TrainerView />;
+      return <TrainerView exercises={exercises}/>;
     case "trainer":
-      return <TrainerView />;
+      return <TrainerView exercises={exercises}/>;
     case "member":
       return <div>Coaching features coming soon.</div>;
     default:
@@ -30,7 +31,7 @@ export default function Coaching({ user }: Props) {
   }
 }
 
-function TrainerView() {
+function TrainerView({ exercises }: { exercises: exercise[] }) {
   const [findClientOpen, setFindClientOpen] = useState(false);
   const [clients, setClients] = useState<user[]>([]);
   const [loadingClients, setLoadingClients] = useState(true);
@@ -89,7 +90,7 @@ function TrainerView() {
         {loadingClients && <div>Loading...</div>}
         {!loadingClients && clients.length === 0 && <div>No clients yet.</div>}
         {clients.map((client) => (
-          <CoachClientcard key={client.userId} client={client} handleRemove={handleRemove}/>
+          <CoachClientcard key={client.userId} client={client} handleRemove={handleRemove} exercises={exercises}/>
         ))}
       </div>
     </div>

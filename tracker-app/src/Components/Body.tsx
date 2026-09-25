@@ -174,7 +174,7 @@ function renderPageContent({
     case "dev":
       return <DevRoom user={currentUser} exercises={exercises} />
     case "coaching":
-      return <Coaching user={currentUser} />
+      return <Coaching user={currentUser} exercises={exercises} />
     default:
       return null;
   }

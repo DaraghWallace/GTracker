@@ -1,21 +1,25 @@
 import { useState } from "react";
-import type { user, session } from "../../Helpers/customTypes";
-import { getClientLatestSession } from "../../Helpers/api";
+import type { user, session, sessionExercise, exercise } from "../../Helpers/customTypes";
+import { getClientLatestSession, getClientSessionExercises} from "../../Helpers/api";
 
-import { FaUserLargeSlash } from "react-icons/fa6";
+import { FaUserLargeSlash, FaPlus } from "react-icons/fa6";
 
 type Props = {
   client: user;
   handleRemove: (clientId: string) => void;
+  exercises: exercise[]
 }
 
-export default function CoachClientcard({ client, handleRemove }: Props) {
+export default function CoachClientcard({ client, handleRemove, exercises }: Props) {
   const [confirmRemove, setConfirmRemove] = useState(false);
+
   const [showLatest, setShowLatest] = useState(false);
   const [latestSession, setLatestSession] = useState<session | null | undefined>(undefined); // undefined = not fetched yet
   const [loadingLatest, setLoadingLatest] = useState(false);
   const [latestError, setLatestError] = useState<string | null>(null);
-
+  const [clientExercises, setClientExercises] = useState<sessionExercise[] | undefined>(undefined);
+  const [loadingExercises, setLoadingExercises] = useState(false);
+  
   async function handleToggleLatest() {
     const next = !showLatest;
     setShowLatest(next);
@@ -25,6 +29,12 @@ export default function CoachClientcard({ client, handleRemove }: Props) {
       try {
         const result = await getClientLatestSession(client.userId);
         setLatestSession(result);
+        if (result) {
+          setLoadingExercises(true);
+          const exResult = await getClientSessionExercises(result.sessionId);
+          setClientExercises(exResult);
+          setLoadingExercises(false);
+        }
       } catch (e: unknown) {
         setLatestError(e instanceof Error ? e.message : "Something went wrong");
       } finally {
@@ -65,10 +75,25 @@ export default function CoachClientcard({ client, handleRemove }: Props) {
           </div>
         )}
       </div>
+
+      
     )}
 
+    {showLatest && (!loadingLatest && latestSession && (
+      <div className="cc_latest_exercises">
+        {loadingExercises && <div>Loading exercises...</div>}
+        {!loadingExercises && clientExercises?.length === 0 && <div>No exercises logged for this session.</div>}
+        {!loadingExercises && clientExercises?.map((ex) => (
+          <div key={ex.sessionExerciseId}>
+            <div>{getExercise(ex.exerciseId, exercises).name}</div>
+            <div>{displaySets(ex.sets)}</div>
+          </div>
+        ))}
+      </div>
+    ))}
+
     <div className="cc_footer">
-      <button>+</button>
+      <button><FaPlus/></button>
       <button onClick={handleToggleLatest}>M</button>
     </div>
   </div>
@@ -77,4 +102,28 @@ export default function CoachClientcard({ client, handleRemove }: Props) {
 function displayDate(date: string): string {
   const d = new Date(date);
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+}
+
+function getExercise(exerciseId: string, exercises: exercise[]): exercise {
+  const thisExercise = exercises.find(e => e.exerciseId === exerciseId);
+
+  if (!thisExercise) {
+    return {
+      exerciseId: exerciseId,
+      name: "Exercise Not Found",
+      group: "N/A",
+      target: "N/A",
+      ppl: "N/A",
+      author: "N/A"
+    }
+  } else return thisExercise
+}
+
+function displaySets(setString: string) {
+  const setArr = setString.split(",")
+  
+  return (setArr.map((set, index)=>{
+    const wxr = set.split("x")
+    return <div key={index}>{`${wxr[0]}Kgs x ${wxr[1]}`}</div>
+  }))
 }

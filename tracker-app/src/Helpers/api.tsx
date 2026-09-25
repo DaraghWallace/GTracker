@@ -32,3 +32,7 @@ export async function apiPost(path: string, data: unknown) {
 export async function getClientLatestSession(clientId: string) {
   return apiGet(`/coaching/clients/${clientId}/latest-session`);
 }
+
+export async function getClientSessionExercises(sessionId: string) {
+  return apiGet(`/coaching/sessions/${sessionId}/exercises`);
+}
