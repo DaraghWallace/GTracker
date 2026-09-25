@@ -93,6 +93,10 @@ function TrainerView({ exercises }: { exercises: exercise[] }) {
           <CoachClientcard key={client.userId} client={client} handleRemove={handleRemove} exercises={exercises}/>
         ))}
       </div>
+
+      <div className="tr_header">
+        <div>Sessions</div>
+      </div>
     </div>
   );
 }

@@ -57,10 +57,16 @@ export default function CoachClientcard({ client, handleRemove, exercises }: Pro
       }
     </div>
     <div className="cc_content">
-      <div>Height: {client.height_cm}cm</div>
-      <div>Current Weight: {client.cur_weight}Kgs</div>
-      <div>Target Weight: {client.tar_weight}Kgs</div>
-      <div>Goal: {client.goal}</div>
+      <div className="cc_c_bar_light">Height: {client.height_cm}cm</div>
+      <div className="cc_c_bar_dark">Starting Weight: {client.cur_weight}Kgs</div>
+      <div className="cc_c_bar_light">Target Weight: {client.tar_weight}Kgs</div>
+      <div className="cc_c_bar_dark">Goal: {client.goal}</div>
+
+      {!showLatest && (
+        <button className="load_sesh_button" onClick={handleToggleLatest}>
+          Show Latest session
+        </button>
+      )}
     </div>
 
     {showLatest && (
@@ -69,14 +75,12 @@ export default function CoachClientcard({ client, handleRemove, exercises }: Pro
         {latestError && <div style={{ color: "red" }}>{latestError}</div>}
         {!loadingLatest && !latestError && latestSession === null && <div>No sessions logged yet.</div>}
         {!loadingLatest && latestSession && (
-          <div>
-            <div>{latestSession.focus ?? "Session"} — {displayDate(latestSession.dateDone)}</div>
+          <div className="cc_s_header">
+            <div>Latest Session: {displayDate(latestSession.dateDone)}</div>
             <div>{latestSession.userWeight > 0 && `${latestSession.userWeight}Kgs`}</div>
           </div>
         )}
       </div>
-
-      
     )}
 
     {showLatest && (!loadingLatest && latestSession && (
@@ -84,9 +88,9 @@ export default function CoachClientcard({ client, handleRemove, exercises }: Pro
         {loadingExercises && <div>Loading exercises...</div>}
         {!loadingExercises && clientExercises?.length === 0 && <div>No exercises logged for this session.</div>}
         {!loadingExercises && clientExercises?.map((ex) => (
-          <div key={ex.sessionExerciseId}>
-            <div>{getExercise(ex.exerciseId, exercises).name}</div>
-            <div>{displaySets(ex.sets)}</div>
+          <div key={ex.sessionExerciseId} className="cc_session">
+            <div className="cc_s_exercise">{getExercise(ex.exerciseId, exercises).name}</div>
+            <div className="cc_s_sets">{displaySets(ex.sets)}</div>
           </div>
         ))}
       </div>
@@ -94,7 +98,6 @@ export default function CoachClientcard({ client, handleRemove, exercises }: Pro
 
     <div className="cc_footer">
       <button><FaPlus/></button>
-      <button onClick={handleToggleLatest}>M</button>
     </div>
   </div>
 }
@@ -124,6 +127,6 @@ function displaySets(setString: string) {
   
   return (setArr.map((set, index)=>{
     const wxr = set.split("x")
-    return <div key={index}>{`${wxr[0]}Kgs x ${wxr[1]}`}</div>
+    return <div key={index} className="cc_s_set">{`${wxr[0]}Kgs x ${wxr[1]}`}</div>
   }))
 }
