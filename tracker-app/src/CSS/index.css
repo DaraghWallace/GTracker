@@ -83,6 +83,15 @@ body {
   box-sizing: border-box;
 }
 
+hr{
+  color: var(--color-accent);
+}
+
+.space{
+  margin: 0;
+  height: 5px;
+}
+
 /* Accessible, on-brand keyboard focus - replaces the browser default outline
    everywhere, since several native controls below remove it explicitly. */
 :focus-visible {

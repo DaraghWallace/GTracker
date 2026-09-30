@@ -30,7 +30,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Invalid JSON" }) };
   }
 
-  const { clientId, ...sessionData } = body;
+  const { clientId, date, ...sessionData } = body;
   if (!clientId) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "clientId required" }) };
   }
@@ -48,9 +48,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     const newItem = {
       ...sessionData,
       sessionId: randomUUID(),
-      userId: clientId, 
-      createdBy: trainerId,  
-      dateDone: new Date().toISOString(),
+      userId: clientId,
+      createdBy: trainerId,
+      dateDone: date,
     };
 
     await docClient.send(new PutCommand({

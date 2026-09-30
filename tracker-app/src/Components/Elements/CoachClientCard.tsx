@@ -4,6 +4,7 @@ import { getClientLatestSession, getClientSessionExercises} from "../../Helpers/
 
 import { FaUserLargeSlash } from "react-icons/fa6";
 import ClientSessionForm from "../Forms/ClientSessionForm";
+// import SessionExerciseEle from "./SessionExerciseEle";
 
 type Props = {
   client: user;
@@ -91,6 +92,12 @@ export default function CoachClientcard({ client, handleRemove, exercises }: Pro
         {loadingExercises && <div>Loading exercises...</div>}
         {!loadingExercises && clientExercises?.length === 0 && <div>No exercises logged for this session.</div>}
         {!loadingExercises && clientExercises?.map((ex) => (
+          // <SessionExerciseEle 
+          //   sessionExercise={} 
+          //   exercises={exercises}
+          //   setSessionExercises={} 
+          //   editSetVisible={false}
+          // />
           <div key={ex.sessionExerciseId} className="cc_session">
             <div className="cc_s_exercise">{getExercise(ex.exerciseId, exercises).name}</div>
             <div className="cc_s_sets">{displaySets(ex.sets)}</div>
@@ -99,11 +106,9 @@ export default function CoachClientcard({ client, handleRemove, exercises }: Pro
       </div>
     ))}
 
-    <div className="cc_footer">
-      <button className="wide_button" onClick={()=>setClientSessionFormOpen(true)}>Create Session</button>
-    </div>
+    <button className="load_sesh_button" onClick={()=>setClientSessionFormOpen(true)}>Create Session</button>
 
-    {clientSessionFormOpen && <ClientSessionForm exercises={exercises}  clientId={client.userId}/>}
+    {clientSessionFormOpen && <ClientSessionForm exercises={exercises}  clientId={client.userId} setClientSessionFormOpen={setClientSessionFormOpen}/>}
   </div>
 }
 

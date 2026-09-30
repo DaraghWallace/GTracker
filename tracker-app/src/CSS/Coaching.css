@@ -30,6 +30,11 @@
 
 .c_content{
   padding: var(--space-xs) var(--space-md);
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
 }
 
 .client_card{

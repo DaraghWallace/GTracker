@@ -57,6 +57,21 @@ export class SessionExercises extends Construct {
     sessionsTable.grantReadData(getClientSessionExercisesFn);
     userProfilesTable.grantReadData(getClientSessionExercisesFn);
 
+    const createSessionExerciseForClientFn = new NodejsFunction(this, "CreateSessionExerciseForClientFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/coachClients/createSessionExerciseForClient.ts",
+      environment: {
+        SESSION_EXERCISES_TABLE: table.tableName,
+        SESSIONS_TABLE: sessionsTable.tableName,
+        USER_PROFILES_TABLE: userProfilesTable.tableName,
+      },
+      bundling: { forceDockerBundling: false },
+    });
+
+    table.grantWriteData(createSessionExerciseForClientFn);
+    sessionsTable.grantReadData(createSessionExerciseForClientFn);
+    userProfilesTable.grantReadData(createSessionExerciseForClientFn);
+
     // --- Routes ---
     const sessionExercises = api.root.addResource("sessionExercises");
     const sessionExerciseById = sessionExercises.addResource("{sessionExerciseId}");
@@ -68,11 +83,11 @@ export class SessionExercises extends Construct {
 
     const coachingSessions = coachingResource.addResource("sessions");
     const coachingSessionById = coachingSessions.addResource("{sessionId}");
-    this.addMethod(coachingSessionById.addResource("exercises"), "GET", getClientSessionExercisesFn, authorizer);
+    const coachingSessionExercises = coachingSessionById.addResource("exercises");
+    this.addMethod(coachingSessionExercises, "GET",  getClientSessionExercisesFn, authorizer);
+    this.addMethod(coachingSessionExercises, "POST", createSessionExerciseForClientFn, authorizer);
   }
 
-
-  
   private fn(id: string, entry: string, tableName: string, otherTableName?: string) {
     return new NodejsFunction(this, id, {
       runtime: lambda.Runtime.NODEJS_22_X,
