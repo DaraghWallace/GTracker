@@ -37,7 +37,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const newItem = {
     ...safeBody,
     userId: callerSub,
-    date: new Date().toISOString(),
+    dateDone: new Date().toISOString(),
   };
 
   await docClient.send(

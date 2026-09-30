@@ -95,7 +95,7 @@ function TrainerView({ exercises }: { exercises: exercise[] }) {
       </div>
 
       <div className="tr_header">
-        <div>Sessions</div>
+        <div>Session Templates</div>
       </div>
     </div>
   );

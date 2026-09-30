@@ -54,27 +54,32 @@ export class Sessions extends Construct {
       },
       bundling: { forceDockerBundling: false },
     });
+
+    this.table.grantWriteData(createForClientFn);
+    userProfilesTable.grantReadData(createForClientFn); 
+
     const getLatestSessionFn = new NodejsFunction(this, "GetLatestSessionFn", {
-    runtime: lambda.Runtime.NODEJS_22_X,
-    entry: "lambda/functions/coachClients/getClientLatestSession.ts",
-    environment: {
-      SESSIONS_TABLE: this.table.tableName,
-      USER_PROFILES_TABLE: userProfilesTable.tableName,
-    },
-    bundling: { forceDockerBundling: false },
-  });
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/coachClients/getClientLatestSession.ts",
+      environment: {
+        SESSIONS_TABLE: this.table.tableName,
+        USER_PROFILES_TABLE: userProfilesTable.tableName,
+      },
+      bundling: { forceDockerBundling: false },
+    });
 
-  this.table.grantReadData(getLatestSessionFn);
-  userProfilesTable.grantReadData(getLatestSessionFn);
+    this.table.grantReadData(getLatestSessionFn);
+    userProfilesTable.grantReadData(getLatestSessionFn);
 
-  const clientById = clientsResource.addResource("{clientId}");
-  this.addMethod(clientById.addResource("latest-session"), "GET", getLatestSessionFn, authorizer);
+    const clientById = clientsResource.addResource("{clientId}");
+    this.addMethod(clientById.addResource("latest-session"), "GET", getLatestSessionFn, authorizer);
 
     // --- Routes ---
     const sessions = api.root.addResource("sessions");
     const sessionById = sessions.addResource("{sessionId}");
 
     this.addMethod(sessions,    "POST",   createFn, authorizer);
+    this.addMethod(sessions.addResource("for-client"), "POST", createForClientFn, authorizer);
     this.addMethod(sessions,    "GET",    getFn,    authorizer);
     this.addMethod(sessionById, "PUT",    updateFn, authorizer);
     this.addMethod(sessionById, "DELETE", deleteFn, authorizer);

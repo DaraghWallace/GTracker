@@ -30,16 +30,15 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Invalid JSON" }) };
   }
 
-  const { traineeId, ...sessionData } = body;
-  if (!traineeId) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "traineeId required" }) };
+  const { clientId, ...sessionData } = body;
+  if (!clientId) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "clientId required" }) };
   }
 
   try {
-    // Verify this trainer actually owns this client before writing anything.
     const profile = await docClient.send(new GetCommand({
       TableName: process.env.USER_PROFILES_TABLE!,
-      Key: { userId: traineeId },
+      Key: { userId: clientId },
     }));
 
     if (profile.Item?.currentTrainerId !== trainerId) {
@@ -49,9 +48,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     const newItem = {
       ...sessionData,
       sessionId: randomUUID(),
-      userId: traineeId,      // the session belongs to the trainee, not the trainer
-      createdBy: trainerId,   // audit trail — who actually logged it
-      date: new Date().toISOString(),
+      userId: clientId, 
+      createdBy: trainerId,  
+      dateDone: new Date().toISOString(),
     };
 
     await docClient.send(new PutCommand({

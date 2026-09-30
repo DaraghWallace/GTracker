@@ -1,6 +1,7 @@
 import { fetchAuthSession } from "aws-amplify/auth";
 
-const API_URL = import.meta.env.VITE_API_URL;
+// const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL.replace(/\/$/, "");
 
 async function authHeaders() {
   const session = await fetchAuthSession();

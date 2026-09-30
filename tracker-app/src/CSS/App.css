@@ -39,7 +39,7 @@
     width: fit-content;
 
     margin-top: 5px;
-    padding-top: 7px;
+    padding-top: 0;
 
     color: var(--color-bg-primary);
     font-size: 25px;

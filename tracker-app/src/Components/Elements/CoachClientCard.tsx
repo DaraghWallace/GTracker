@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { user, session, sessionExercise, exercise } from "../../Helpers/customTypes";
 import { getClientLatestSession, getClientSessionExercises} from "../../Helpers/api";
 
-import { FaUserLargeSlash, FaPlus } from "react-icons/fa6";
+import { FaUserLargeSlash } from "react-icons/fa6";
+import ClientSessionForm from "../Forms/ClientSessionForm";
 
 type Props = {
   client: user;
@@ -19,7 +20,9 @@ export default function CoachClientcard({ client, handleRemove, exercises }: Pro
   const [latestError, setLatestError] = useState<string | null>(null);
   const [clientExercises, setClientExercises] = useState<sessionExercise[] | undefined>(undefined);
   const [loadingExercises, setLoadingExercises] = useState(false);
-  
+
+  const [clientSessionFormOpen, setClientSessionFormOpen] = useState(false);
+
   async function handleToggleLatest() {
     const next = !showLatest;
     setShowLatest(next);
@@ -97,8 +100,10 @@ export default function CoachClientcard({ client, handleRemove, exercises }: Pro
     ))}
 
     <div className="cc_footer">
-      <button><FaPlus/></button>
+      <button className="wide_button" onClick={()=>setClientSessionFormOpen(true)}>Create Session</button>
     </div>
+
+    {clientSessionFormOpen && <ClientSessionForm exercises={exercises}  clientId={client.userId}/>}
   </div>
 }
 

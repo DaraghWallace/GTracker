@@ -24,8 +24,12 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         KeyConditionExpression: "userId = :uid AND dateDone BETWEEN :start AND :end",
         ExpressionAttributeValues: {
           ":uid": userId,
-          ":start": startDate ?? `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`,
-          ":end":   endDate   ?? new Date().toISOString().split("T")[0],
+          ":start": startDate
+            ? `${startDate}T00:00:00.000Z`
+            : `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01T00:00:00.000Z`,
+          ":end": endDate
+            ? `${endDate}T23:59:59.999Z`
+            : `${new Date().toISOString().split("T")[0]}T23:59:59.999Z`,
         },
       })
     );

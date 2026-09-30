@@ -21,6 +21,14 @@ export class TrackerCdkStack extends cdk.Stack {
       },
     });
 
+    api.addGatewayResponse('Default4xx', {
+      type: apigateway.ResponseType.DEFAULT_4XX,
+      responseHeaders: {
+        'Access-Control-Allow-Origin': "'*'",
+        'Access-Control-Allow-Headers': "'*'",
+      },
+    });
+
     //userPool, userpoolClient
     const auth = new Auth(this, 'Auth', { api });
 
