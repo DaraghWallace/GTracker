@@ -11,7 +11,7 @@
 
   button{
     background-color: var(--color-accent);
-    border: 0;
+    color: var(--color-bg-primary);
     border-radius: var(--radius-md);
     height: 40px;
     width: 40px;
@@ -20,8 +20,7 @@
     margin: 0;
     margin-left: 5px;
     margin-right: 5px;
-
-    color: var(--color-bg-primary);
+    border: 2px solid transparent;
     font-size: 25px;
     cursor: pointer;
     transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
@@ -108,7 +107,7 @@
     margin-left: 3px;
     margin-right: 3px;
 
-    color: var(--color-bg-primary);
+    /* color: var(--color-bg-primary); */
     font-size: 18px;
     cursor: pointer;
     transition: background-color var(--transition-fast), color var(--transition-fast);

@@ -12,11 +12,12 @@ import Loading from "./Loading";
 type Props = {
   sessionExercise: sessionExercise;
   exercises: exercise[];
-  setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>;
+  setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>> | undefined;
   editSetVisible: boolean;
 }
 
 type WeightSet = { weight: number; reps: number };
+type holdSet = { hours: number; minutes: number; seconds: number; weight: number};
 type CardioSet = { hours: number; minutes: number; seconds: number; distance: number; rpe: number , weight: number};
 type SetKey = "weight" | "reps" | "hours" | "minutes" | "seconds" | "distance" | "rpe";
 
@@ -56,8 +57,11 @@ type UpdateSetOfRepsArgs = {
     "h:m:sxdistancexrpe" (e.g. "0:32:15x5.2x7").
 */
 export default function SessionExerciseEle({ sessionExercise, exercises, setSessionExercises, editSetVisible }: Props) {
+  const safeSetSessionExercises = setSessionExercises ?? (() => {});
+
   const setEx = getExercise(sessionExercise.exerciseId, exercises);
   const isCardio = setEx.group === "Cardio";
+  const isHold = setEx.ppl === "Hold";
 
   const [delConfirm, setDelConfirm] = useState(false);
 
@@ -91,7 +95,7 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
               )}><FaXmark /></button>
 
               <button aria-label="Save exercise" onClick={() => handleUpdateSessionExercise({
-                sessionExercise, newExercise, newIndex, newSets, setEditSets, setSessionExercises, setAwaiting
+                sessionExercise, newExercise, newIndex, newSets, setEditSets, setSessionExercises: safeSetSessionExercises, setAwaiting
               })} className="green_button"><FaCheck /></button>
             </>
             :
@@ -100,12 +104,11 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
           {delConfirm ?
             <>Are you Sure
               <button aria-label="Confirm delete" onClick={() => handleDeleteSessionExercise({
-                sessionExercise, setSessionExercises, setDelConfirm, setAwaiting
+                sessionExercise, setSessionExercises: safeSetSessionExercises, setDelConfirm, setAwaiting
               })}>Y</button>
               <button aria-label="Cancel delete" onClick={() => setDelConfirm(false)}>N</button>
-            </>
-            :
-            <button aria-label="Delete exercise" onClick={() => setDelConfirm(true)}><FaTrash /></button>
+            </> :
+              <button aria-label="Delete exercise" onClick={() => setDelConfirm(true)}><FaTrash /></button>
           }
         </div>
       }
@@ -113,70 +116,98 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
 
     <div className="es_reps">
       {isCardio ?
-        displayCardioSets(sessionExercise.sets).map((set, index) => (
-          <div className="es_rep" key={index}>
-            {( editSets && editSetVisible) ?
-              <div>
+          displayCardioSets(sessionExercise.sets).map((set, index) => (
+            <div className="es_rep" key={index}>
+              {( editSets && editSetVisible) ?
                 <div>
-                  <input type="number" placeholder={String(set.hours)}
-                    onChange={(e) => handleUpdateSetOfReps({ index, key: "hours", value: e.target.value, newSets, setNewSets, isCardio })}
-                  />:
-                  <input type="number" placeholder={String(set.minutes)}
-                    onChange={(e) => handleUpdateSetOfReps({ index, key: "minutes", value: e.target.value, newSets, setNewSets, isCardio })}
-                  />:
-                  <input type="number" placeholder={String(set.seconds)}
-                    onChange={(e) => handleUpdateSetOfReps({ index, key: "seconds", value: e.target.value, newSets, setNewSets, isCardio })}
+                  <div>
+                    <input type="number" placeholder={String(set.hours)}
+                      onChange={(e) => handleUpdateSetOfReps({ index, key: "hours", value: e.target.value, newSets, setNewSets, isCardio })}
+                    />:
+                    <input type="number" placeholder={String(set.minutes)}
+                      onChange={(e) => handleUpdateSetOfReps({ index, key: "minutes", value: e.target.value, newSets, setNewSets, isCardio })}
+                    />:
+                    <input type="number" placeholder={String(set.seconds)}
+                      onChange={(e) => handleUpdateSetOfReps({ index, key: "seconds", value: e.target.value, newSets, setNewSets, isCardio })}
+                    />
+                  </div>
+                  |
+                  <input type="number" placeholder={String(set.distance)}
+                    onChange={(e) => handleUpdateSetOfReps({ index, key: "distance", value: e.target.value, newSets, setNewSets, isCardio })}
+                  /> km | 
+                  <input type="number" placeholder={String(set.distance)}
+                    onChange={(e) => handleUpdateSetOfReps({ index, key: "weight", value: e.target.value, newSets, setNewSets, isCardio })}
+                  />Kgs| RPE
+                  <input type="number" placeholder={String(set.rpe)}
+                    onChange={(e) => handleUpdateSetOfReps({ index, key: "rpe", value: e.target.value, newSets, setNewSets, isCardio })}
                   />
                 </div>
-                |
-                <input type="number" placeholder={String(set.distance)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "distance", value: e.target.value, newSets, setNewSets, isCardio })}
-                /> km | 
-                <input type="number" placeholder={String(set.distance)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "weight", value: e.target.value, newSets, setNewSets, isCardio })}
-                />Kgs| RPE
-                <input type="number" placeholder={String(set.rpe)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "rpe", value: e.target.value, newSets, setNewSets, isCardio })}
-                />
-              </div>
-              :
-              <div className="s_e_s_w_num">
-                {(set.hours !== 0 || set.minutes !== 0 || set.seconds !== 0) &&
-                  <>
-                    {set.hours}{":"}
-                    {String(set.minutes).padStart(2, "0")}{":"}
-                    {String(set.seconds).padStart(2, "0")}
-                    {" | "}
-                  </>
-                }
+                :
+                <div className="s_e_s_w_num">
+                  {(set.hours !== 0 || set.minutes !== 0 || set.seconds !== 0) &&
+                    <>
+                      {set.hours}{":"}
+                      {String(set.minutes).padStart(2, "0")}{":"}
+                      {String(set.seconds).padStart(2, "0")}
+                      {" | "}
+                    </>
+                  }
 
-                {set.distance}
-                {" km | RPE "}
-                {set.rpe} {" | "}
-                {(set.weight >=0 ) && `${set.weight}Kgs | `}
-                {formatPace(set.hours,set.minutes,set.seconds,set.distance)}
+                  {set.distance}
+                  {" km | RPE "}
+                  {set.rpe} {" | "}
+                  {(set.weight >=0 ) && `${set.weight}Kgs | `}
+                  {formatPace(set.hours,set.minutes,set.seconds,set.distance)}
+                </div>
+              }
+            </div>
+        )) :
+          isHold ?
+            displayHoldSets(sessionExercise.sets).map((set, index) => (
+              <div className="es_rep" key={index}>
+                {(editSets && editSetVisible) ?
+                  <div>
+                    {/* <input type="number" placeholder={String(set.time)}
+                      onChange={(e) => handleUpdateSetOfReps({ index, key: "weight", value: e.target.value, newSets, setNewSets, isCardio })}
+                    />
+                    Kgs x
+                    <input type="number" placeholder={String(set.weight)}
+                      onChange={(e) => handleUpdateSetOfReps({ index, key: "reps", value: e.target.value, newSets, setNewSets, isCardio })}
+                    /> */}
+                  </div>
+                  :
+                  <div className="s_e_s_w_num" onClick={()=>console.log(set)}>
+                    {(!Number.isNaN(set.hours) && set.hours != 0) && `${set.hours}hrs `}
+                    {(!Number.isNaN(set.minutes) && set.minutes != 0) && `${set.minutes}min `}
+                    {(!Number.isNaN(set.seconds) && set.seconds != 0) && `${set.seconds}sec `}
+                    {/* {set.hours}{":"}
+                    {(String(set.minutes) != "NaN" ) && String(set.minutes).padStart(2, "0")}{":"}
+                    {String(set.seconds).padStart(2, "0")}*/}
+
+                    { (set.weight >=0 ) && ` | ${set.weight}Kgs`} 
+                  </div>
+                }
               </div>
-            }
-          </div>
-        ))
-        :
-        displayWeightSets(sessionExercise.sets).map((set, index) => (
-          <div className="es_rep" key={index}>
-            {(editSets && editSetVisible) ?
-              <div>
-                <input type="number" placeholder={String(set.weight)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "weight", value: e.target.value, newSets, setNewSets, isCardio })}
-                />
-                Kgs x
-                <input type="number" placeholder={String(set.reps)}
-                  onChange={(e) => handleUpdateSetOfReps({ index, key: "reps", value: e.target.value, newSets, setNewSets, isCardio })}
-                />
+            )) :
+            displayWeightSets(sessionExercise.sets).map((set, index) => (
+              <div className="es_rep" key={index}>
+                {(editSets && editSetVisible) ?
+                  <div>
+                    <input type="number" placeholder={String(set.weight)}
+                      onChange={(e) => handleUpdateSetOfReps({ index, key: "weight", value: e.target.value, newSets, setNewSets, isCardio })}
+                    />
+                    Kgs x
+                    <input type="number" placeholder={String(set.reps)}
+                      onChange={(e) => handleUpdateSetOfReps({ index, key: "reps", value: e.target.value, newSets, setNewSets, isCardio })}
+                    />
+                  </div>
+                  :
+                  <div className="s_e_s_w_num">{set.weight}kg x {set.reps}</div>
+                }
               </div>
-              :
-              <div className="s_e_s_w_num">{set.weight}kg x {set.reps}</div>
-            }
-          </div>
-        ))
+          )) 
+          
+          
       }
     </div>
 
@@ -206,6 +237,21 @@ function displayCardioSets(sets: string): CardioSet[] {
       seconds: Number(seconds),
       distance: Number(distance),
       rpe: Number(rpe),
+      weight: Number(weight),
+    };
+  });
+}
+
+// Weight/reps sets: "h:m:sxweight" pairs, e.g. "0:32:15x10"
+function displayHoldSets(sets: string): holdSet[] {
+  if (!sets) return [];
+  return sets.split(',').map(entry => {
+    const [time, weight] = entry.split('x');
+    const [hours, minutes, seconds] = time.split(':');
+    return {
+      hours: Number(hours),
+      minutes: Number(minutes),
+      seconds: Number(seconds),
       weight: Number(weight),
     };
   });

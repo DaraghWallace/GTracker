@@ -2,8 +2,8 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import type { exercise } from "../../Helpers/customTypes";
 import { apiPost } from "../../Helpers/api";
 
-import { FaUserPlus , FaXmark, FaMagnifyingGlass , FaHourglassHalf, FaPlus, FaMinus, FaList, FaCross, FaFloppyDisk } from "react-icons/fa6";
-
+import { FaXmark, FaHourglassHalf, FaPlus, FaMinus, FaList} from "react-icons/fa6";
+import { FiSend } from "react-icons/fi";
 type Props = {
   exercises: exercise[];
   clientId: string;
@@ -55,9 +55,9 @@ export default function ClientSessionForm({ exercises, clientId, onCreated, setC
 
   return (<div className="form">
     
-    {error && <div style={{ color: "red" }}>{error}</div>}
     <div className="f_panel">
       <div className="f_p_header">New Session</div>
+
       {error && <div style={{ color: "red" }}>{error}</div>}
 
       <div className="f_p_col">
@@ -122,13 +122,10 @@ export default function ClientSessionForm({ exercises, clientId, onCreated, setC
       <div className="f_p_row_c">
         <button onClick={() => setClientSessionFormOpen(false)}><FaXmark/></button>
         <button onClick={handleSubmit} disabled={submitting}>
-          <FaFloppyDisk/>
+          {submitting ? <FaHourglassHalf/> :<FiSend/>}
         </button>        
       </div>
     </div>
-    
-
-
   </div>);
 }
 function getExercise(exerciseId: string, exercises: exercise[]): exercise {

@@ -29,7 +29,7 @@
 }
 
 .c_content{
-  padding: var(--space-xs) var(--space-md);
+  /* padding: var(--space-xs) var(--space-md); */
   width: 100%;
   flex: 1;
   min-height: 0;
@@ -38,13 +38,18 @@
 }
 
 .client_card{
+  margin: var(--space-xs) var(--space-xs);
   border: 1px solid var(--color-accent);
-  border-radius: var(--radius-lg);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
   width: 350px;
   max-width: 500px;
   flex-grow: 4;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .cc_header{
@@ -53,6 +58,9 @@
   padding-left: var(--space-xs);
   padding-right: var(--space-xs);
   
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+
   flex-direction: row;
   justify-content: space-between;
   background-color: var(--color-accent);
@@ -72,9 +80,10 @@
 
 .load_sesh_button{
   width: 100%;
+
+  border-radius: 0;
   margin: 0;
   padding: 0;
-  border-radius: 0;
   font-size: 18px;
   height: 25px;
 }
@@ -106,6 +115,8 @@
   font-family: var(--font-display);
   background-color: var(--color-accent);
   color: var(--color-bg-primary);
+
+
 
   font-size: 22px;
   padding-left: 5px;
@@ -145,14 +156,12 @@
 }
 
 .cc_footer{
-  border-top: 1px solid var(--color-accent);
+  /* border-top: 1px solid var(--color-accent); */
   width: 100%;
   display: flex;
-  padding-left: var(--space-xs);
-  padding-right: var(--space-xs);
-  
+
+  margin-top: 10px;
   flex-direction: row;
-  justify-content: space-around;
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: 0.01em;

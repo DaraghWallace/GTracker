@@ -4,7 +4,7 @@ import { getClientLatestSession, getClientSessionExercises} from "../../Helpers/
 
 import { FaUserLargeSlash } from "react-icons/fa6";
 import ClientSessionForm from "../Forms/ClientSessionForm";
-// import SessionExerciseEle from "./SessionExerciseEle";
+import SessionExerciseEle from "./SessionExerciseEle";
 
 type Props = {
   client: user;
@@ -48,65 +48,70 @@ export default function CoachClientcard({ client, handleRemove, exercises }: Pro
   }
 
   return <div className="client_card" >
-    <div className="cc_header">
-      {client.nickname}
+    <div>
+      <div className="cc_header">
+        {client.nickname}
 
-      {confirmRemove?
-        <div>
-          Are you sure?
-          <button onClick={() => handleRemove(client.userId)}>Y</button>
-          <button onClick={() => setConfirmRemove(false)}>N</button>
-        </div>:
-        <button onClick={() => setConfirmRemove(true)}><FaUserLargeSlash/> </button>      
-      }
+        {confirmRemove?
+          <div>
+            Are you sure?
+            <button onClick={() => handleRemove(client.userId)}>Y</button>
+            <button onClick={() => setConfirmRemove(false)}>N</button>
+          </div>:
+          <button onClick={() => setConfirmRemove(true)}><FaUserLargeSlash/> </button>      
+        }
+      </div>  
+
+      <div className="cc_content">
+        <div className="cc_c_bar_light">Height: {client.height_cm}cm</div>
+        <div className="cc_c_bar_dark">Starting Weight: {client.cur_weight}Kgs</div>
+        <div className="cc_c_bar_light">Target Weight: {client.tar_weight}Kgs</div>
+        <div className="cc_c_bar_dark">Goal: {client.goal}</div>
+
+        {!showLatest ? (
+          <button className="load_sesh_button" onClick={handleToggleLatest}>
+            Show Latest session
+          </button>
+        ):
+          <div className="cc_latest_session">
+            {loadingLatest && <div>Loading...</div>}
+            {latestError && <div style={{ color: "red" }}>{latestError}</div>}
+            {!loadingLatest && !latestError && latestSession === null && <div>No sessions logged yet.</div>}
+            {!loadingLatest && latestSession && (
+              <div>
+                <div className="cc_s_header">
+                  <div>Latest Session: {displayDate(latestSession.dateDone)}</div>
+                  <div>{latestSession.userWeight > 0 && `${latestSession.userWeight}Kgs`}</div>
+                </div>
+
+                {showLatest && (!loadingLatest && latestSession && (
+                  <div className="cc_latest_exercises">
+                    {loadingExercises && <div>Loading exercises...</div>}
+                    {!loadingExercises && clientExercises?.length === 0 && <div>No exercises logged for this session.</div>}
+                    {!loadingExercises && clientExercises?.map((ex) => (
+                      <SessionExerciseEle 
+                        sessionExercise={ex} 
+                        exercises={exercises}
+                        setSessionExercises={() => {}}  
+                        editSetVisible={false}
+                      />
+                      // <div key={ex.sessionExerciseId} className="cc_session">
+                      //   <div className="cc_s_exercise">{getExercise(ex.exerciseId, exercises).name}</div>
+                      //   <div className="cc_s_sets">{displaySets(ex.sets)}</div>
+                      // </div>
+                    ))}
+                  </div>
+                ))}                
+              </div>
+            )}
+          </div>        
+        }
+      </div>          
     </div>
-    <div className="cc_content">
-      <div className="cc_c_bar_light">Height: {client.height_cm}cm</div>
-      <div className="cc_c_bar_dark">Starting Weight: {client.cur_weight}Kgs</div>
-      <div className="cc_c_bar_light">Target Weight: {client.tar_weight}Kgs</div>
-      <div className="cc_c_bar_dark">Goal: {client.goal}</div>
 
-      {!showLatest && (
-        <button className="load_sesh_button" onClick={handleToggleLatest}>
-          Show Latest session
-        </button>
-      )}
+    <div className="cc_footer">
+      <button className="load_sesh_button" onClick={()=>setClientSessionFormOpen(true)}>Create Session</button>
     </div>
-
-    {showLatest && (
-      <div className="cc_latest_session">
-        {loadingLatest && <div>Loading...</div>}
-        {latestError && <div style={{ color: "red" }}>{latestError}</div>}
-        {!loadingLatest && !latestError && latestSession === null && <div>No sessions logged yet.</div>}
-        {!loadingLatest && latestSession && (
-          <div className="cc_s_header">
-            <div>Latest Session: {displayDate(latestSession.dateDone)}</div>
-            <div>{latestSession.userWeight > 0 && `${latestSession.userWeight}Kgs`}</div>
-          </div>
-        )}
-      </div>
-    )}
-
-    {showLatest && (!loadingLatest && latestSession && (
-      <div className="cc_latest_exercises">
-        {loadingExercises && <div>Loading exercises...</div>}
-        {!loadingExercises && clientExercises?.length === 0 && <div>No exercises logged for this session.</div>}
-        {!loadingExercises && clientExercises?.map((ex) => (
-          // <SessionExerciseEle 
-          //   sessionExercise={} 
-          //   exercises={exercises}
-          //   setSessionExercises={} 
-          //   editSetVisible={false}
-          // />
-          <div key={ex.sessionExerciseId} className="cc_session">
-            <div className="cc_s_exercise">{getExercise(ex.exerciseId, exercises).name}</div>
-            <div className="cc_s_sets">{displaySets(ex.sets)}</div>
-          </div>
-        ))}
-      </div>
-    ))}
-
-    <button className="load_sesh_button" onClick={()=>setClientSessionFormOpen(true)}>Create Session</button>
 
     {clientSessionFormOpen && <ClientSessionForm exercises={exercises}  clientId={client.userId} setClientSessionFormOpen={setClientSessionFormOpen}/>}
   </div>
@@ -117,26 +122,26 @@ function displayDate(date: string): string {
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-function getExercise(exerciseId: string, exercises: exercise[]): exercise {
-  const thisExercise = exercises.find(e => e.exerciseId === exerciseId);
+// function getExercise(exerciseId: string, exercises: exercise[]): exercise {
+//   const thisExercise = exercises.find(e => e.exerciseId === exerciseId);
 
-  if (!thisExercise) {
-    return {
-      exerciseId: exerciseId,
-      name: "Exercise Not Found",
-      group: "N/A",
-      target: "N/A",
-      ppl: "N/A",
-      author: "N/A"
-    }
-  } else return thisExercise
-}
+//   if (!thisExercise) {
+//     return {
+//       exerciseId: exerciseId,
+//       name: "Exercise Not Found",
+//       group: "N/A",
+//       target: "N/A",
+//       ppl: "N/A",
+//       author: "N/A"
+//     }
+//   } else return thisExercise
+// }
 
-function displaySets(setString: string) {
-  const setArr = setString.split(",")
+// function displaySets(setString: string) {
+//   const setArr = setString.split(",")
   
-  return (setArr.map((set, index)=>{
-    const wxr = set.split("x")
-    return <div key={index} className="cc_s_set">{`${wxr[0]}Kgs x ${wxr[1]}`}</div>
-  }))
-}
+//   return (setArr.map((set, index)=>{
+//     const wxr = set.split("x")
+//     return <div key={index} className="cc_s_set">{`${wxr[0]}Kgs x ${wxr[1]}`}</div>
+//   }))
+// }

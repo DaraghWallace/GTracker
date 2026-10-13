@@ -120,7 +120,7 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
               <div className="set_field">Done?</div>
             </div>
 
-            {renderSetRows(numOfSets, setArr, setSetArr, selectedExercise?.group)}
+            {renderSetRows(numOfSets, setArr, setSetArr, selectedExercise)}
 
             <div className="f_p_row_mid">
               <div className="bold_text">To failure?</div>
@@ -132,35 +132,55 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
               />
             </div>
           </div> :
-          <div className="f_p_sets">
-            <div className="sets">
-              <div className="set_field">Weight</div>
-              <div className="set_field">Reps</div>
-              <div className="set_field">Done?</div>
-            </div>
+            selectedExercise?.ppl == "Hold" ?
+              <div className="f_p_sets">
+                <div className="sets">
+                  <div className="set_field_wide">Time (hh:mm:ss)</div>
+                  <div className="set_field">Added Weight (Kgs)</div>
+                  <div className="set_field">Done?</div>
+                </div>
 
-            {renderSetRows(numOfSets, setArr, setSetArr, selectedExercise?.group)}
+                {renderSetRows(numOfSets, setArr, setSetArr, selectedExercise)}
 
-            <div className="f_p_row_mid">
-              <div className="bold_text">To failure?</div>
-              <input
-                type="checkbox"
-                aria-label="To failure"
-                checked={toFailure}
-                onChange={e => setToFailure(e.target.checked)}
-              />
-            </div>
-          </div>          
-        }
+                <div className="f_p_row_mid">
+                  <div className="bold_text">To failure?</div>
+                  <input
+                    type="checkbox"
+                    aria-label="To failure"
+                    checked={toFailure}
+                    onChange={e => setToFailure(e.target.checked)}
+                  />
+                </div>
 
+              </div>:
+              selectedExercise &&
+                <div className="f_p_sets">
+                  <div className="sets">
+                    <div className="set_field">Weight</div>
+                    <div className="set_field">Reps</div>
+                    <div className="set_field">Done?</div>
+                  </div>
 
+                  {renderSetRows(numOfSets, setArr, setSetArr, selectedExercise)}
 
-        {message && <div className="thick_text">{message}</div>}
+                  <div className="f_p_row_mid">
+                    <div className="bold_text">To failure?</div>
+                    <input
+                      type="checkbox"
+                      aria-label="To failure"
+                      checked={toFailure}
+                      onChange={e => setToFailure(e.target.checked)}
+                    />
+                  </div>
+                </div>
+            }
 
-        <div className="f_p_row_c">
-          <button aria-label="Create exercise" onClick={handleSubmit}><FaCheck /></button>
-          <button aria-label="Cancel" onClick={() => setNewSetFormOpen(false)}><FaXmark /></button>
-        </div>        
+          {message && <div className="thick_text">{message}</div>}
+
+          <div className="f_p_row_c">
+            <button aria-label="Create exercise" onClick={handleSubmit}><FaCheck /></button>
+            <button aria-label="Cancel" onClick={() => setNewSetFormOpen(false)}><FaXmark /></button>
+          </div>        
 
 
         {awaiting && <Loading message={"Creating Set"} />}
@@ -169,9 +189,9 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
   );
 }
 
-function renderSetRows(numOfSets: number, setArr: string[], setSetArr: Dispatch<SetStateAction<string[]>>, group: string | undefined) {
+function renderSetRows(numOfSets: number, setArr: string[], setSetArr: Dispatch<SetStateAction<string[]>>, exercise: exercise | undefined) {
   return Array.from({ length: numOfSets }, (_, i) => (
-    <NseSetFormEle key={i} index={i} setArr={setArr} setSetArr={setSetArr} group={group} />
+    <NseSetFormEle key={i} index={i} setArr={setArr} setSetArr={setSetArr} exercise={exercise} />
   ));
 }
 
