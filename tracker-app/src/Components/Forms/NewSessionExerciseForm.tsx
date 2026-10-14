@@ -23,6 +23,7 @@ type Props = {
     incrementSets/decrementSets: grow/shrink the set rows, keeping setArr
     in sync so a removed row's leftover value can't sneak into the submission.
 */
+
 export default function NewSessionExerciseForm({ sessionId, exercises, setSessionExercises, setNewSetFormOpen, sessionSets }: Props) {
   const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
   const [numOfSets, setNumOfSets] = useState(0);
@@ -83,6 +84,8 @@ export default function NewSessionExerciseForm({ sessionId, exercises, setSessio
           {!selectedExercise && "New "}Exercise: {selectedExercise && selectedExercise.name}
           {selectedExercise && <button aria-label="Change exercise" onClick={() => setSelectedExercise(null)}><FaPen /></button>}
         </div>
+
+        {/* <div className="thick_text">{selectedExercise && `PR: ${displayPR(selectedExercise)}kgs`}</div> */}
 
         {!selectedExercise && ( //Exercise Select
           <div className="f_p_exercises" >
@@ -194,4 +197,8 @@ function renderSetRows(numOfSets: number, setArr: string[], setSetArr: Dispatch<
     <NseSetFormEle key={i} index={i} setArr={setArr} setSetArr={setSetArr} exercise={exercise} />
   ));
 }
+
+// function displayPR(selectedExercise: exercise): number  {
+//   return 3
+// }
 

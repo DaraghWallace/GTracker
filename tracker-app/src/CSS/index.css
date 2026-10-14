@@ -17,7 +17,7 @@
    * Centralised here so future visual changes - a new accent,
    * tighter spacing, a different type scale - only need to
    * happen in one place.
-   * ------------------------------------------------------------ */
+  ------------------------------------------------------------ */
 
   /* Type */
   --font-display: 'Oswald', 'Arial Narrow', sans-serif;   /* headers, big numbers - condensed, athletic */

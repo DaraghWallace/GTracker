@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { fetchAuthSession } from 'aws-amplify/auth';
-
-import "./CSS/App.css"
+import type { user, session, exercise, sessionExercise } from "./Helpers/customTypes";
+import { getExercises, getSessionExerciseBySession, getSessions } from './Helpers/APIfunctions';
+import { getUserAttributes, logout } from './Helpers/amplify';
 
 import Header from './Components/Header';
 import Body from './Components/Body';
 
-import type { user, session, exercise, sessionExercise } from "./Helpers/customTypes";
-import { getExercises, getSessionExerciseBySession, getSessions } from './Helpers/APIfunctions';
-import { getUserAttributes, logout } from './Helpers/amplify';
+
+import "./CSS/App.css"
 
 
 import dtProgPng from "./assets/progress.png"

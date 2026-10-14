@@ -1,22 +1,36 @@
-import NewSessionForm from "./Forms/NewSessionForm"
-import SessionEle from "../Components/Elements/SessionEle"
-import type { exercise, session, sessionExercise, user } from "../Helpers/customTypes";
 import { useState, type Dispatch, type SetStateAction } from "react";
+import type { exercise, session, sessionExercise, user } from "../Helpers/customTypes";
+
 import ProgressGrid from "./ProgressGrid";
 import ProgressGraph from "./ProgressGraph";
-
-import "../CSS/Body.css"
-import "../CSS/form.css"
-
-import { FaPlus, FaPen, FaXmark, FaChartLine, FaTableList } from "react-icons/fa6";
 import DevRoom from "./DevRoom";
 import Coaching from "./Coaching";
+import SessionEle from "../Components/Elements/SessionEle";
+import NewSessionForm from "./Forms/NewSessionForm";
 
-const MONTH_FILTER_MONTHLY = 13;
-const MONTH_FILTER_YEARLY = 14;
+import "../CSS/Body.css";
+import "../CSS/form.css";
+import { FaPlus, FaPen, FaXmark, FaChartLine, FaTableList } from "react-icons/fa6";
+
+/*
+  Body.tsx - main content area of the app.
+
+  Renders whichever page is active:
+    - "sessions": filtered/sorted list of SessionEle cards, with add (+) and edit-mode (pen/x) buttons
+    - "progress": ProgressGrid or ProgressGraph, toggled with the header icons
+    - "dev":      DevRoom
+    - "coaching": Coaching
+
+  Owns all header filter state (month, year, muscle group, date sort) and the
+  open/closed state of the NewSessionForm overlay. dev/coaching pages have no header.
+
+  Month filter values: 0 = all, 1-12 = Jan-Dec, 13 = Monthly, 14 = Yearly (13/14 progress page only).
+  The year dropdown is hidden for Yearly (14) since it spans all years.
+*/
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = [CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 type Props = {
   currentUser: user | null;
@@ -26,132 +40,121 @@ type Props = {
   sessionExercises: sessionExercise[];
   setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>;
   page: string;
-}
+};
 
-type DisplayArgs = {
-  page: string;
-  currentUser: user;
-  sessionData: session[];
-  setSessionData: Dispatch<SetStateAction<session[]>>;
-  sessionExercises: sessionExercise[];
-  setSessionExercises: Dispatch<SetStateAction<sessionExercise[]>>;
-  exercises: exercise[];
-  editSessions: boolean;
-  monthFilter: number;
-  yearFilter: number;
-  groupFilter: string;
-  dateSort: boolean;
-  progressDisplay: string;
-}
-
-type FilterArgs = {
-  page: string;
-  exercises: exercise[];
-  setMonthFilter: Dispatch<SetStateAction<number>>;
-  monthFilter: number;
-  setYearFilter: Dispatch<SetStateAction<number>>;
-  yearFilter: number;
-  setGroupFilter: Dispatch<SetStateAction<string>>;
-  groupFilter: string;
-  setDateSort: Dispatch<SetStateAction<boolean>>;
-  dateSort: boolean;
-  progressDisplay: string;
-}
-
-/*
-  Body
-    Renders the active page - sessions list, progress grid/graph, or dev room -
-    plus the header filter controls and the new-session form overlay.
-*/
-export default function Body({ currentUser, sessionData, setSessionData, exercises, sessionExercises, setSessionExercises, page }: Props) {
+export default function Body({
+  currentUser, sessionData, setSessionData, exercises, sessionExercises, setSessionExercises, page,
+}: Props) {
   const [newSessionFormOpen, setNewSessionFormOpen] = useState(false);
   const [editSessions, setEditSessions] = useState(false);
 
   const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(CURRENT_YEAR);
   const [groupFilter, setGroupFilter] = useState("All");
-  const [dateSort, setDateSort] = useState(false); // true = ascending (Jan - Dec) || false = descending (Dec - Jan)
+  const [dateSort, setDateSort] = useState(false); // true = ascending (Jan - Dec), false = descending (Dec - Jan)
+  const [progressDisplay, setProgressDisplay] = useState<"grid" | "graph">("grid");
 
-  const [progressDisplay, setProgressDisplay] = useState<string>("grid");
+  const showHeader = page !== "dev" && page !== "coaching";
 
-  return (<div className="Body">
-    {(page !== "dev" && page !== "coaching")&&
-      <div className="b_header">
-        {renderFilters({
-          page, exercises, setMonthFilter, monthFilter, setYearFilter, yearFilter,
-          setGroupFilter, groupFilter, setDateSort, dateSort, progressDisplay
-        })}
-        {page === "sessions" &&
-          <div className="b_h_buttons">
-            <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
-            {editSessions ?
-              <button onClick={() => setEditSessions(false)}><FaXmark /></button>
-              :
-              <button onClick={() => setEditSessions(true)}><FaPen /></button>
-            }
+  function renderFilters() {
+    const groups = [...new Set(exercises.map((ex) => ex.group))].filter((g) => g !== "Cardio");
+
+    return (
+      <div className="b_h_filters">
+        {/* Date filter */}
+        <div className="b_h_filter">
+          <div className="b_h_f_text">Date Filter: </div>
+          <div>
+            <select value={monthFilter} onChange={(e) => setMonthFilter(Number(e.target.value))}>
+              <option value={0}>All of</option>
+              {MONTHS.map((name, i) => <option key={name} value={i + 1}>{name}</option>)}
+              {page === "progress" && <option value={13}>Monthly</option>}
+              {page === "progress" && <option value={14}>Yearly</option>}
+            </select>
+
+            {monthFilter !== 14 && (
+              <select value={yearFilter} onChange={(e) => setYearFilter(Number(e.target.value))}>
+                {YEAR_OPTIONS.map((year) => <option key={year} value={year}>{year}</option>)}
+              </select>
+            )}
           </div>
-        }
-        {page === "progress" &&
-          <div className="b_h_buttons">
-            <button onClick={() => setProgressDisplay("grid")}><FaTableList /></button>
-            <button onClick={() => setProgressDisplay("graph")}><FaChartLine /></button>
-          </div>
-        }
-      </div>
-    }
-
-    <div className="b_content">
-      {currentUser &&
-        renderPageContent({
-          page, currentUser, sessionData, setSessionData, sessionExercises, setSessionExercises,
-          exercises, editSessions, monthFilter, yearFilter, groupFilter, dateSort, progressDisplay
-        })
-      }
-
-      {newSessionFormOpen && <NewSessionForm
-        userId={currentUser?.userId ?? ""}
-        setNewSessionFormOpen={setNewSessionFormOpen}
-        setSessionData={setSessionData}
-      />}
-    </div>
-  </div>)
-}
-
-function renderPageContent({
-  page, currentUser, sessionData, setSessionData, sessionExercises, setSessionExercises,
-  exercises, editSessions, monthFilter, yearFilter, groupFilter, dateSort, progressDisplay
-}: DisplayArgs) {
-
-  const sorted = [...sessionData].sort((a, b) =>
-    dateSort
-      ? new Date(a.dateDone).getTime() - new Date(b.dateDone).getTime()
-      : new Date(b.dateDone).getTime() - new Date(a.dateDone).getTime()
-  )
-
-  switch (page) {
-    case "sessions":
-      return (
-        <div className="sessions">
-          {sorted.filter((session) => {
-            const date = new Date(session.dateDone);
-            const matchesMonth = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
-            const matchesYear = date.getFullYear() === yearFilter;
-            return matchesMonth && matchesYear;
-          }).map((session) => (
-            <SessionEle key={session.sessionId}
-              session={session}
-              setSessionData={setSessionData}
-              exercises={exercises}
-              sessionExercises={sessionExercises}
-              setSessionExercises={setSessionExercises}
-              editSessions={editSessions}
-            />
-          ))}
         </div>
-      )
-    case "progress":
-      if (progressDisplay === "grid") {
+
+        {/* Sort order (sessions only) */}
+        {page === "sessions" && (
+          <div className="b_h_filter">
+            <div className="b_h_f_text">Sort by: </div>
+            <button className="filter_button" onClick={() => setDateSort(!dateSort)}>
+              {dateSort ? "Ascending" : "Descending"}
+            </button>
+          </div>
+        )}
+
+        {/* Muscle group (progress grid only) */}
+        {page === "progress" && progressDisplay === "grid" && (
+          <div className="b_h_filter">
+            <div>Group Filter: </div>
+            <select value={groupFilter} onChange={(e) => setGroupFilter(e.target.value)}>
+              <option value="All">All</option>
+              {groups.map((group) => <option key={group} value={group}>{group}</option>)}
+            </select>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function renderHeaderButtons() {
+    if (page === "sessions") {
+      return (
+        <div className="b_h_buttons">
+          <button onClick={() => setNewSessionFormOpen(true)}><FaPlus /></button>
+          <button onClick={() => setEditSessions(!editSessions)}>
+            {editSessions ? <FaXmark /> : <FaPen />}
+          </button>
+        </div>
+      );
+    }
+    if (page === "progress") {
+      return (
+        <div className="b_h_buttons">
+          <button onClick={() => setProgressDisplay("grid")}><FaTableList /></button>
+          <button onClick={() => setProgressDisplay("graph")}><FaChartLine /></button>
+        </div>
+      );
+    }
+    return null;
+  }
+
+  function renderPageContent(currentUser: user) {
+    switch (page) {
+      case "sessions": {
+        const direction = dateSort ? 1 : -1;
+        const visibleSessions = sessionData
+          .filter((s) => {
+            const date = new Date(s.dateDone);
+            const matchesMonth = monthFilter === 0 || date.getMonth() + 1 === monthFilter;
+            return matchesMonth && date.getFullYear() === yearFilter;
+          })
+          .sort((a, b) => direction * (new Date(a.dateDone).getTime() - new Date(b.dateDone).getTime()));
         return (
+          <div className="sessions">
+            {visibleSessions.map((session) => (
+              <SessionEle
+                key={session.sessionId}
+                session={session}
+                setSessionData={setSessionData}
+                exercises={exercises}
+                sessionExercises={sessionExercises}
+                setSessionExercises={setSessionExercises}
+                editSessions={editSessions}
+              />
+            ))}
+          </div>
+        );
+      }
+      case "progress":
+        return progressDisplay === "grid" ? (
           <ProgressGrid
             exercises={exercises}
             sessionData={sessionData}
@@ -160,82 +163,44 @@ function renderPageContent({
             yearFilter={yearFilter}
             groupFilter={groupFilter}
           />
-        )
-      }
-      return (
-        <ProgressGraph
-          exercises={exercises}
-          sessionData={sessionData}
-          sessionExercises={sessionExercises}
-          monthFilter={monthFilter}
-          yearFilter={yearFilter}
-        />
-      )
-    case "dev":
-      return <DevRoom user={currentUser} exercises={exercises} />
-    case "coaching":
-      return <Coaching user={currentUser} exercises={exercises} />
-    default:
-      return null;
+        ) : (
+          <ProgressGraph
+            exercises={exercises}
+            sessionData={sessionData}
+            sessionExercises={sessionExercises}
+            monthFilter={monthFilter}
+            yearFilter={yearFilter}
+          />
+        );
+      case "dev":
+        return <DevRoom user={currentUser} exercises={exercises} />;
+      case "coaching":
+        return <Coaching user={currentUser} exercises={exercises} />;
+      default:
+        return null;
+    }
   }
-}
-
-function renderFilters({
-  page, exercises, setMonthFilter, monthFilter, setYearFilter, yearFilter,
-  setGroupFilter, groupFilter, setDateSort, dateSort, progressDisplay
-}: FilterArgs) {
-  const mGroupList: string[] = [...new Set(exercises.map(ex => ex.group))];
 
   return (
-    <div className="b_h_filters">
-      <div className="b_h_filter"> {/* Date Filter */}
-        <div className="b_h_f_text">Date Filter: </div>
-        <div>
-          <select onChange={(e) => setMonthFilter(Number(e.target.value))} value={monthFilter}>
-            <option value={0}>All of</option>
-            <option value={1}>Jan</option>
-            <option value={2}>Feb</option>
-            <option value={3}>Mar</option>
-            <option value={4}>Apr</option>
-            <option value={5}>May</option>
-            <option value={6}>Jun</option>
-            <option value={7}>Jul</option>
-            <option value={8}>Aug</option>
-            <option value={9}>Sep</option>
-            <option value={10}>Oct</option>
-            <option value={11}>Nov</option>
-            <option value={12}>Dec</option>
-            {page === "progress" && <option value={MONTH_FILTER_MONTHLY}>Monthly</option>}
-            {page === "progress" && <option value={MONTH_FILTER_YEARLY}>Yearly</option>}
-          </select>
-          {monthFilter !== MONTH_FILTER_YEARLY &&
-            <select onChange={(e) => setYearFilter(Number(e.target.value))} value={yearFilter}>
-              {YEAR_OPTIONS.map(year => <option value={year} key={year}>{year}</option>)}
-            </select>
-          }          
+    <div className="Body">
+      {showHeader && (
+        <div className="b_header">
+          {renderFilters()}
+          {renderHeaderButtons()}
         </div>
+      )}
 
+      <div className="b_content">
+        {currentUser && renderPageContent(currentUser)}
+
+        {newSessionFormOpen && (
+          <NewSessionForm
+            userId={currentUser?.userId ?? ""}
+            setNewSessionFormOpen={setNewSessionFormOpen}
+            setSessionData={setSessionData}
+          />
+        )}
       </div>
-      {page === "sessions" &&
-        <div className="b_h_filter">  {/* Sort by date */}
-          <div className="b_h_f_text">Sort by: </div>
-
-          <button className="filter_button" onClick={() => setDateSort(!dateSort)}>
-            {!dateSort ? "Decending" : "Ascending"}
-          </button>
-        </div>
-      }
-      {(page === "progress" && progressDisplay === "grid") &&
-        <div className="b_h_filter">  {/* Group Filter */}
-          <div>Group Filter: </div>
-          <select onChange={(e) => setGroupFilter(e.target.value)} value={groupFilter}>
-            <option value="All">All</option>
-            {mGroupList
-              .filter(group => group !== "Cardio")
-              .map(group => <option value={group} key={group}>{group}</option>)}
-          </select>
-        </div>
-      }
     </div>
-  )
+  );
 }

@@ -1,9 +1,9 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
+
 import type { user } from "../Helpers/customTypes";
 import UserInForm from "./Forms/UserInForm";
 
 import "../CSS/Header.css"
-
 import { FaChartLine, FaDumbbell, FaArrowRightFromBracket, FaArrowRightToBracket, FaFrog, FaCircleQuestion, FaXmark, FaCheck, FaHandshakeAngle } from "react-icons/fa6";
 import { GiFrog } from "react-icons/gi";
 

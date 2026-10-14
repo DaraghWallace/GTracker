@@ -3,26 +3,44 @@ import type { exercise, user } from "../Helpers/customTypes";
 import { apiGet, apiPost } from "../Helpers/api";
 
 import "../CSS/Coaching.css";
-import { FaUserPlus , FaXmark, FaMagnifyingGlass , FaHourglassHalf } from "react-icons/fa6";
+import { FaUserPlus, FaXmark, FaMagnifyingGlass, FaHourglassHalf } from "react-icons/fa6";
 import CoachClientcard from "./Elements/CoachClientCard";
+
+/*
+  Coaching.tsx - the coaching page.
+
+  Coaching (default export) picks a view based on user.userType:
+    - "developer" / "trainer": TrainerView
+    - "member": placeholder ("coming soon")
+
+  TrainerView
+    Lists the trainer's clients (loaded from /coaching/clients) as CoachClientcards,
+    with a remove handler and a toggle that opens FindClientForm.
+    Also has a (currently empty) "Session Templates" section.
+
+  FindClientForm
+    Looks up a user by email (/coaching/find-user), asks the trainer to confirm
+    "Is this your client?", then adds them (/coaching/add-client) and tells the
+    parent to refresh the client list.
+*/
 
 type Props = {
   user: user;
-  exercises: exercise[]
-}
-
+  exercises: exercise[];
+};
 
 type FoundUser = {
   userId: string;
   nickname: string;
 };
 
+const errorMessage = (e: unknown) => (e instanceof Error ? e.message : "Something went wrong");
+
 export default function Coaching({ user, exercises }: Props) {
   switch (user.userType) {
     case "developer":
-      return <TrainerView exercises={exercises}/>;
     case "trainer":
-      return <TrainerView exercises={exercises}/>;
+      return <TrainerView exercises={exercises} />;
     case "member":
       return <div>Coaching features coming soon.</div>;
     default:
@@ -40,10 +58,9 @@ function TrainerView({ exercises }: { exercises: exercise[] }) {
   async function loadClients() {
     setLoadingClients(true);
     try {
-      const data = await apiGet("/coaching/clients");
-      setClients(data);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      setClients(await apiGet("/coaching/clients"));
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setLoadingClients(false);
     }
@@ -57,46 +74,41 @@ function TrainerView({ exercises }: { exercises: exercise[] }) {
     try {
       await apiPost("/coaching/remove-client", { clientId });
       setClients((prev) => prev.filter((c) => c.userId !== clientId));
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+    } catch (e) {
+      setError(errorMessage(e));
     }
+  }
+
+  function handleClientAdded() {
+    setFindClientOpen(false);
+    loadClients();
   }
 
   return (
     <div className="Coaching">
       <div className="tr_header">
         <div>Clients</div>
-
         {error && <div style={{ color: "red" }}>{error}</div>}
-
         <button onClick={() => setFindClientOpen(!findClientOpen)}>
-          {findClientOpen ? <FaXmark/> : <FaUserPlus/>}
+          {findClientOpen ? <FaXmark /> : <FaUserPlus />}
         </button>
       </div>
 
       <div className="tr_client_search">
-        {findClientOpen && (
-          <FindClientForm
-            onAdded={() => {
-              setFindClientOpen(false);
-              loadClients();
-            }}
-          />
-        )}        
+        {findClientOpen && <FindClientForm onAdded={handleClientAdded} />}
       </div>
-
 
       <div className="c_content">
         {loadingClients && <div>Loading...</div>}
         {!loadingClients && clients.length === 0 && <div>No clients yet.</div>}
         {clients.map((client) => (
-          <CoachClientcard key={client.userId} client={client} handleRemove={handleRemove} exercises={exercises}/>
+          <CoachClientcard key={client.userId} client={client} handleRemove={handleRemove} exercises={exercises} />
         ))}
       </div>
 
-      <div className="tr_header">
+      {/* <div className="tr_header">
         <div>Session Templates</div>
-      </div>
+      </div> */}
     </div>
   );
 }
@@ -111,12 +123,12 @@ function FindClientForm({ onAdded }: { onAdded: () => void }) {
     setError(null);
     setFound(null);
     if (!email) return;
+
     setSearching(true);
     try {
-      const result = await apiGet(`/coaching/find-user?email=${encodeURIComponent(email)}`);
-      setFound(result);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      setFound(await apiGet(`/coaching/find-user?email=${encodeURIComponent(email)}`));
+    } catch (e) {
+      setError(errorMessage(e));
     } finally {
       setSearching(false);
     }
@@ -127,24 +139,25 @@ function FindClientForm({ onAdded }: { onAdded: () => void }) {
     try {
       await apiPost("/coaching/add-client", { clientId: found.userId });
       onAdded();
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+    } catch (e) {
+      setError(errorMessage(e));
     }
   }
 
   return (
     <div className="tr_cs_input">
       {error && <div style={{ color: "red" }}>{error}</div>}
+
       Email: <input value={email} onChange={(e) => setEmail(e.target.value)} />
       <button onClick={handleFind} disabled={searching}>
-        {searching ? <FaHourglassHalf /> : <FaMagnifyingGlass/>}
+        {searching ? <FaHourglassHalf /> : <FaMagnifyingGlass />}
       </button>
 
       {found && (
         <div>
           Is this your client — <strong>{found.nickname}</strong>?
-          <button onClick={handleConfirmAdd}><FaUserPlus/></button>
-          <button onClick={() => setFound(null)}><FaXmark/></button>
+          <button onClick={handleConfirmAdd}><FaUserPlus /></button>
+          <button onClick={() => setFound(null)}><FaXmark /></button>
         </div>
       )}
     </div>
