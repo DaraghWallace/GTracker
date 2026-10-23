@@ -95,6 +95,7 @@
 
   button{
     background-color: var(--color-accent);
+    color: var(--color-bg-primary);
     border: 0;
     border-radius: var(--radius-sm);
     height: 30px;

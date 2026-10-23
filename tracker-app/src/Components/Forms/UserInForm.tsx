@@ -7,7 +7,7 @@ import '../../CSS/form.css'
 import { FaCheck, FaXmark } from "react-icons/fa6";
 
 type Tab = "login" | "signup" | "confirm";
-type UserType = "member" | "trainer";
+// type UserType = "member" | "trainer";
 
 type Props = {
   setCurrentUser: Dispatch<SetStateAction<user | null>>;
@@ -30,7 +30,6 @@ export default function UserInForm({ setCurrentUser, loadUserData, setUserInForm
   const [currentWeight, setCurrentWeight] = useState(0);
   const [targetWeight, setTargetWeight] = useState(0);
   const [height, setHeight] = useState(0);
-  const [userType, setUserType] = useState<UserType>("member");
   
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
@@ -65,7 +64,7 @@ export default function UserInForm({ setCurrentUser, loadUserData, setUserInForm
 
   async function handleSignUp() {
     try {
-      await register(email, password, nickname, height, currentWeight, targetWeight, userType);
+      await register(email, password, nickname, height, currentWeight, targetWeight/*, userType*/);
       setPendingEmail(email);
       switchTab("confirm");
     } catch (e: unknown) {
@@ -96,8 +95,17 @@ export default function UserInForm({ setCurrentUser, loadUserData, setUserInForm
         {tab === "login" && (
           <div className="f_p_col">
             <div className="thick_text">Welcome Back</div>
-            <input type="text" placeholder="Email" aria-label="Email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="password" placeholder="Password" aria-label="Password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} />
+            
+            <input type="text" placeholder="Email" aria-label="Email" 
+              autoComplete="email" maxLength={256}  minLength={5}
+              value={email} onChange={e => setEmail(e.target.value)} 
+            />
+            
+            <input placeholder="Password" type="password" 
+              aria-label="Password" autoComplete="new-password" 
+              maxLength={30} minLength={11}
+              value={password} onChange={e => setPassword(e.target.value)} 
+            />
 
             <div className="f_p_row_c">
               <button aria-label="Sign in" onClick={handleLogin}><FaCheck /></button>
@@ -109,19 +117,43 @@ export default function UserInForm({ setCurrentUser, loadUserData, setUserInForm
         {tab === "signup" && (
           <div className="f_p_col">
             <div className="thick_text">Welcome</div>
-            <input type="text" placeholder="Email" aria-label="Email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="text" placeholder="Nickname" aria-label="Nickname" value={nickname} onChange={e => setNickname(e.target.value)} />
-            <input placeholder="Password" type="password" aria-label="Password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} />
 
-            <div>Height (cm): <input type="number" placeholder="000" value={currentWeight} onChange={e => setHeight(Number(e.target.value))}/>cm</div>
+            <input type="text" placeholder="Email" aria-label="Email" 
+              autoComplete="email" maxLength={256}  minLength={5}
+              value={email} onChange={e => setEmail(e.target.value)} 
+            />
+            <input type="text" placeholder="Nickname"  aria-label="Nickname"
+              maxLength={20} minLength={3}
+              value={nickname} onChange={e => setNickname(e.target.value)} 
+            />
 
-            <div>Current Weight: <input type="number" placeholder="000" value={currentWeight} onChange={e => setCurrentWeight(Number(e.target.value))}/>Kgs</div>
-            <div>Target Weight: <input type="number" placeholder="000" value={targetWeight} onChange={e => setTargetWeight(Number(e.target.value))}/>Kgs</div>
+            <input placeholder="Password" type="password" 
+              aria-label="Password" autoComplete="new-password" 
+              maxLength={30} minLength={11}
+              value={password} onChange={e => setPassword(e.target.value)} 
+            />
 
-            <select value={userType} onChange={e => setUserType(e.target.value as UserType)}>
-              <option value="member">Member</option>
-              <option value="trainer">Trainer</option>
-            </select>
+            <div>Height (cm): 
+              <input type="number" placeholder="000cm" 
+                max={251} min={60} 
+                value={currentWeight} onChange={e => setHeight(Number(e.target.value))}
+                />cm
+            </div>
+
+            <div>Current Weight: 
+              <input type="number" placeholder="000" 
+                max={485} min={5}
+                value={currentWeight} onChange={e => setCurrentWeight(Number(e.target.value))}
+              />Kgs
+            </div>
+            
+            <div>Target Weight: 
+              <input type="number" placeholder="000" 
+                max={486} min={5}
+                value={targetWeight} onChange={e => setTargetWeight(Number(e.target.value))}
+              />Kgs
+            </div>
+
             <div className="f_p_row_c">
               <button aria-label="Sign up" onClick={handleSignUp}><FaCheck /></button>
               <button aria-label="Cancel" onClick={() => setUserInFormOpen(false)}><FaXmark /></button>

@@ -6,6 +6,10 @@ const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const userId = event.requestContext.authorizer?.claims?.sub;
+
+  const claims = event.requestContext.authorizer?.claims;
+  console.log("GROUPS CHECK:", typeof claims?.["cognito:groups"], claims?.["cognito:groups"]);
+
   const { startDate, endDate } = event.queryStringParameters ?? {};
 
   if (!userId) {

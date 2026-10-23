@@ -100,6 +100,7 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
     <input
       type="number"
       placeholder={String(placeholder)}
+      maxLength={3}
       onChange={(e) => setNewSets(updateSetString(newSets, index, key, e.target.value, isCardio))}
     />
   );
@@ -184,7 +185,7 @@ export default function SessionExerciseEle({ sessionExercise, exercises, setSess
         {/* Name (or position + exercise picker while editing) */}
         {editing ? (
           <div>
-            <input type="number" value={newIndex} onChange={(e) => setNewIndex(Number(e.target.value))} />:
+            <input type="number" value={newIndex} maxLength={2} onChange={(e) => setNewIndex(Number(e.target.value))} />:
             <select value={newExercise} onChange={(e) => setNewExercise(e.target.value)}>
               {exercises.map((ex) => <option key={ex.exerciseId} value={ex.exerciseId}>{ex.name}</option>)}
             </select>

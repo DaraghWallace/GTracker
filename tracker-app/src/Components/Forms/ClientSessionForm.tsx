@@ -77,7 +77,11 @@ export default function ClientSessionForm({ exercises, clientId, onCreated, setC
 
         {/* Session details */}
         <div className="f_p_col">
-          <input type="text" placeholder="Focus" aria-label="Focus" value={focus} size={7} onChange={(e) => setFocus(e.target.value)} />
+          <input type="text" placeholder="Focus" aria-label="Focus"  
+            size={7} maxLength={25} minLength={2}
+            value={focus} onChange={e => setFocus(e.target.value)} 
+          />
+          
           <div className="f_p_e_header">
             Date <input type="date" aria-label="Date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>

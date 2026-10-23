@@ -39,7 +39,7 @@ export default function Header({ currentUser, setCurrentUser, loadUserData, hand
         />
       }
 
-      <div className="h_hello" onClick={() => console.log(currentUser)}>
+      <div className="h_hello">
         Hey {currentUser?.nickname}
       </div>
 

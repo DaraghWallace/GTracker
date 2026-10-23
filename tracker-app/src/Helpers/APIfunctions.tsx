@@ -13,7 +13,6 @@ export async function getToken(): Promise<string> {
 export async function createSession(newSession: session) {
     const token = await getToken()
     const url = `${API_URL}sessions`;
-    console.log(newSession);
 
     try {
         const response = await fetch(url, {
@@ -27,7 +26,7 @@ export async function createSession(newSession: session) {
 
         const text = await response.text();
         const result = JSON.parse(text);
-        console.log("Session created:", result);
+        console.log("Session created!");
         return result;
     } catch (error) {
         console.error("Failed to Post:", error);
@@ -75,11 +74,9 @@ export async function updateSession(newSession: session) {
         });
 
         const text = await response.text();
-        console.log("RAW RESPONSE:", text);
-
         const result = JSON.parse(text);
 
-        console.log("Session Updated:", result);
+        console.log("Session Updated!");
         return result;
     } catch (error) {
         console.error("Failed to PUT:", error);
@@ -102,7 +99,6 @@ export const deleteSession = async (sessionId: string) => {
     });
 
   if (!response.ok) {
-    console.log(response.json());
     throw new Error("Failed to delete session");
   } else console.log("Session Deleted");
 };
@@ -165,11 +161,10 @@ export async function updateExercise(newExercise: exercise) {
 		});
 
 		const text = await response.text();
-		console.log("RAW RESPONSE:", text);
 
 		const result = JSON.parse(text);
 
-		console.log("Exercise Updated:", result);
+		console.log("Exercise Updated");
 		return result;
 	} catch (error) {
 		console.error("Failed to PUT:", error);
@@ -189,7 +184,6 @@ export const deleteExercise = async (exerciseId: string) => {
     });
 
     if (!response.ok) {
-        console.log(response.json());
         throw new Error("Failed to delete exercise");
     } else console.log("Exercise Deleted");
 };
@@ -214,7 +208,6 @@ export async function createSessionExercise(newSessionExercise: sessionExercise)
         });
 
         const text = await response.text();
-        console.log("RAW RESPONSE:", text);
 
         let result;
         try {
@@ -222,7 +215,7 @@ export async function createSessionExercise(newSessionExercise: sessionExercise)
         } catch {
             result = text;
         }
-        console.log("SessionExercise created:", result);
+        console.log("SessionExercise created!");
         return result;
     } catch (error) {
         console.error("Failed to Post:", error);
@@ -250,7 +243,6 @@ export async function getSessionExerciseBySession(sessionId: string): Promise<se
 export async function updateSessionExercise(newSessionExercise: sessionExercise) {
     const token = await getToken()
     const url = `${API_URL}sessionExercises/${newSessionExercise.sessionExerciseId}`;
-    console.log(url);
 
     try {
         console.log("updating session...");
@@ -265,11 +257,9 @@ export async function updateSessionExercise(newSessionExercise: sessionExercise)
         });
 
         const text = await response.text();
-        console.log("RAW RESPONSE:", text);
-
         const result = JSON.parse(text);
 
-        console.log("Session Updated:", result);
+        console.log("Session Updated!");
         return result;
     } catch (error) {
         console.error("Failed to PUT:", error);

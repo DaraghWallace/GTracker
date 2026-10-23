@@ -1,0 +1,411 @@
+GTRACKER - SECURITY IMPROVEMENTS LIST
+=====================================
+Reviewed: frontend (FE.zip) and backend (BE.zip, CDK + Lambdas)
+Date: 2026-10-19
+
+Progress tracker: [ ] = todo, [R]= Reveiw [x] = done
+
+
+======================================================================
+SECTION 1 - BACKEND: AUTHENTICATION & ROLES
+======================================================================
+
+    [ ] 1.1 [CRITICAL] Users can choose their own role
+        Where: be/lib/constructs/auth.ts (userPoolClient writeAttributes,
+            customAttributes) ; fe/src/Helpers/amplify.ts (register)
+        Problem: "custom:userType" is writable by the client app. Anyone calling the
+                Cognito sign-up API directly (not through your UI) can set it to
+                any string, including "developer". Your Lambdas then trust that
+                value for admin-style actions (Exercises create/update/delete,
+                coaching endpoints). The signup dropdown only hides the options in
+                the UI; it enforces nothing.
+        Try: Who should be allowed to write an attribute that grants privileges?
+            Search: "Cognito custom attribute mutable writeAttributes privilege
+            escalation", "Cognito groups vs custom attributes for authorization".
+            Test it yourself: use the AWS SDK / CLI to sign up with
+            custom:userType=developer and see what your API lets you do.
+
+    [ ] 1.2 [HIGH] Authorization uses two different sources of truth
+        Where: lambda/functions/coachClients/*.ts (trainer check),
+            generic/updateItem.ts, generic/delete.ts, generic/getItem.ts
+        Problem: Trainer check = "cognito:groups contains 'trainers'" OR
+                custom:userType == "developer". Signup UI stores "trainer"
+                (singular) in userType and nothing ever puts anyone in the
+                "trainers" group. So the intended trainer path and the real check
+                disagree, and the only thing that actually works is the
+                spoofable attribute from 1.1. The check is also a substring match
+                on a string (what would a group called "not-trainers-lol" do?).
+        Try: Decide ONE source of truth for roles. Look at how groups appear in the
+            token (string vs array). Search: "cognito:groups claim format API
+            Gateway authorizer".
+
+    [ ] 1.3 [HIGH] Role checks are copy-pasted into ~8 handlers
+        Where: coachClients/*.ts, generic/*.ts
+        Problem: Every handler re-implements auth and CORS by hand. This is how
+                inconsistencies (1.2, 2.x) creep in, and one forgotten check means
+                a hole.
+        Try: Search: "Lambda middleware pattern", "shared auth helper / Lambda
+            layer", "middy". Think about how you'd make "forgetting the check"
+            impossible rather than unlikely.
+
+    [ ] 1.4 [MEDIUM] Weak sign-in protections
+        Where: be/lib/constructs/auth.ts
+        Problem: - Password policy: min 8, no symbols.
+                - No MFA configured.
+                - userPassword auth flow is enabled even though the app uses SRP
+                (password sent to Cognito in a less protected form).
+                - No account recovery / lockout / advanced security thought through.
+                - Token lifetimes left at defaults.
+        Try: Read the Cognito UserPool props for mfa, passwordPolicy, and the
+            authFlows meaning of userPassword vs userSrp. Search: "Cognito
+            threat protection", "Cognito token validity access/id/refresh".
+
+    [ ] 1.5 [MEDIUM] Email verification / sign-up abuse
+        Where: be/lib/constructs/auth.ts
+        Problem: Open self-signup with no rate limiting, bot protection or
+                domain/verification policy review. (Check what happens to the
+                email attribute before it is verified.)
+        Try: Search: "Cognito autoVerify", "Cognito signup abuse WAF / captcha",
+            "AWS WAF Cognito user pool".
+
+
+======================================================================
+SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
+======================================================================
+
+    [ ] 2.1 [CRITICAL] A user can overwrite someone else's SessionExercise
+        Where: lambda/functions/generic/create.ts
+            (+ be/lib/constructs/sessionExercises.ts, where it is wired up)
+        Problem: The create handler strips "userId" from the body but keeps every
+                other field, including the table's primary key
+                (sessionExerciseId). The write has no condition, so it is an
+                "upsert". If a malicious user sends an existing ID belonging to
+                another user, what happens to that item? (Look at what userId it
+                gets stamped with afterwards.)
+        Try: Search: "DynamoDB PutItem ConditionExpression attribute_not_exists",
+            "server-generated IDs vs client-supplied IDs". Reproduce with two
+            accounts.
+
+    [ ] 2.2 [CRITICAL] A user can attach exercises to someone else's session
+        Where: lambda/functions/generic/create.ts, generic/updateItem.ts (case
+            "SessionExercises")
+        Problem: Creating a SessionExercise never checks that the sessionId in the
+                body belongs to the caller. Meanwhile getBySession returns ALL
+                items for a sessionId to the session's owner. Think about what a
+                stranger can now plant in your history. Update has the same
+                weakness: the body can change sessionId.
+        Try: Compare how Sessions are protected (the key includes userId) with how
+            SessionExercises are protected. What check exists on READ that is
+            missing on WRITE?
+
+    [ ] 2.3 [HIGH] Any logged-in user can create/modify Exercises
+        Where: lambda/functions/generic/create.ts, be/lib/constructs/exercises.ts
+        Problem: update and delete require userType "developer", but create does
+                not. Create is the same Lambda used by every table and has no
+                per-table rules at all. Combined with 2.1 (client chooses the
+                ID), what can a normal user do to the shared exercise list that
+                every other user reads?
+        Try: Compare the switch(TABLE_NAME) logic in delete.ts/updateItem.ts with
+            create.ts. Then think about whether switching on a table name inside
+            one "generic" Lambda is a good design (see 1.3).
+
+    [ ] 2.4 [HIGH] Mass assignment (any field the client sends is stored)
+        Where: generic/create.ts, generic/updateItem.ts,
+            coachClients/createSessionForClient.ts,
+            coachClients/createSessionExerciseForClient.ts
+        Problem: Bodies are spread straight into the DynamoDB item. Users can add
+                arbitrary attributes, override fields like createdBy, and send
+                huge/deeply nested payloads. Update uses a full PutItem replace,
+                so a partial/malicious body also deletes fields.
+        Try: Search: "mass assignment vulnerability", "allow-list vs deny-list",
+            "schema validation zod / JSON schema", "API Gateway request
+            validator / models". Note the code uses a DENY-list (removes userId
+            only). Why is an allow-list safer?
+
+    [ ] 2.5 [HIGH] Trainers can add ANY user as a client with no consent
+        Where: coachClients/addClient.ts, findByEmail.ts, removeClient.ts
+        Problem: A trainer only needs a user's id to attach them, then can read
+                their sessions and write sessions/exercises into their account.
+                The client is never asked, can't see who their trainer is, and
+                can't remove them. Also the "Is this your client?" prompt is
+                purely cosmetic (it's UI, not enforcement).
+        Try: Think about the data flow of consent: request -> accept -> active.
+            Search: "invitation / approval workflow", "data minimisation".
+            Who is the data subject here and who should control access?
+
+    [ ] 2.6 [HIGH] User enumeration + full table scan for email search
+        Where: coachClients/findByEmail.ts
+        Problem: Any account that passes the (spoofable, see 1.1) trainer check
+                can probe which emails are registered and get their user id and
+                nickname. Implementation is a Scan with a filter (reads the whole
+                table every call - cost and DoS risk, and it only reads the first
+                page of results, which also makes it unreliable at scale).
+                Email matching case-sensitivity is also unhandled.
+        Try: Search: "account enumeration", "DynamoDB Scan vs Query", "GSI on
+            email", "DynamoDB pagination LastEvaluatedKey".
+
+    [ ] 2.7 [MEDIUM] Trainer gets the full profile of each client
+        Where: coachClients/listClients.ts
+        Problem: Returns whole DynamoDB items (email, createdAt, anything else
+                stored). The "only return what's needed" comment exists in
+                findByEmail but not here.
+        Try: What fields does the trainer UI actually use? Search: "response
+            shaping / projection", "DynamoDB ProjectionExpression".
+
+    [ ] 2.8 [MEDIUM] "developer" is also a trainer, everywhere
+        Where: all coachClients/*.ts
+        Problem: A developer account silently has trainer powers over any user it
+                adds (see 2.5). Powers should be explicit and separate.
+        Try: Search: "principle of least privilege", "separation of duties".
+
+    [ ] 2.9 [MEDIUM] Orphaned / inconsistent data
+        Where: generic/delete.ts, be/lib/constructs/sessions.ts
+        Problem: Deleting a Session does not delete its SessionExercises; deleting
+                a SessionExercise or Session by a trainer-created record, etc.
+                Leftover data of deleted sessions stays forever (privacy: user
+                "deleted" it, you still hold it).
+        Try: Search: "DynamoDB TransactWriteItems", "cascading delete patterns",
+            "DynamoDB TTL", "DynamoDB streams".
+
+    [ ] 2.10 [LOW] Update/delete do read-then-write (race condition)
+        Where: generic/updateItem.ts, generic/delete.ts
+        Problem: They GET, check ownership, then PUT/DELETE as separate calls.
+                The ownership can be enforced inside the write itself instead.
+        Try: Search: "TOCTOU", "DynamoDB conditional writes".
+
+
+======================================================================
+SECTION 3 - BACKEND: API GATEWAY, CORS, ERRORS, INPUT HANDLING
+======================================================================
+
+    [ ] 3.1 [HIGH] Unhandled errors and invalid JSON crash handlers
+        Where: generic/create.ts (no try/catch around the DB write),
+            generic/updateItem.ts (JSON.parse unguarded, DB calls unguarded),
+            coachClients/addClient.ts and removeClient.ts (JSON.parse
+            unguarded), generic/delete.ts, getBySession.ts
+        Problem: Bad input or a DynamoDB error (for example an oversized item)
+                becomes an unhandled exception -> API Gateway 502 with no CORS
+                headers, no useful message, and noisy logs. Inconsistent with the
+                handlers that DO guard.
+        Try: Send malformed JSON / 500KB bodies / wrong types to each route and
+            record what you get back. Search: "Lambda proxy integration error
+            response format", "API Gateway payload limits".
+
+    [ ] 3.2 [MEDIUM] Internal error details leak to the client
+        Where: scan.ts, getItem.ts, coachClients/*.ts (String(error) in 500s)
+        Problem: Raw error text (table names, AWS messages) is returned to callers.
+        Try: Search: "information disclosure error handling", "log detail
+            server-side, return generic message + request id".
+
+    [ ] 3.3 [MEDIUM] CORS is wide open and inconsistent
+        Where: be/lib/tracker-cdk-stack.ts (ALL_ORIGINS, ALL_METHODS, '*' headers),
+            every Lambda's CORS_HEADERS
+        Problem: Any website may call your API from a browser (they'd still need a
+                valid token, but this removes a defence-in-depth layer). Headers
+                are hardcoded in many places and differ between handlers; the
+                gateway's 5xx responses have no CORS config at all.
+        Try: Search: "CORS allowed origins explained", "preflight". What is your
+            one real production origin (note vite base '/GTracker/')? Where is
+            the single best place to define CORS?
+
+    [ ] 3.4 [MEDIUM] No throttling, quotas, WAF or request validation
+        Where: be/lib/tracker-cdk-stack.ts
+        Problem: Nothing limits request rate or body shape. One user (or a stolen
+                token) can run up your AWS bill or fill DynamoDB (PAY_PER_REQUEST
+                scales with abuse).
+        Try: Search: "API Gateway stage throttling / usage plans", "AWS WAF rate
+            based rule", "AWS Budgets alarm", "API Gateway request validator".
+
+    [ ] 3.5 [MEDIUM] Query parameter handling
+        Where: getByUser.ts (startDate/endDate), getBySession.ts
+        Problem: Dates are string-interpolated with no format validation; results
+                have no pagination or limits (DynamoDB returns max 1MB then
+                silently stops - data may be missing).
+        Try: Search: "input validation allow-list", "DynamoDB Query pagination".
+
+    [ ] 3.6 [LOW] Dev-only leftovers
+        Where: generic/updateItem.ts (default: break in switch), tests, README
+        Problem: An unknown table name falls through to the default branch quietly
+                in update but returns an error in delete. Small things like this
+                are where bugs hide.
+
+
+======================================================================
+SECTION 4 - BACKEND: INFRASTRUCTURE (CDK)
+======================================================================
+
+    [ ] 4.1 [HIGH] All data is set to be destroyed with the stack
+        Where: be/lib/constructs/*.ts (removalPolicy DESTROY on 4 tables AND the
+            Cognito user pool)
+        Problem: Deleting/rolling back the stack deletes every user account and
+                every workout, with no backup. No point-in-time recovery, no
+                deletion protection.
+        Try: Search: "CDK RemovalPolicy RETAIN vs DESTROY", "DynamoDB PITR",
+            "deletionProtection", "separate dev and prod stacks".
+
+    [ ] 4.2 [MEDIUM] Hardcoded physical names
+        Where: table names "Sessions", "Exercises", "SessionExercises",
+            "GtUserProfiles", pool name
+        Problem: The stack can't be deployed twice (dev/prod) in one account, and
+                changing a table forces replacement. Also the Lambda code
+                switches on these literal names for authorization (see 2.3), so
+                renaming breaks security logic silently.
+        Try: Search: "CDK physical name vs generated name".
+
+    [ ] 4.3 [MEDIUM] Least-privilege IAM not reviewed
+        Where: grant* calls in each construct
+        Problem: e.g. delete/update Lambdas get read+write on whole tables (do they
+                need all those actions?). Worth auditing each Lambda's actual
+                DynamoDB calls vs granted actions.
+        Try: Search: "IAM least privilege CDK grant methods vs explicit policy
+            statements".
+
+    [ ] 4.4 [MEDIUM] No logging, monitoring or alerting
+        Where: whole stack
+        Problem: No API access logs, no Lambda log retention, no alarms. If someone
+                abuses an endpoint you wouldn't know.
+        Try: Search: "API Gateway access logging", "CloudWatch log retention in
+            CDK", "CloudWatch alarms 4XX/5XX/throttles", "CloudTrail".
+
+    [ ] 4.5 [LOW] Deployment/env script
+        Where: be/bin/scripts/sync-env.ts
+        Problem: Writes outputs into a sibling project's .env and src/ folder.
+                Nothing here is secret (pool IDs, API URL), but confirm
+                cdk-outputs.json can never be committed and that a missing path
+                fails safely.
+        Try: Check both .gitignore files for the outputs file.
+
+
+======================================================================
+SECTION 5 - FRONTEND
+======================================================================
+
+    [ ] 5.1 [HIGH] UI role checks are not security (and are trusted too much)
+        Where: fe/src/Components/Header.tsx (isDeveloper), Coaching.tsx,
+            DevRoom.tsx, fe/src/Helpers/amplify.ts (reads userType from token)
+        Problem: Hiding buttons by userType is fine for UX but gives no protection.
+                The real protection must be server side (which is currently
+                weak - see 1.1 / 2.3). Keep a clear mental line: frontend =
+                convenience, backend = enforcement.
+        Try: Open devtools and see how easy it is to call your API without your UI.
+
+    [ ] 5.2 [MEDIUM] Tokens in browser storage + no Content Security Policy
+        Where: fe/index.html, Amplify default storage
+        Problem: Amplify keeps tokens in localStorage by default; any XSS bug would
+                expose them. index.html has no CSP and there is no response-header
+                hardening (hosting is under '/GTracker/'; find out where it is
+                served from and what headers you can control).
+        Try: Search: "localStorage vs httpOnly cookie tokens tradeoffs", "Content
+            Security Policy", "XSS in React: what React protects against and what
+            it doesn't (dangerouslySetInnerHTML, href javascript:)". Good news:
+            I found no dangerouslySetInnerHTML/eval in the code - keep it that way.
+
+    [R] 5.3 [MEDIUM] Sensitive data written to the browser console
+        Where: fe/src/Helpers/APIfunctions.tsx (logs bodies/responses),
+            fe/src/Components/Header.tsx (click on greeting logs currentUser)
+        Problem: Console logs are visible to anyone with the device/extensions and
+                often get left in production builds.
+        Try: Search: "remove console in production Vite build", "logging
+            hygiene". Decide what is dev-only.
+
+    [R] 5.4 [MEDIUM] Client-side validation is minimal, and server doesn't back it up
+        Where: Forms/*.tsx (weights/height are free numbers, nickname/email no
+            limits, exercise fields), Helpers/amplify.ts register()
+        Problem: Negative/absurd numbers, huge strings, etc. Remember client-side
+                validation is only for UX; the same rules must exist in the API.
+                (Also: in UserInForm the Height input is bound to the
+                currentWeight state - a functional bug that also makes the
+                stored profile data wrong.)
+        Try: Search: "validate on both sides", "zod".
+
+    [ ] 5.5 [MEDIUM] Inconsistent, duplicated API layers
+        Where: Helpers/api.tsx vs Helpers/APIfunctions.tsx
+        Problem: Two different fetch layers with different error handling and
+                different Authorization formats (some send "Bearer <token>", some
+                send the bare token; some swallow errors and return []). Failures
+                can be silent, e.g. getSessions returns an empty list on any
+                error, which looks like "no data".
+                Values are also put into URLs without encoding (sessionId,
+                startDate in query strings).
+        Try: Search: "single API client wrapper", "encodeURIComponent", "fail
+            loudly vs fail silently".
+
+    [ ] 5.6 [LOW] Client generates IDs for records
+        Where: Forms/NewSessionForm.tsx (uuid), NewExerciseForm.tsx
+        Problem: Trusting client-supplied IDs is what makes 2.1 possible. IDs
+                should be decided where you can trust the code.
+        Try: Link this to 2.1 and think about which side should own ID creation.
+
+    [R] 5.7 [LOW] Trainer/client profile fields are placeholders
+        Where: UserInForm.tsx handleLogin (currentTrainerId and goal are filled
+            with the userType value), user object height/weight set to 0
+        Problem: Confusing/incorrect data in client state; easy to misuse later.
+        SOLUTION: commented out for now, removing this function for now, as coach would likley be a payed tier some form of admin would be needed to update user type.
+
+======================================================================
+SECTION 6 - DEPENDENCIES & PROJECT HYGIENE
+======================================================================
+
+    [R] 6.1 [HIGH] Known vulnerabilities in dependencies (npm audit, lockfile only)
+        Frontend (fe):      22 findings (15 high) - notable: vite (dev server file
+                            read/path traversal issues), uuid (moderate).
+        Backend CDK (be):   44 findings (1 critical, 36 high) - notable: handlebars
+                            (critical, comes in via jest tooling), aws-cdk-lib
+                            (<= 2.259.0), jest chain.
+        Lambda (be/lambda): 4 findings (1 high, 3 moderate)
+        Notes: Many are dev-tooling only (vite dev server, jest) and don't ship to
+            users - part of the skill is working out which ones are real
+            exposure. Run the audit yourself, read each advisory, and decide.
+        Try: Search: "npm audit dev vs production dependencies", "npm audit
+            --omit=dev", "Dependabot / Renovate", "lockfile hygiene".
+
+    [R] 6.2 [LOW] Unused / questionable dependencies
+        Where: fe/package.json ("dotenv" is in dependencies but Vite doesn't need
+            it in browser code; I found no use of it in src)
+        Try: Search: "depcheck".
+
+    [R] 6.3 [LOW] README claims more than the code does
+        Where: fe/README.md (line ~21 and ~89), be/README.md (line ~89)
+        Problem: It says "Lambda handlers verify ownership on every read/write" -
+                not true today (see 2.1-2.3; create.ts does no ownership check). Portfolio readers (and employers)
+                do check. Either fix the code or fix the claim after you fix the
+                code.
+
+    [x] 6.4 [LOW] Compiled files in the backend folder
+        Where: be/lib/tracker-cdk-stack.js, be/bin/tracker-cdk.js
+        Problem: Generated .js next to .ts (they're in .gitignore, but stale
+                copies get picked up by tooling). Make sure they aren't being
+                committed or deployed.
+
+    [ ] 6.5 [MEDIUM] Missing security-focused tests
+        Where: lambda/functions/**/*.test.ts
+        Problem: Check whether the tests ever try to do something they should NOT
+                be allowed to (user B touching user A's data, member calling a
+                trainer endpoint, spoofed IDs). Tests that only prove the happy
+                path won't catch any item in Section 2.
+        Try: For every item in Sections 1-2 write one "this must be rejected"
+            test first.
+
+
+======================================================================
+SUGGESTED ORDER OF ATTACK (and what you'll learn)
+======================================================================
+ 1. 1.1 + 1.2  -> Roles & authorization model (Cognito groups/claims)
+ 2. 2.1, 2.2, 2.3 -> IDOR / broken access control (OWASP API #1)
+ 3. 2.4        -> Mass assignment + input validation
+ 4. 2.5, 2.6, 2.7 -> Consent, data minimisation, enumeration
+ 5. 3.1, 3.2, 3.3 -> Error handling, info disclosure, CORS
+ 6. 4.1        -> Don't lose real users' data (RETAIN, PITR)
+ 7. 3.4, 4.4   -> Rate limits, logging, alarms
+ 8. 5.x        -> Frontend hygiene
+ 9. 6.x        -> Dependencies and tests
+
+Good reading to anchor all of this:
+ - OWASP API Security Top 10 (especially API1 Broken Object Level
+   Authorization, API3 Broken Object Property Level Authorization / mass
+   assignment, API5 Broken Function Level Authorization, API4 Unrestricted
+   Resource Consumption)
+ - AWS Well-Architected: Security pillar (serverless lens)
+ - Cognito developer guide: groups, custom attributes, token claims
+
+

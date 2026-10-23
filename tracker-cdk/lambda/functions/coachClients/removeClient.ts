@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
+import { isInGroup } from "../auth";
 
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const CORS_HEADERS = {
@@ -21,9 +22,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "clientId required" }) };
   }
 
-  const groups = event.requestContext.authorizer?.claims?.["cognito:groups"] ?? "";
-  const userType = event.requestContext.authorizer?.claims?.["custom:userType"];
-  const isTrainer = groups.includes("trainers") || userType === "developer";
+  const claims = event.requestContext.authorizer?.claims;
+  const isTrainer = isInGroup(claims, "admins") || isInGroup(claims, "trainers") 
 
   if (!isTrainer) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not a trainer" }) };

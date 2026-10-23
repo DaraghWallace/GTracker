@@ -2,7 +2,7 @@
 
 A full-stack web application for tracking individual gym sessions. Users can log workouts, record exercises and sets, and review their training history over time.
 
-Built as a portfolio project demonstrating end-to-end AWS serverless architecture, infrastructure-as-code, and secure API design.
+Built as a portfolio project demonstrating end-to-end AWS serverless architecture and infrastructure-as-code. Security hardening is an ongoing part of the project (see [Security](#security)).
 
 ---
 
@@ -16,9 +16,9 @@ React (Vite) → API Gateway → Lambda → DynamoDB
 
 **Frontend:** React + TypeScript, bootstrapped with Vite. Auth handled via AWS Amplify (Cognito).
 
-**Backend:** Serverless REST API built with AWS CDK. Each resource (Sessions, Exercises, SessionExercises) has its own DynamoDB table and Lambda functions wired to API Gateway routes.
+**Backend:** Serverless REST API built with AWS CDK. Each resource (Sessions, Exercises, SessionExercises, UserProfiles) has its own DynamoDB table and Lambda functions wired to API Gateway routes.
 
-**Auth:** Amazon Cognito User Pool with a per-route Cognito authorizer on every API Gateway method. Lambda handlers verify ownership on every read/write using the verified `sub` claim from the JWT — not client-supplied IDs.
+**Auth:** Amazon Cognito User Pool with a Cognito authorizer on every API Gateway method. Handlers read the caller's identity from the verified `sub` claim in the JWT. Ownership checks are implemented per handler (see [Security](#security) for current coverage and known gaps).
 
 ---
 
@@ -27,13 +27,13 @@ React (Vite) → API Gateway → Lambda → DynamoDB
 ```
 GTracker/
 ├── tracker-cdk/          # CDK infrastructure (Lambda, API Gateway, DynamoDB, Cognito)
-│   ├── bin/              # CDK app entry point
+│   ├── bin/              # CDK app entry point, scripts/sync-env.ts
 │   ├── lib/              # Stack and constructs
 │   │   └── constructs/   # Auth, Sessions, Exercises, SessionExercises, UserProfiles
-│   ├── lambda/           # Lambda handler source
-│   │   └── functions/
-│   │       └── generic/  # Shared create, update, delete handlers
-│   └── test/             # CDK and unit tests
+│   └── lambda/           # Lambda handler source and unit tests
+│       └── functions/
+│           ├── generic/       # Shared create, update, delete, get handlers
+│           └── coachClients/  # Trainer/client handlers
 └── tracker-app/          # React frontend
     └── src/
 ```
@@ -57,10 +57,10 @@ cdk bootstrap   # first time only
 cdk deploy --outputs-file ../tracker-app/src/cdk-outputs.json
 ```
 
-After deploying, sync the CDK outputs to your frontend environment:
+After deploying, sync the CDK outputs to your frontend environment (run from `tracker-cdk`):
 
 ```bash
-npx ts-node scripts/sync-env.ts
+npx ts-node bin/scripts/sync-env.ts
 ```
 
 This generates `tracker-app/.env` with the API URL and Cognito IDs from the deployment.
@@ -80,20 +80,34 @@ cd tracker-cdk
 npm test
 ```
 
+Current tests are Lambda handler unit tests (DynamoDB mocked). There are no CDK stack tests yet.
+
 ---
 
 ## Security
 
-- Every API Gateway route requires a valid Cognito JWT
-- Lambda handlers extract the caller's identity from the verified token (`requestContext.authorizer.claims.sub`), never from client-supplied parameters
-- Write operations (update, delete) fetch the existing item and verify ownership before acting
-- Client-supplied `userId` fields are stripped from request bodies and replaced with the verified identity
+This project is a work in progress and a learning exercise. It should be treated as a demo and not used to store sensitive data until the hardening below is finished.
+
+**In place**
+- Every API Gateway route requires a valid Cognito JWT.
+- Handlers take the caller's identity from the verified token (`requestContext.authorizer.claims.sub`).
+- The generic create/update handlers strip any client-supplied `userId` and replace it with the verified identity.
+- Sessions are keyed by `sessionId` + `userId`, so session update/delete operate only on the caller's own records.
+- Update/delete handlers for session exercises fetch the existing item and check ownership before acting.
+- `POST /sessions` validates its request body (field allow-list and length/range limits) at API Gateway.
+- The Sessions table is retained if the stack is deleted.
+
+**In progress**
+- Ownership and role checks are not yet applied uniformly across every handler and table.
+- Request validation is only on `POST /sessions` so far; other routes still need it.
+- Role handling, CORS configuration, rate limiting, logging/alerting, backups for the remaining tables, and dependency updates are being reviewed and fixed.
 
 ---
 
 ## What's Next
 
+- **Security hardening** — finish the items above
+- **Coach/client relationships** (in progress) — trainers can view and track their clients' sessions; role handling is being reworked as part of the hardening
 - **Cardio tracking** — log cardio sessions alongside weight training
-- **Coach/client relationships** — trainers can view and track their clients' sessions, with role-based access control via Cognito groups
 - **Progressive overload insights** — surface trends across sessions (volume, weight, frequency)
 - **Mobile experience** — responsive improvements and potential React Native port

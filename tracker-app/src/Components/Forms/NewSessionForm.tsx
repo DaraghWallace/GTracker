@@ -65,9 +65,21 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
     <div className="form">
       <div className="f_panel">
         <div className="f_p_col">
-          <input type="text" placeholder="Focus" aria-label="Focus" value={focus} size={7} onChange={e => setFocus(e.target.value)} />
-          <div className="bold_text">Current Weight: <input type="number" aria-label="Current weight" value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} />Kgs</div>
-          <div><input type="date" aria-label="Date" value={date} onChange={e => setDate(e.target.value)} /></div>
+          <input type="text" placeholder="Focus" aria-label="Focus"  
+            size={7} maxLength={25} minLength={2}
+            value={focus} onChange={e => setFocus(e.target.value)} 
+          />
+          
+          <div className="bold_text">Current Weight: 
+            <input type="number" aria-label="Current weight" 
+              max={486} min={5}
+              value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} 
+            />Kgs
+          </div>
+          
+          <div>
+            <input type="date" aria-label="Date" value={date} onChange={e => setDate(e.target.value)} />
+          </div>
         </div>
 
         <textarea placeholder="Notes (optional)" aria-label="Notes" value={notes} onChange={e => setNotes(e.target.value)} />

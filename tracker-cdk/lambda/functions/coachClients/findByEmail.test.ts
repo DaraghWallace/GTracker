@@ -58,7 +58,7 @@ describe('findByEmail handler', () => {
     expect(response.statusCode).toBe(404);
   });
 
-  test('returns 200 with only userId and nickname on match', async () => {
+  test('returns 200 with only userId and nickname on match (trainers)', async () => {
     const response = await handler({
       queryStringParameters: { email: "client@test.com" },
       requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "trainers" } } },
@@ -67,5 +67,29 @@ describe('findByEmail handler', () => {
     const body = JSON.parse(response.body);
     expect(body).toEqual({ userId: "CLIENT_1", nickname: "Bob" });
     expect(body.email).toBeUndefined(); // shouldn't leak email back
+  });
+
+  test('returns 200 with only userId and nickname on match (Admin)', async () => {
+    const response = await handler({
+      queryStringParameters: { email: "client@test.com" },
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "admins" } } },
+    } as any);
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('returns 403 wrong group (members)', async () => {
+    const response = await handler({
+      queryStringParameters: { email: "client@test.com" },
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "members" } } },
+    } as any);
+    expect(response.statusCode).toBe(403);
+  });
+
+  test('returns 403 wrong usertype (developer)', async () => {
+    const response = await handler({
+      queryStringParameters: { email: "client@test.com" },
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "custom:userType": "developer" } } },
+    } as any);
+    expect(response.statusCode).toBe(403);
   });
 });

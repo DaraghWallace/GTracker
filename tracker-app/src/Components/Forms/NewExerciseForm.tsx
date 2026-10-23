@@ -61,7 +61,10 @@ export default function NewExerciseForm({ user, setNewExercise,exercises }: Prop
   return (
     <div className="form">
       <div className="f_panel">
-        <input type="text" placeholder="Name" aria-label="Exercise name" value={name} onChange={e => setName(e.target.value)} />
+        <input type="text" placeholder="Name" aria-label="Exercise name"
+          maxLength={30} minLength={1}
+          value={name} onChange={e => setName(e.target.value)} 
+        />
 
         <select value={group} aria-label="Muscle group" onChange={e => handleGroupChange(e.target.value as MuscleGroup)}>
           <option hidden>Group</option>

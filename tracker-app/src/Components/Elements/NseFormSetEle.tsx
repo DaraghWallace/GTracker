@@ -88,6 +88,7 @@ function lockSet() {
               type="number"
               placeholder="00"
               aria-label="hours"
+              maxLength={3}
               value={hours}
               disabled={locked}
               onChange={e => setHours(e.target.value)}
@@ -117,6 +118,7 @@ function lockSet() {
               type="number"
               placeholder="##.##"
               aria-label="distance"
+              maxLength={5}
               value={distance}
               disabled={locked}
               onChange={e => setDistance(e.target.value)}
@@ -127,6 +129,7 @@ function lockSet() {
               type="number"
               placeholder="Kgs"
               aria-label="Weight"
+              maxLength={4}
               value={weight}
               disabled={locked}
               onChange={e => setWeight(e.target.value)}
@@ -163,6 +166,7 @@ function lockSet() {
                   type="number"
                   placeholder="00"
                   aria-label="hours"
+                  maxLength={3}
                   value={hours}
                   disabled={locked}
                   onChange={e => setHours(e.target.value)}
@@ -192,6 +196,7 @@ function lockSet() {
                   type="number"
                   placeholder="Kgs"
                   aria-label="Weight"
+                  maxLength={4}
                   value={weight}
                   disabled={locked}
                   onChange={e => setWeight(e.target.value)}
@@ -214,6 +219,7 @@ function lockSet() {
                   type="number"
                   placeholder="Kgs"
                   aria-label="Weight"
+                  maxLength={4}
                   value={weight}
                   disabled={locked}
                   onChange={e => setWeight(e.target.value)}
@@ -223,6 +229,7 @@ function lockSet() {
                 <input
                   type="number"
                   placeholder="#"
+                  maxLength={4}
                   aria-label="Reps"
                   value={reps}
                   disabled={locked}

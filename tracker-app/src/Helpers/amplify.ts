@@ -19,7 +19,7 @@ Amplify.configure({
   }
 });
 
-export async function register(email: string, password: string, nickname: string, height: number, currentWeight: number, targetWeight: number, userType: string) {
+export async function register(email: string, password: string, nickname: string, height: number, currentWeight: number, targetWeight: number/*, userType: string*/) {
   const result = await signUp({
     username: email,
     password,
@@ -32,7 +32,7 @@ export async function register(email: string, password: string, nickname: string
         "tar_weight": String(targetWeight),
         // "currentTrainerId": currentTrainerId,
         // "goal": goal,
-        "custom:userType": userType,
+        "custom:userType": "member",
       }
     }
   });

@@ -8,13 +8,13 @@ AWS CDK project defining all backend infrastructure for GTracker. Deploys a serv
 
 | Construct | Resources |
 |---|---|
-| Auth | Cognito User Pool, User Pool Client, API Gateway Cognito Authorizer |
-| UserProfiles | DynamoDB table, post-confirmation Lambda trigger |
-| Sessions | DynamoDB table, Lambda functions (create, read, update, delete) |
+| Auth | Cognito User Pool, User Pool Client, user groups, API Gateway Cognito Authorizer |
+| UserProfiles | DynamoDB table, post-confirmation Lambda trigger, user lookup and coach/client routes |
+| Sessions | DynamoDB table, Lambda functions (create, read, update, delete, trainer create-for-client, latest session), request validation on `POST /sessions` |
 | Exercises | DynamoDB table, Lambda functions (create, scan, update, delete) |
-| SessionExercises | DynamoDB table, Lambda functions (create, read, update, delete) |
+| SessionExercises | DynamoDB table, Lambda functions (create, read, update, delete, trainer read/create for a client's session) |
 
-All API Gateway methods require a valid Cognito JWT. The authorizer injects verified claims into `requestContext` — handlers use `claims.sub` as the canonical user identity.
+All API Gateway methods require a valid Cognito JWT. The authorizer injects verified claims into `requestContext`; handlers use `claims.sub` as the caller's identity.
 
 ---
 
@@ -23,16 +23,29 @@ All API Gateway methods require a valid Cognito JWT. The authorizer injects veri
 ### Generic handlers (shared across constructs)
 | File | HTTP Method | Description |
 |---|---|---|
-| `generic/create.ts` | POST | Creates a new item, stamping `userId` from the verified token |
-| `generic/updateItem.ts` | PUT | Fetches existing item, verifies ownership, then overwrites |
-| `generic/delete.ts` | DELETE | Fetches existing item, verifies ownership, then deletes |
+| `generic/create.ts` | POST | Creates a new item and stamps `userId` from the verified token. Does not currently check ownership of related records or restrict which table fields are written (see Security status) |
+| `generic/updateItem.ts` | PUT | Fetches the existing item and applies per-table ownership/role rules, then overwrites the whole item |
+| `generic/delete.ts` | DELETE | Fetches the existing item and applies per-table ownership/role rules, then deletes |
+| `generic/getItem.ts` | GET | Fetches one item by id (used for user profiles) for its owner or a developer |
+
+The generic handlers choose their rules by comparing `TABLE_NAME` to the literal table names `Sessions`, `SessionExercises` and `Exercises`.
 
 ### Construct-specific handlers
 | File | Construct | Description |
 |---|---|---|
 | `getByUser.ts` | Sessions | Queries sessions by the authenticated caller's `userId` |
 | `getBySession.ts` | SessionExercises | Queries session exercises by `sessionId`, with ownership check against Sessions table |
-| `scan.ts` | Exercises | Returns all exercises (public/shared data, no per-user ownership) |
+| `scan.ts` | Exercises | Returns all exercises (shared data, no per-user ownership) |
+
+### Coach/client handlers (`coachClients/`)
+| File | Description |
+|---|---|
+| `findByEmail.ts` | Trainer looks up a user by email |
+| `addClient.ts` / `removeClient.ts` | Trainer links/unlinks a client via `currentTrainerId` |
+| `listClients.ts` | Trainer lists their clients |
+| `createSessionForClient.ts` | Trainer creates a session for a linked client |
+| `getClientLatestSession.ts` | Trainer reads a linked client's latest session |
+| `getClientSessionExercises.ts` / `createSessionExerciseForClient.ts` | Trainer reads/adds exercises on a linked client's session |
 
 ---
 
@@ -45,32 +58,34 @@ cdk diff         # preview changes before deploying
 cdk deploy --outputs-file ../tracker-app/src/cdk-outputs.json
 ```
 
-After deploying, sync outputs to the frontend:
+After deploying, sync outputs to the frontend (run from this folder):
 
 ```bash
-npx ts-node scripts/sync-env.ts
+npx ts-node bin/scripts/sync-env.ts
 ```
 
-To tear down all resources:
+To tear down the stack:
 
 ```bash
 cdk destroy
 ```
 
-Note: `cdk destroy` deletes all DynamoDB tables and the Cognito User Pool. All user accounts and data will be lost.
+Note: the Sessions table is set to be retained when the stack is deleted. The other DynamoDB tables and the Cognito User Pool are currently set to be destroyed, so `cdk destroy` deletes those user accounts and that data. Because the Sessions table keeps its fixed name `Sessions`, redeploying the stack after a destroy fails until the retained table is removed or imported.
 
 ---
 
 ## Environment Variables
 
-Lambda functions receive their configuration via environment variables set by CDK at deploy time. No values are hardcoded in handler source.
+Lambda functions receive their configuration via environment variables set by CDK at deploy time (table names are passed in, not read from handler source). Note that the table names themselves are fixed in the CDK constructs, and the generic handlers compare `TABLE_NAME` against those literal names.
 
 | Variable | Used by | Description |
 |---|---|---|
-| `TABLE_NAME` | All handlers | The construct's own DynamoDB table name |
+| `TABLE_NAME` | Generic handlers, `getByUser.ts`, `getBySession.ts`, `scan.ts`, `findByEmail.ts`, `listClients.ts` | The construct's own DynamoDB table name |
 | `OTHER_TABLE` | `getBySession.ts` | Sessions table name, used for ownership verification |
+| `PARTITION_KEY_NAME`, `OWNERSHIP_FIELD`, `IS_PUBLIC` | `generic/getItem.ts` | Key name, ownership field and public-read switch for the user profile lookup |
+| `SESSIONS_TABLE`, `SESSION_EXERCISES_TABLE`, `USER_PROFILES_TABLE` | Coach/client handlers | Tables used for trainer-link checks and client data access |
 
-Frontend environment variables are generated by `scripts/sync-env.ts` into `tracker-app/.env`:
+Frontend environment variables are generated by `bin/scripts/sync-env.ts` into `tracker-app/.env`:
 
 | Variable | Description |
 |---|---|
@@ -86,11 +101,21 @@ Frontend environment variables are generated by `scripts/sync-env.ts` into `trac
 npm test
 ```
 
-Unit tests cover the generic Lambda handlers and construct-specific read handlers. Each test mocks the DynamoDB client and verifies handler behaviour for ownership enforcement, auth checks, and input validation.
+Unit tests live next to the handlers under `lambda/functions/`. Each test mocks the DynamoDB client and checks handler behaviour such as auth checks, missing parameters, ownership failures and success responses. Coverage varies by handler, and there are no CDK stack (infrastructure) tests yet.
 
-Key scenarios tested per handler:
-- Returns 401 when caller is unauthenticated
-- Returns 400 when required parameters are missing
-- Returns 403 when caller does not own the requested item
-- Returns 404 when the item does not exist
-- Returns 200 on success
+---
+
+## Security status
+
+This is a learning project and should be treated as a demo, not used to store sensitive data until hardening is complete.
+
+**In place**
+- Cognito authorizer on every API method; caller identity read from the verified `sub` claim.
+- Session key is `sessionId` + `userId`, so session update/delete only touch the caller's own records.
+- `POST /sessions` has request validation (field allow-list, length and range limits).
+- Sessions table uses a retain policy.
+
+**Known gaps being worked on**
+- Authorization and ownership checks are not yet consistent across all handlers and tables.
+- Request validation is not yet applied to most routes.
+- Role handling, CORS, throttling, logging/alerting, backups for the remaining tables, and dependency updates still need work.

@@ -52,9 +52,17 @@ describe('removeClient handler', () => {
     expect(response.statusCode).toBe(403);
   });
 
-  test('returns 200 on successful release', async () => {
+  test('returns 200 on successful release (trainers)', async () => {
     const response = await handler({
       requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "trainers" } } },
+      body: JSON.stringify({ clientId: "CLIENT_1" }),
+    } as any);
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('returns 200 on successful release (admins)', async () => {
+    const response = await handler({
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "admins" } } },
       body: JSON.stringify({ clientId: "CLIENT_1" }),
     } as any);
     expect(response.statusCode).toBe(200);
@@ -66,5 +74,21 @@ describe('removeClient handler', () => {
       body: JSON.stringify({ clientId: "NOT_YOUR_CLIENT" }),
     } as any);
     expect(response.statusCode).toBe(409);
+  });
+  
+  test('returns 403 wrong group (members)', async () => {
+    const response = await handler({
+      requestContext: { authorizer: { claims: { sub: "MEMBER_1", "cognito:groups": "members" } } },
+      body: JSON.stringify({ clientId: "MEMBER_1" }),
+    } as any);
+    expect(response.statusCode).toBe(403);
+  });
+
+  test('returns 403 wrong usertype (developer)', async () => {
+    const response = await handler({
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "custom:userType": "developer" } } },
+      body: JSON.stringify({ clientId: "CLIENT_1" }),
+    } as any);
+    expect(response.statusCode).toBe(403);
   });
 });

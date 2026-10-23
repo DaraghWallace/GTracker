@@ -102,17 +102,20 @@ export default function SessionEle({ session, setSessionData, exercises, session
         {/* Header: edit form or plain text */}
         {editingHeader ? (
           <div className="s_header_form">
-            <div>
-              Focus: <input type="text" placeholder={session.focus || ""} size={7} value={newFocus || ""}
-                onChange={(e) => setNewFocus(e.target.value)} />
+            <div> Focus: <input type="text" placeholder="Focus" aria-label="Focus"  
+                size={7} maxLength={25} minLength={2}
+                value={newFocus || ""} onChange={e => setNewFocus(e.target.value)} 
+              />
             </div>
-            <div>
-              Date: <input type="date" placeholder={session.dateDone} value={newDateDone}
+            
+            <div> Date: <input type="date" placeholder={session.dateDone} value={newDateDone}
                 onChange={(e) => setNewDateDone(e.target.value)} />
             </div>
-            <div>
-              Weight: <input type="number" value={newUserWeight}
-                onChange={(e) => setNewUserWeight(Number(e.target.value))} />Kgs
+
+            <div> Weight: <input type="number" aria-label="Current weight" 
+                max={486} min={5}
+                value={newUserWeight} onChange={e => setNewUserWeight(Number(e.target.value))} 
+              />Kgs
             </div>
           </div>
         ) : (

@@ -36,9 +36,17 @@ describe('listClients handler', () => {
     expect(response.statusCode).toBe(401);
   });
 
+  test('returns 403 if caller is a "member"', async () => {
+    const response = await handler({
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "members" } } },
+    } as any);
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body)).toHaveLength(2);
+  })
+
   test('returns 200 with the caller\'s clients', async () => {
     const response = await handler({
-      requestContext: { authorizer: { claims: { sub: "TRAINER_1" } } },
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "trainers" } } },
     } as any);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toHaveLength(2);
@@ -46,9 +54,11 @@ describe('listClients handler', () => {
 
   test('returns 200 with empty array if trainer has no clients', async () => {
     const response = await handler({
-      requestContext: { authorizer: { claims: { sub: "TRAINER_WITH_NONE" } } },
+      requestContext: { authorizer: { claims: { sub: "TRAINER_WITH_NONE", "cognito:groups": "trainers" } } },
     } as any);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toEqual([]);
   });
+
+  
 });
