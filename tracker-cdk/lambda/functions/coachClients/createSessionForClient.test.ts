@@ -29,13 +29,12 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
   };
 });
 
-const makeEvent = (claims: Record<string, any>, body: any) =>
-  ({
-    requestContext: { authorizer: { claims } },
-    body: typeof body === "string" ? body : JSON.stringify(body),
-  }) as any;
+const makeEvent = (claims: Record<string, any>, body: any) => ({
+  requestContext: { authorizer: { claims } },
+  body: typeof body === "string" ? body : JSON.stringify(body),
+}) as any;
 
-  describe('createSessionForClient handler', () => {
+describe('createSessionForClient handler', () => {
   beforeEach(() => {
     process.env.SESSIONS_TABLE = "Sessions";
     process.env.USER_PROFILES_TABLE = "UserProfiles";
