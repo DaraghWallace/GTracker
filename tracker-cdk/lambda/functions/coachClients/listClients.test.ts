@@ -2,7 +2,8 @@ import { handler } from './listClients';
 
 const fakeClients = [
   { userId: "CLIENT_1", currentTrainerId: "TRAINER_1", nickname: "Bob" },
-  { userId: "CLIENT_2", currentTrainerId: "TRAINER_1", nickname: "Alice" },
+  { userId: "CLIENT_2", currentTrainerId: "MEMBER_1", nickname: "Alice" },
+  { userId: "CLIENT_3", currentTrainerId: "TRAINER_1", nickname: "Rob" },
 ];
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
@@ -40,9 +41,16 @@ describe('listClients handler', () => {
     const response = await handler({
       requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "members" } } },
     } as any);
-    expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toHaveLength(2);
-  })
+    expect(response.statusCode).toBe(403);
+  });
+
+  test('returns 403 wrong usertype (developer)', async () => {
+    const response = await handler({
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "custom:userType": "developer" } } },
+      body: JSON.stringify({ clientId: "CLIENT_1" }),
+    } as any);
+    expect(response.statusCode).toBe(403);
+  });
 
   test('returns 200 with the caller\'s clients', async () => {
     const response = await handler({
@@ -59,6 +67,4 @@ describe('listClients handler', () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toEqual([]);
   });
-
-  
 });

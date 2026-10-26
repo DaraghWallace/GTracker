@@ -54,6 +54,14 @@ describe('getClientLatestSession handler', () => {
     expect(response.statusCode).toBe(403);
   });
 
+  test('returns 403 if caller is not in the trainer Group', async () => {
+    const response = await handler({
+      pathParameters: { clientId: "CLIENT_1" },
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:userType": "trainers" } } },
+    } as any);
+    expect(response.statusCode).toBe(403);
+  });
+
   test('returns 400 if clientId missing', async () => {
     const response = await handler({
       pathParameters: null,
@@ -70,7 +78,7 @@ describe('getClientLatestSession handler', () => {
     expect(response.statusCode).toBe(403);
   });
 
-  test('returns 200 with the latest session', async () => {
+  test('returns 200 with the latest session (trainers)', async () => {
     const response = await handler({
       pathParameters: { clientId: "CLIENT_1" },
       requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "trainers" } } },
@@ -87,5 +95,14 @@ describe('getClientLatestSession handler', () => {
     } as any);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toBeNull();
+  });
+
+  test('returns 200 with the latest session (admins)', async () => {
+    const response = await handler({
+      pathParameters: { clientId: "CLIENT_1" },
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "admins" } } },
+    } as any);
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body).sessionId).toBe("S1");
   });
 });
