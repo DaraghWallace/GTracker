@@ -30,14 +30,11 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not found" }) };
     }
 
-    // Gate 1: this table is public (e.g. Exercises) — anyone authenticated can read
     const isPublicTable = process.env.IS_PUBLIC === "true";
 
-    // Gate 2: caller owns the item
-    const ownershipField = process.env.OWNERSHIP_FIELD; // e.g. "userId"
+    const ownershipField = process.env.OWNERSHIP_FIELD; 
     const isOwner = ownershipField ? result.Item[ownershipField] === callerSub : false;
 
-    // Gate 3: caller is a developer
     const callerUserType = event.requestContext.authorizer?.claims?.["custom:userType"];
     const isDeveloper = callerUserType === "developer";
 

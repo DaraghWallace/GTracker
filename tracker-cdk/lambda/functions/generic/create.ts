@@ -1,25 +1,39 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand,} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
+import { isInGroup } from "../auth";
 
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
-const tableName = process.env.TABLE_NAME!;
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const callerSub = event.requestContext.authorizer?.claims?.sub;
+  const tableName = process.env.TABLE_NAME!;
+  const claims = event.requestContext.authorizer?.claims;
+
+  const callerSub = claims?.sub;
+  const isAdmin = isInGroup(claims, "admins");
 
   if (!callerSub) {
     return {
       statusCode: 401,
       headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ message: "Unauthorized" }),
+      body: JSON.stringify({ error: "Unauthorized" }),
     };
   }
 
-  if (!event.body) return {
-    statusCode: 400,
-    headers: { "Access-Control-Allow-Origin": "*" },
-    body: JSON.stringify({ error: "event body missing " }),
+  if (tableName === "Exercises" && !isAdmin) {
+    return {
+      statusCode: 403,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "Forbidden" }),
+    };
+  }
+
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "event body missing" }),
+    };
   }
 
   let safeBody;
@@ -48,10 +62,12 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   );
 
   return {
-    statusCode: 200, headers: {
+    statusCode: 200,
+    headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-    },body: JSON.stringify({message: `Sent to ${tableName}` }),
-  };  
+    },
+    body: JSON.stringify({ message: `Sent to ${tableName}` }),
+  };
 };

@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
+import { isInGroup } from "../auth";
 
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const CORS_HEADERS = {
@@ -9,42 +10,52 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const callerSub = event.requestContext.authorizer?.claims?.sub;
+  const tableName = process.env.TABLE_NAME!;
+  const claims = event.requestContext.authorizer?.claims;
 
-  let key: Record<string, string> | undefined;
-  let checkOwnerManually = false;
-  let requireDeveloper = false;
-  
-  switch (process.env.TABLE_NAME) {
+  const callerSub = claims?.sub;
+  const isAdmin = isInGroup(claims, "admins");
+
+  if (!callerSub) {
+    return {
+      statusCode: 401,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: "Unauthorized" }),
+    };
+  }
+
+  if (!event.pathParameters) {
+    return {
+      statusCode: 400,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: "Fail to fetch Path Params" }),
+    };
+  }
+
+  let key: Record<string, string | undefined>;
+  switch (tableName) {
     case "Sessions":
-      if (event.pathParameters?.sessionId && callerSub) {
-        key = { sessionId: event.pathParameters.sessionId, userId: callerSub };
-      }
+      key = { sessionId: event.pathParameters.sessionId, userId: callerSub };
       break;
     case "SessionExercises":
-      if (event.pathParameters?.sessionExerciseId) {
-        key = { sessionExerciseId: event.pathParameters.sessionExerciseId }; // no userId here
-        checkOwnerManually = true;
-      }
+      key = { sessionExerciseId: event.pathParameters.sessionExerciseId };
       break;
     case "Exercises":
-      if (!event.pathParameters?.exerciseId) { break }
-      key = { exerciseId: event.pathParameters?.exerciseId };
-      requireDeveloper = true;
+      if (!isAdmin) {
+        return {
+          statusCode: 403,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ error: "Forbidden" }),
+        };
+      }
+      key = { exerciseId: event.pathParameters.exerciseId };
       break;
     default:
       return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Path Failure" }) };
   }
 
-  if (!callerSub) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
-  }
-  if (!key) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Item not specified" }) };
-  }
-
   const existing = await docClient.send(new GetCommand({
-    TableName: process.env.TABLE_NAME,
+    TableName: tableName,
     Key: key,
   }));
 
@@ -52,19 +63,12 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Item not found" }) };
   }
 
-  if (checkOwnerManually && existing.Item.userId !== callerSub) {
+  if (tableName === "SessionExercises" && existing.Item.userId !== callerSub) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Forbidden" }) };
   }
 
-  if (requireDeveloper) {
-    const userType = event.requestContext.authorizer?.claims?.["custom:userType"];
-    if (userType !== "developer") {
-      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Forbidden" }) };
-    }
-  }
-
   await docClient.send(new DeleteCommand({
-    TableName: process.env.TABLE_NAME,
+    TableName: tableName,
     Key: key,
   }));
 

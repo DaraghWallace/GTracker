@@ -27,6 +27,8 @@ export async function createSession(newSession: session) {
         const text = await response.text();
         const result = JSON.parse(text);
         console.log("Session created!");
+        console.log(newSession);
+        
         return result;
     } catch (error) {
         console.error("Failed to Post:", error);

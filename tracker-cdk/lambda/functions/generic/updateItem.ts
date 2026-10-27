@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
+import { isInGroup } from "../auth";
 
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
@@ -10,80 +11,78 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const callerSub = event.requestContext.authorizer?.claims?.sub;
+  const tableName = process.env.TABLE_NAME!;
+  const claims = event.requestContext.authorizer?.claims;
 
-  let key: Record<string, string> | undefined;
-  let checkOwnerManually = false;
-  let trackOwner = true;
-  let requireDeveloper = false;
-
-  switch (process.env.TABLE_NAME) {
-    case "Sessions":
-      if (event.pathParameters?.sessionId && callerSub) {
-        key = { sessionId: event.pathParameters.sessionId, userId: callerSub };
-      }
-      break;
-    case "SessionExercises":
-      if (event.pathParameters?.sessionExerciseId) {
-        key = { sessionExerciseId: event.pathParameters.sessionExerciseId };
-        checkOwnerManually = true;
-      }
-      break;
-    case "Exercises":
-      if (event.pathParameters?.exerciseId) {
-        key = { exerciseId: event.pathParameters.exerciseId };
-        trackOwner = false;
-        requireDeveloper = true;
-      }
-      break;
-    default:
-      break;
-  }
+  const callerSub = claims?.sub;
+  const isAdmin = isInGroup(claims, "admins");
+  const isTrainer = isInGroup(claims, "trainers");
 
   if (!callerSub) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
 
-  if (!key) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Item not specified" }) };
+  if (!event.pathParameters) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Fail to fetch Path Params" }), };
   }
-
+  
   if (!event.body) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "event body missing" }) };
   }
 
+  
+  let key: Record<string, string | undefined>;
+  switch (tableName) {
+    case "Sessions":
+      key = { sessionId: event.pathParameters.sessionId, userId: callerSub };
+      break;
+    case "SessionExercises":
+      key = { sessionExerciseId: event.pathParameters.sessionExerciseId };
+      break;
+    case "Exercises":
+      if (!isAdmin || !isTrainer) {
+        return {
+          statusCode: 403,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ error: "Forbidden" }),
+        };
+      }
+      key = { exerciseId: event.pathParameters.exerciseId };
+      break;
+    default:
+      return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Path Failure" }) };
+  }
+
   const existing = await docClient.send(new GetCommand({
-    TableName: process.env.TABLE_NAME,
+    TableName: tableName,
     Key: key,
   }));
+
 
   if (!existing.Item) {
     return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Item not found" }) };
   }
 
-  if (checkOwnerManually && existing.Item.userId !== callerSub) {
+  if (tableName === "SessionExercises" && existing.Item.userId !== callerSub) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Forbidden" }) };
   }
 
-  if (requireDeveloper) {
-    const userType = event.requestContext.authorizer?.claims?.["custom:userType"];
-    if (userType !== "developer") {
-      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Forbidden" }) };
-    }
+    
+  try {
+    const { userId, ...safeBody } = JSON.parse(event.body);
+
+    await docClient.send(new PutCommand({
+      TableName: tableName!,
+      Item: { ...safeBody, ...key, userId: existing.Item.userId }
+    }));
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ message: "updated" }),
+    };
+  } catch (error) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Failed to update" }) };
   }
 
-  const { userId, ...safeBody } = JSON.parse(event.body);
-
-  await docClient.send(new PutCommand({
-    TableName: process.env.TABLE_NAME!,
-    Item: trackOwner
-      ? { ...safeBody, ...key, userId: callerSub }
-      : { ...safeBody, ...key },
-  }));
-
-  return {
-    statusCode: 200,
-    headers: CORS_HEADERS,
-    body: JSON.stringify({ message: "updated" }),
-  };
 };

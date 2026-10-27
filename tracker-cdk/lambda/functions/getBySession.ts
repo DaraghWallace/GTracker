@@ -19,7 +19,6 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
   }
 
-
   if (!sessionId) {
     return {
       statusCode: 400,

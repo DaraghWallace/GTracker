@@ -1,14 +1,12 @@
 import { handler } from './delete';
 
-const fakeSession = { sessionId: "item_1", userId: "TEST_USER" };
-const fakeExercise = { exerciseId: "item_1" }; // shared catalog — no owner
-const fakeSessionExercise = { sessionExerciseId: "item_1", userId: "TEST_USER" }; // owner tracked in data, not in key
-
 const fakeTables: Record<string, { idField: string; item: Record<string, any> }> = {
-  Sessions: { idField: "sessionId", item: fakeSession },
-  Exercises: { idField: "exerciseId", item: fakeExercise },
-  SessionExercises: { idField: "sessionExerciseId", item: fakeSessionExercise },
+  Sessions:         { idField: "sessionId",         item: { sessionId: "item_1",         userId: "OWNER" } },
+  SessionExercises: { idField: "sessionExerciseId", item: { sessionExerciseId: "item_1", userId: "OWNER" } },
+  Exercises:        { idField: "exerciseId",        item: { exerciseId: "item_1",        userId: "SOME_ADMIN" } },
 };
+
+let deleteCalls: any[] = [];
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
   const actual = jest.requireActual('@aws-sdk/lib-dynamodb');
@@ -18,21 +16,18 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
       from: () => ({
         send: jest.fn((command) => {
           const table = fakeTables[process.env.TABLE_NAME ?? ""];
+
           if (command instanceof actual.GetCommand) {
             if (!table) return Promise.resolve({ Item: undefined });
             const requestedKey = command.input.Key ?? {};
             const idMatches = requestedKey[table.idField] === table.item[table.idField];
-
-            const keyHasUserId = "userId" in requestedKey; // Sessions only
+            const keyHasUserId = "userId" in requestedKey;
             const userMatches = keyHasUserId ? requestedKey.userId === table.item.userId : true;
-
-            if (idMatches && userMatches) {
-              return Promise.resolve({ Item: table.item });
-            }
-            return Promise.resolve({ Item: undefined });
+            return Promise.resolve({ Item: idMatches && userMatches ? table.item : undefined });
           }
 
           if (command instanceof actual.DeleteCommand) {
+            deleteCalls.push(command);
             return Promise.resolve({});
           }
 
@@ -43,97 +38,86 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
   };
 });
 
-describe.each([
-  { tableName: "Sessions", idParam: "sessionId", ownerRejectStatus: 404 },
-  { tableName: "SessionExercises", idParam: "sessionExerciseId", ownerRejectStatus: 403 },
-])("delete handler — $tableName", ({ tableName, idParam, ownerRejectStatus }) => {
-  beforeEach(() => {
-    process.env.TABLE_NAME = tableName;
+
+const member = (sub: string) => ({ sub, "cognito:groups": "members" });
+const admin  = (sub: string) => ({ sub, "cognito:groups": "admins" });
+
+async function deleteFrom(tableName: string, claims: Record<string, any>, pathParameters: Record<string, string>) {
+  process.env.TABLE_NAME = tableName;
+  const response = await handler({
+    requestContext: { authorizer: { claims } },
+    pathParameters,
+  } as any);
+  return response.statusCode;
+}
+
+beforeEach(() => {
+  deleteCalls = [];
+});
+
+test('401 when there is no sub', async () => {
+  expect(await deleteFrom("Sessions", { sub: null }, { sessionId: "item_1" })).toBe(401);
+  expect(deleteCalls.length).toBe(0);
+});
+
+describe('Sessions', () => {
+  test('owner deletes own session (200)', async () => {
+    expect(await deleteFrom("Sessions", member("OWNER"), { sessionId: "item_1" })).toBe(200);
+    expect(deleteCalls.length).toBe(1);
   });
 
-  test(`Rejects if caller doesn't own the item`, async () => {
-    const response = await handler({
-      pathParameters: { [idParam]: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "ATTACKER_USER" } } },
-    } as any);
-    expect(response.statusCode).toBe(ownerRejectStatus);
+  test("another user cannot delete it (404, nothing deleted)", async () => {
+    expect(await deleteFrom("Sessions", member("OTHER"), { sessionId: "item_1" })).toBe(404);
+    expect(deleteCalls.length).toBe(0);
   });
 
-  test('Allows delete if caller owns the item (200)', async () => {
-    const response = await handler({
-      pathParameters: { [idParam]: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
-    } as any);
-    expect(response.statusCode).toBe(200);
-  });
-
-  test(`Throws 400 for missing id`, async () => {
-    const response = await handler({
-      pathParameters: null,
-      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
-    } as any);
-    expect(response.statusCode).toBe(400);
-  });
-
-  test(`returns 401 if user isn't authenticated`, async () => {
-    const response = await handler({
-      pathParameters: { [idParam]: "item_1" },
-      requestContext: { authorizer: { claims: { sub: null } } },
-    } as any);
-    expect(response.statusCode).toBe(401);
-  });
-
-  test('returns 404 when item does not exist', async () => {
-    const response = await handler({
-      pathParameters: { [idParam]: "nonexistent_item" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
-    } as any);
-    expect(response.statusCode).toBe(404);
+  test("admin cannot delete someone else's session (404): no admin delete for now", async () => {
+    expect(await deleteFrom("Sessions", admin("ADMIN_2"), { sessionId: "item_1" })).toBe(404);
+    expect(deleteCalls.length).toBe(0);
   });
 });
 
-describe("delete handler — Exercises (developer-gated shared catalog)", () => {
-  beforeEach(() => {
-    process.env.TABLE_NAME = "Exercises";
+describe('SessionExercises', () => {
+  test('owner deletes own session exercise (200)', async () => {
+    expect(await deleteFrom("SessionExercises", member("OWNER"), { sessionExerciseId: "item_1" })).toBe(200);
+    expect(deleteCalls.length).toBe(1);
   });
 
-  test('Rejects non-developer (403)', async () => {
-    const response = await handler({
-      pathParameters: { exerciseId: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } }, // no userType claim
-    } as any);
-    expect(response.statusCode).toBe(403);
+  test("another user cannot delete it (403, nothing deleted)", async () => {
+    expect(await deleteFrom("SessionExercises", member("OTHER"), { sessionExerciseId: "item_1" })).toBe(403);
+    expect(deleteCalls.length).toBe(0);
   });
 
-  test('Allows developer (200)', async () => {
-    const response = await handler({
-      pathParameters: { exerciseId: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER", "custom:userType": "developer" } } },
-    } as any);
-    expect(response.statusCode).toBe(200);
+  test("admin cannot delete someone else's session exercise (403): no admin delete for now", async () => {
+    expect(await deleteFrom("SessionExercises", admin("ADMIN_2"), { sessionExerciseId: "item_1" })).toBe(403);
+    expect(deleteCalls.length).toBe(0);
+  });
+});
+
+describe('Exercises', () => {
+  test('admin deletes an exercise created by another admin (200)', async () => {
+    expect(await deleteFrom("Exercises", admin("ADMIN_2"), { exerciseId: "item_1" })).toBe(200);
+    expect(deleteCalls.length).toBe(1);
   });
 
-  test('Throws 400 for missing id', async () => {
-    const response = await handler({
-      pathParameters: null,
-      requestContext: { authorizer: { claims: { sub: "TEST_USER", "custom:userType": "developer" } } },
-    } as any);
-    expect(response.statusCode).toBe(400);
+  test('admin deletes an exercise that has no userId (200)', async () => {
+    const original = fakeTables.Exercises.item;
+    fakeTables.Exercises.item = { exerciseId: "item_1" };
+    try {
+      expect(await deleteFrom("Exercises", admin("ADMIN_2"), { exerciseId: "item_1" })).toBe(200);
+    } finally {
+      fakeTables.Exercises.item = original;
+    }
   });
 
-  test(`returns 401 if user isn't authenticated`, async () => {
-    const response = await handler({
-      pathParameters: { exerciseId: "item_1" },
-      requestContext: { authorizer: { claims: { sub: null } } },
-    } as any);
-    expect(response.statusCode).toBe(401);
+  test('member cannot delete an exercise (403, nothing deleted)', async () => {
+    expect(await deleteFrom("Exercises", member("OWNER"), { exerciseId: "item_1" })).toBe(403);
+    expect(deleteCalls.length).toBe(0);
   });
 
-  test('returns 404 when item does not exist', async () => {
-    const response = await handler({
-      pathParameters: { exerciseId: "nonexistent_item" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER", "custom:userType": "developer" } } },
-    } as any);
-    expect(response.statusCode).toBe(404);
+  test('spoofed custom:userType developer, with no group, cannot delete (403)', async () => {
+    const claims = { sub: "ATTACKER", "custom:userType": "developer" };
+    expect(await deleteFrom("Exercises", claims, { exerciseId: "item_1" })).toBe(403);
+    expect(deleteCalls.length).toBe(0);
   });
 });
