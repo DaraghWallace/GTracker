@@ -16,21 +16,19 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
   const callerSub = claims?.sub;
   const isAdmin = isInGroup(claims, "admins");
-  const isTrainer = isInGroup(claims, "trainers");
 
   if (!callerSub) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
 
   if (!event.pathParameters) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Fail to fetch Path Params" }), };
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Fail to fetch Path Params" }) };
   }
-  
+
   if (!event.body) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "event body missing" }) };
   }
 
-  
   let key: Record<string, string | undefined>;
   switch (tableName) {
     case "Sessions":
@@ -40,12 +38,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       key = { sessionExerciseId: event.pathParameters.sessionExerciseId };
       break;
     case "Exercises":
-      if (!isAdmin || !isTrainer) {
-        return {
-          statusCode: 403,
-          headers: CORS_HEADERS,
-          body: JSON.stringify({ error: "Forbidden" }),
-        };
+      if (!isAdmin) {
+        return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Forbidden" }) };
       }
       key = { exerciseId: event.pathParameters.exerciseId };
       break;
@@ -53,11 +47,22 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Path Failure" }) };
   }
 
+  if (Object.values(key).some((value) => !value)) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Item not specified" }) };
+  }
+
+  let safeBody: Record<string, any>;
+  try {
+    const { userId, ...rest } = JSON.parse(event.body);
+    safeBody = rest;
+  } catch {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Invalid JSON in request body" }) };
+  }
+
   const existing = await docClient.send(new GetCommand({
     TableName: tableName,
     Key: key,
   }));
-
 
   if (!existing.Item) {
     return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Item not found" }) };
@@ -67,22 +72,17 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Forbidden" }) };
   }
 
-    
+  const owner = existing.Item.userId;
+
   try {
-    const { userId, ...safeBody } = JSON.parse(event.body);
-
     await docClient.send(new PutCommand({
-      TableName: tableName!,
-      Item: { ...safeBody, ...key, userId: existing.Item.userId }
+      TableName: tableName,
+      Item: { ...safeBody, ...key, ...(owner ? { userId: owner } : {}) },
     }));
-
-    return {
-      statusCode: 200,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ message: "updated" }),
-    };
   } catch (error) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Failed to update" }) };
+    console.error("Failed to update item:", error);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: "Failed to update" }) };
   }
 
+  return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ message: "updated" }) };
 };

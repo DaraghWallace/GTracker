@@ -78,10 +78,10 @@ describe('getItem handler', () => {
     expect(response.statusCode).toBe(200);
   });
 
-  test('returns 200 regardless of ownership if caller is a developer', async () => {
+  test('returns 200 regardless of ownership if caller is a admin', async () => {
     const response = await handler({
       pathParameters: { id: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "SOMEONE_ELSE", "custom:userType": "developer" } } },
+      requestContext: { authorizer: { claims: { sub: "SOMEONE_ELSE", "cognito:groups": "admins" } } },
     } as any);
     expect(response.statusCode).toBe(200);
   });

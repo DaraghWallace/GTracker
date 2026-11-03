@@ -1,14 +1,13 @@
 import { handler } from './updateItem';
 
-const fakeSession = { sessionId: "item_1", userId: "TEST_USER" };
-const fakeExercise = { exerciseId: "item_1" }; // shared catalog — no owner
-const fakeSessionExercise = { sessionExerciseId: "item_1", userId: "TEST_USER" };
-
 const fakeTables: Record<string, { idField: string; item: Record<string, any> }> = {
-  Sessions: { idField: "sessionId", item: fakeSession },
-  Exercises: { idField: "exerciseId", item: fakeExercise },
-  SessionExercises: { idField: "sessionExerciseId", item: fakeSessionExercise },
+  Sessions:         { idField: "sessionId",         item: { sessionId: "item_1",         userId: "OWNER" } },
+  SessionExercises: { idField: "sessionExerciseId", item: { sessionExerciseId: "item_1", userId: "OWNER" } },
+  Exercises:        { idField: "exerciseId",        item: { exerciseId: "item_1",        userId: "SOME_ADMIN" } },
 };
+
+let putItems: any[] = [];
+let failNextPut = false;
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
   const actual = jest.requireActual('@aws-sdk/lib-dynamodb');
@@ -18,6 +17,7 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
       from: () => ({
         send: jest.fn((command) => {
           const table = fakeTables[process.env.TABLE_NAME ?? ""];
+
           if (command instanceof actual.GetCommand) {
             if (!table) return Promise.resolve({ Item: undefined });
             const requestedKey = command.input.Key ?? {};
@@ -25,14 +25,15 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
 
             const keyHasUserId = "userId" in requestedKey;
             const userMatches = keyHasUserId ? requestedKey.userId === table.item.userId : true;
-
-            if (idMatches && userMatches) {
-              return Promise.resolve({ Item: table.item });
-            }
-            return Promise.resolve({ Item: undefined });
+            return Promise.resolve({ Item: idMatches && userMatches ? table.item : undefined });
           }
 
           if (command instanceof actual.PutCommand) {
+            if (failNextPut) return Promise.reject(new Error("DynamoDB exploded"));
+            for (const [name, value] of Object.entries(command.input.Item ?? {})) {
+              if (value === undefined) return Promise.reject(new Error(`undefined value for ${name}`));
+            }
+            putItems.push(command.input.Item);
             return Promise.resolve({});
           }
 
@@ -43,105 +44,130 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
   };
 });
 
-describe.each([
-  { tableName: "Sessions", idParam: "sessionId", ownerRejectStatus: 404 },
-  { tableName: "SessionExercises", idParam: "sessionExerciseId", ownerRejectStatus: 403 },
-])("update handler — $tableName", ({ tableName, idParam, ownerRejectStatus }) => {
-  beforeEach(() => {
-    process.env.TABLE_NAME = tableName;
-  });
+const member = (sub: string) => ({ sub, "cognito:groups": "members" });
+const admin  = (sub: string) => ({ sub, "cognito:groups": "admins" });
 
-  test('Allows update if caller owns the item (200)', async () => {
-    const response = await handler({
-      pathParameters: { [idParam]: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
-      body: JSON.stringify({ someField: "updated value" }),
-    } as any);
+async function update(
+  tableName: string,
+  claims: Record<string, any>,
+  pathParameters: Record<string, string>,
+  body: any,
+) {
+  process.env.TABLE_NAME = tableName;
+  return handler({
+    requestContext: { authorizer: { claims } },
+    pathParameters,
+    body: typeof body === "string" ? body : JSON.stringify(body),
+  } as any);
+}
+
+beforeEach(() => {
+  putItems = [];
+  failNextPut = false;
+  jest.spyOn(console, 'error').mockImplementation(() => {}); // keep test output quiet
+});
+
+test('401 when there is no sub', async () => {
+  const response = await update("Sessions", { sub: null }, { sessionId: "item_1" }, { focus: "x" });
+  expect(response.statusCode).toBe(401);
+  expect(putItems.length).toBe(0);
+});
+
+// --- Sessions ---
+describe('Sessions', () => {
+  test('owner updates own session (200)', async () => {
+    const response = await update("Sessions", member("OWNER"), { sessionId: "item_1" }, { focus: "Legs" });
     expect(response.statusCode).toBe(200);
+    expect(putItems[0].focus).toBe("Legs");
   });
 
-  test('Fails for missing Body (400)', async () => {
-    const response = await handler({
-      pathParameters: { [idParam]: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
-    } as any);
-    expect(response.statusCode).toBe(400);
+  test('another user cannot update it (404, nothing written)', async () => {
+    const response = await update("Sessions", member("OTHER"), { sessionId: "item_1" }, { focus: "hacked" });
+    expect(response.statusCode).toBe(404);
+    expect(putItems.length).toBe(0);
   });
 
-  test('Throws 400 for missing id', async () => {
-    const response = await handler({
-      pathParameters: null,
-      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
-      body: JSON.stringify({ someField: "updated value" }),
-    } as any);
-    expect(response.statusCode).toBe(400);
-  });
-
-  test('Throws 401 Failed to authentication', async () => {
-    const response = await handler({
-      pathParameters: { [idParam]: "item_1" },
-      requestContext: { authorizer: { claims: { sub: null } } },
-      body: JSON.stringify({ someField: "updated value" }),
-    } as any);
-    expect(response.statusCode).toBe(401);
-  });
-
-  test('caller does not own the item', async () => {
-    const response = await handler({
-      pathParameters: { [idParam]: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "ATTACKER_USER" } } },
-      body: JSON.stringify({ someField: "updated value" }),
-    } as any);
-    expect(response.statusCode).toBe(ownerRejectStatus);
+  test('a userId in the body cannot move the session to someone else', async () => {
+    await update("Sessions", member("OWNER"), { sessionId: "item_1" }, { userId: "VICTIM", focus: "x" });
+    expect(putItems[0].userId).toBe("OWNER");
   });
 });
 
-describe("update handler — Exercises (developer-gated shared catalog)", () => {
-  beforeEach(() => {
-    process.env.TABLE_NAME = "Exercises";
-  });
-
-  test('Allows developer to update (200)', async () => {
-    const response = await handler({
-      pathParameters: { exerciseId: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER", "custom:userType": "developer" } } },
-      body: JSON.stringify({ someField: "updated value" }),
-    } as any);
+// --- SessionExercises ---
+describe('SessionExercises', () => {
+  test('owner updates own session exercise (200)', async () => {
+    const response = await update("SessionExercises", member("OWNER"), { sessionExerciseId: "item_1" }, { sets: "5x5" });
     expect(response.statusCode).toBe(200);
   });
 
-  test('Rejects non-developer (403)', async () => {
-    const response = await handler({
-      pathParameters: { exerciseId: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER" } } },
-      body: JSON.stringify({ someField: "updated value" }),
-    } as any);
+  test("another user cannot update it (403, nothing written)", async () => {
+    const response = await update("SessionExercises", member("OTHER"), { sessionExerciseId: "item_1" }, { sets: "HACKED" });
     expect(response.statusCode).toBe(403);
+    expect(putItems.length).toBe(0);
   });
 
-  test('Fails for missing Body (400)', async () => {
-    const response = await handler({
-      pathParameters: { exerciseId: "item_1" },
-      requestContext: { authorizer: { claims: { sub: "TEST_USER", "custom:userType": "developer" } } },
-    } as any);
+  test("admin cannot update someone else's session exercise (403)", async () => {
+    const response = await update("SessionExercises", admin("ADMIN_2"), { sessionExerciseId: "item_1" }, { sets: "x" });
+    expect(response.statusCode).toBe(403);
+    expect(putItems.length).toBe(0);
+  });
+
+  test('a userId in the body cannot change the owner', async () => {
+    await update("SessionExercises", member("OWNER"), { sessionExerciseId: "item_1" }, { userId: "VICTIM", sets: "x" });
+    expect(putItems[0].userId).toBe("OWNER");
+  });
+});
+
+// --- Exercises ---
+describe('Exercises', () => {
+  test('admin updates an exercise created by another admin (200)', async () => {
+    const response = await update("Exercises", admin("ADMIN_2"), { exerciseId: "item_1" }, { name: "Curl" });
+    expect(response.statusCode).toBe(200);
+    expect(putItems[0].userId).toBe("SOME_ADMIN"); // creator is preserved, not overwritten
+  });
+
+  test('admin updates an exercise that has no userId (200)', async () => {
+    const original = fakeTables.Exercises.item;
+    fakeTables.Exercises.item = { exerciseId: "item_1" };
+    try {
+      const response = await update("Exercises", admin("ADMIN_2"), { exerciseId: "item_1" }, { name: "Curl" });
+      expect(response.statusCode).toBe(200);
+      expect("userId" in putItems[0]).toBe(false);
+    } finally {
+      fakeTables.Exercises.item = original; // put it back for the other tests
+    }
+  });
+
+  test('member cannot update an exercise (403, nothing written)', async () => {
+    const response = await update("Exercises", member("OWNER"), { exerciseId: "item_1" }, { name: "x" });
+    expect(response.statusCode).toBe(403);
+    expect(putItems.length).toBe(0);
+  });
+
+  test('spoofed custom:userType developer, with no group, cannot update (403)', async () => {
+    const claims = { sub: "ATTACKER", "custom:userType": "developer" };
+    const response = await update("Exercises", claims, { exerciseId: "item_1" }, { name: "x" });
+    expect(response.statusCode).toBe(403);
+    expect(putItems.length).toBe(0);
+  });
+});
+
+// --- Bad input and failures ---
+describe('bad input and failures', () => {
+  test('400 for invalid JSON', async () => {
+    const response = await update("Sessions", member("OWNER"), { sessionId: "item_1" }, "not json");
+    expect(response.statusCode).toBe(400);
+    expect(putItems.length).toBe(0);
+  });
+
+  test('400 when the id in the path is missing', async () => {
+    const response = await update("Sessions", member("OWNER"), {}, { focus: "x" });
     expect(response.statusCode).toBe(400);
   });
 
-  test('Throws 400 for missing id', async () => {
-    const response = await handler({
-      pathParameters: null,
-      requestContext: { authorizer: { claims: { sub: "TEST_USER", "custom:userType": "developer" } } },
-      body: JSON.stringify({ someField: "updated value" }),
-    } as any);
-    expect(response.statusCode).toBe(400);
-  });
-
-  test('Throws 401 Failed to authentication', async () => {
-    const response = await handler({
-      pathParameters: { exerciseId: "item_1" },
-      requestContext: { authorizer: { claims: { sub: null } } },
-      body: JSON.stringify({ someField: "updated value" }),
-    } as any);
-    expect(response.statusCode).toBe(401);
+  test('500 when the database write fails', async () => {
+    failNextPut = true;
+    const response = await update("Sessions", member("OWNER"), { sessionId: "item_1" }, { focus: "x" });
+    expect(response.statusCode).toBe(500);
   });
 });

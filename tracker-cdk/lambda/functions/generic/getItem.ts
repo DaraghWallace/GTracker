@@ -2,6 +2,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
+import { isInGroup } from "../auth";
 
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const CORS_HEADERS = {
@@ -10,7 +11,12 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const callerSub = event.requestContext.authorizer?.claims?.sub;
+  const claims = event.requestContext.authorizer?.claims;
+
+  const callerSub = claims?.sub;
+  const isAdmin = isInGroup(claims, "admins"); // Admins can see all O_O
+
+
   if (!callerSub) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
@@ -35,10 +41,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     const ownershipField = process.env.OWNERSHIP_FIELD; 
     const isOwner = ownershipField ? result.Item[ownershipField] === callerSub : false;
 
-    const callerUserType = event.requestContext.authorizer?.claims?.["custom:userType"];
-    const isDeveloper = callerUserType === "developer";
 
-    if (!isPublicTable && !isOwner && !isDeveloper) {
+    if (!isPublicTable && !isOwner && !isAdmin) {
       return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Forbidden" }) };
     }
 
