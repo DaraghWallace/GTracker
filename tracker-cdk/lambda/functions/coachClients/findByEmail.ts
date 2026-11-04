@@ -1,8 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { isInGroup } from "../auth";
-
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -28,11 +27,12 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   try {
-    // Scan + filter for now — fine at current scale, revisit with an email GSI if this table grows.
-    const result = await docClient.send(new ScanCommand({
+    const result = await docClient.send(new QueryCommand({
       TableName: process.env.TABLE_NAME!,
-      FilterExpression: "email = :email",
+      IndexName: "email-index",
+      KeyConditionExpression: "email = :email",
       ExpressionAttributeValues: { ":email": email },
+      Limit: 1,
     }));
 
     const match = result.Items?.[0];
@@ -40,7 +40,6 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "No user found" }) };
     }
 
-    // Only return what's needed to confirm identity — not the full profile.
     return {
       statusCode: 200,
       headers: CORS_HEADERS,

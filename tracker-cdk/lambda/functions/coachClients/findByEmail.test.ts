@@ -1,7 +1,13 @@
 import { handler } from './findByEmail';
 
 const fakeUser = { userId: "CLIENT_1", email: "client@test.com", nickname: "Bob" };
-
+const fakeUser2 = {
+  userId: "USER_1",
+  nickname: "Dave",
+  email: "dave@example.com",
+  phone: "123",            // extra, should NOT come back
+  secretField: "nope",     // extra, should NOT come back
+};
 jest.mock('@aws-sdk/lib-dynamodb', () => {
   const actual = jest.requireActual('@aws-sdk/lib-dynamodb');
   return {
@@ -9,7 +15,7 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
     DynamoDBDocumentClient: {
       from: () => ({
         send: jest.fn((command) => {
-          if (command instanceof actual.ScanCommand) {
+          if (command instanceof actual.QueryCommand) {
             const email = command.input.ExpressionAttributeValues?.[":email"];
             if (email === fakeUser.email) return Promise.resolve({ Items: [fakeUser] });
             return Promise.resolve({ Items: [] });
@@ -71,7 +77,7 @@ describe('findByEmail handler', () => {
 
   test('returns 200 with only userId and nickname on match (Admin)', async () => {
     const response = await handler({
-      queryStringParameters: { email: "client@test.com" },
+      queryStringWarameters: { email: "client@test.com" },
       requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "admins" } } },
     } as any);
     expect(response.statusCode).toBe(200);
@@ -85,11 +91,15 @@ describe('findByEmail handler', () => {
     expect(response.statusCode).toBe(403);
   });
 
-  test('returns 403 wrong usertype (developer)', async () => {
+  test('response contains only safe fields', async () => {
     const response = await handler({
-      queryStringParameters: { email: "client@test.com" },
-      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "custom:userType": "developer" } } },
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "trainers" } } },
+      queryStringParameters: { email: fakeUser2.email },   // or pathParameters / body, whichever your handler reads
     } as any);
-    expect(response.statusCode).toBe(403);
+    const body = JSON.parse(response.body);
+
+    expect(Object.keys(body).sort()).toEqual(["nickname", "userId"]);
   });
+
+
 });

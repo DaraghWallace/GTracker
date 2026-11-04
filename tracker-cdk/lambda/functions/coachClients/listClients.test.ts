@@ -67,4 +67,12 @@ describe('listClients handler', () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toEqual([]);
   });
+
+  test('returns 200 with array if Admin has clients', async () => {
+    const response = await handler({
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "admins" } } },
+    } as any);
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body)).toHaveLength(2);
+  });
 });

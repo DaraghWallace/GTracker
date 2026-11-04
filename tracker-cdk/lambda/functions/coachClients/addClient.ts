@@ -15,8 +15,13 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
 
-  const body = JSON.parse(event.body ?? "{}");
-  const { clientId } = body;
+  let clientId
+  try {
+    const body = JSON.parse(event.body ?? "{}");
+    clientId = body.clientId;
+  } catch (error) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Invalid JSON" }) };
+  }
 
   if (!clientId) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "clientId required" }) };

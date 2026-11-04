@@ -36,6 +36,11 @@ export class UserProfiles extends Construct {
       partitionKey: { name: "currentTrainerId", type: dynamodb.AttributeType.STRING },
     });
 
+    this.table.addGlobalSecondaryIndex({
+      indexName: "email-index",
+      partitionKey: { name: "email", type: dynamodb.AttributeType.STRING },
+    });
+
     // --- Post-confirm trigger (unchanged) ---
     const postConfirmFn = new NodejsFunction(this, 'PostConfirmFn', {
       runtime: lambda.Runtime.NODEJS_22_X,
