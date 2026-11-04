@@ -11,14 +11,13 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const trainerId = event.requestContext.authorizer?.claims?.sub;
+  const claims = event.requestContext.authorizer?.claims;
+  const trainerId = claims?.sub;
   if (!trainerId) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
 
-  const claims = event.requestContext.authorizer?.claims;
-  const isTrainer = isInGroup(claims, "admins") || isInGroup(claims, "trainers") 
-
+  const isTrainer = isInGroup(claims, "trainers") || isInGroup(claims, "admins");
   if (!isTrainer) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not a trainer" }) };
   }
@@ -28,11 +27,22 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "sessionId required" }) };
   }
 
-  let body;
+  let body: Record<string, any>;
   try {
     body = JSON.parse(event.body ?? "{}");
   } catch {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Invalid JSON" }) };
+  }
+
+  // Validate the fields we accept. Wrong or missing types are the caller's fault (400).
+  const validBody =
+    body !== null && typeof body === "object" &&
+    typeof body.exerciseId === "string" && body.exerciseId.length > 0 && body.exerciseId.length <= 64 &&
+    Number.isInteger(body.exerciseIndex) && body.exerciseIndex >= 0 && body.exerciseIndex <= 100 &&
+    typeof body.toFailure === "boolean" &&
+    typeof body.sets === "string" && body.sets.length <= 200;
+  if (!validBody) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Invalid exercise fields" }) };
   }
 
   try {
@@ -57,8 +67,13 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not your client's session" }) };
     }
 
+    // Allow-list: only these fields are copied from the request. Anything else is dropped.
+    // The ids and owner always come from the server, never from the body.
     const newItem = {
-      ...body,
+      exerciseId: body.exerciseId,
+      exerciseIndex: body.exerciseIndex,
+      toFailure: body.toFailure,
+      sets: body.sets,
       sessionExerciseId: randomUUID(),
       sessionId,
       userId: session.userId,
@@ -72,6 +87,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(newItem) };
   } catch (error) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: String(error) }) };
+    console.error("createSessionExerciseForClient failed:", error);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: "Internal server error" }) };
   }
 };

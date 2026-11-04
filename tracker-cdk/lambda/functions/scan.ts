@@ -32,12 +32,13 @@ export const handler = async (event: APIGatewayProxyEvent)=>{
     };
 
   } catch (error) {
+    console.error("scan failed:", error); // detail stays in the logs
     return {
       statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*",
       },
-      body: JSON.stringify({ error: String(error) }),
+      body: JSON.stringify({ error: "Internal server error" }),
     };
   }
 };

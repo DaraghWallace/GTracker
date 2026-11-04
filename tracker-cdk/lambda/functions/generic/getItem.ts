@@ -1,4 +1,3 @@
-// lambda/functions/generic/getItem.ts
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
@@ -14,8 +13,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const claims = event.requestContext.authorizer?.claims;
 
   const callerSub = claims?.sub;
-  const isAdmin = isInGroup(claims, "admins"); // Admins can see all O_O
-
+  const isAdmin = isInGroup(claims, "admins");
 
   if (!callerSub) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
@@ -48,6 +46,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(result.Item) };
   } catch (error) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: String(error) }) };
+    console.error("getItem failed:", error); // detail stays in the logs
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: "Internal server error" }) };
   }
 };

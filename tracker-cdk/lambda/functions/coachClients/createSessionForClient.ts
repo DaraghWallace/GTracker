@@ -11,13 +11,13 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const trainerId = event.requestContext.authorizer?.claims?.sub;
+  const claims = event.requestContext.authorizer?.claims;
+  const trainerId = claims?.sub;
   if (!trainerId) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
 
-  const claims = event.requestContext.authorizer?.claims;
-  const isTrainer = isInGroup(claims, "admins") || isInGroup(claims, "trainers") 
+  const isTrainer = isInGroup(claims, "trainers") || isInGroup(claims, "admins");
 
   if (!isTrainer) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not a trainer" }) };
@@ -60,6 +60,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(newItem) };
   } catch (error) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: String(error) }) };
+    console.error("createSessionForClient failed:", error);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: "Internal server error" }) };
   }
 };

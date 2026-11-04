@@ -38,7 +38,7 @@ describe('removeClient handler', () => {
 
   test('returns 400 if clientId missing', async () => {
     const response = await handler({
-      requestContext: { authorizer: { claims: { sub: "TRAINER_1" } } },
+      requestContext: { authorizer: { claims: { sub: "TRAINER_1" , "cognito:groups": "trainers" } } },
       body: JSON.stringify({}),
     } as any);
     expect(response.statusCode).toBe(400);

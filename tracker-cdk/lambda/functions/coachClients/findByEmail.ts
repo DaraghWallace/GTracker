@@ -2,6 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { isInGroup } from "../auth";
+
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -9,14 +10,13 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const callerSub = event.requestContext.authorizer?.claims?.sub;
+  const claims = event.requestContext.authorizer?.claims;
+  const callerSub = claims?.sub;
   if (!callerSub) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
-  
-  const claims = event.requestContext.authorizer?.claims;
-  const isTrainer = isInGroup(claims, "admins") || isInGroup(claims, "trainers") 
 
+  const isTrainer = isInGroup(claims, "trainers") || isInGroup(claims, "admins");
   if (!isTrainer) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not a trainer" }) };
   }
@@ -27,6 +27,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   try {
+    // Query the email-index GSI (needs the index added in user-profiles.ts and deployed).
     const result = await docClient.send(new QueryCommand({
       TableName: process.env.TABLE_NAME!,
       IndexName: "email-index",
@@ -40,12 +41,14 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "No user found" }) };
     }
 
+    // Allow-list: only what's needed to confirm identity, not the full profile.
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
       body: JSON.stringify({ userId: match.userId, nickname: match.nickname }),
     };
   } catch (error) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: String(error) }) };
+    console.error("findByEmail failed:", error);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: "Internal server error" }) };
   }
 };

@@ -38,12 +38,12 @@ describe('addClient handler', () => {
     expect(response.statusCode).toBe(401);
   });
 
-  test('returns 400 if clientId missing', async () => {
+  test('returns 403 if clientId missing', async () => {
     const response = await handler({
       requestContext: { authorizer: { claims: { sub: "TRAINER_1" } } },
       body: JSON.stringify({}),
     } as any);
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(403);
   });
 
   test('returns 403 if caller is not a trainer', async () => {

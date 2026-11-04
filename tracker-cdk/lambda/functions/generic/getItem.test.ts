@@ -61,7 +61,7 @@ describe('getItem handler', () => {
     expect(response.statusCode).toBe(200);
   });
 
-  test('returns 403 if caller does not own, table not public, not developer', async () => {
+  test('returns 403 if caller does not own, table not public, not admin', async () => {
     const response = await handler({
       pathParameters: { id: "item_1" },
       requestContext: { authorizer: { claims: { sub: "SOMEONE_ELSE" } } },
@@ -78,7 +78,7 @@ describe('getItem handler', () => {
     expect(response.statusCode).toBe(200);
   });
 
-  test('returns 200 regardless of ownership if caller is a admin', async () => {
+  test('returns 200 regardless of ownership if caller is an admin', async () => {
     const response = await handler({
       pathParameters: { id: "item_1" },
       requestContext: { authorizer: { claims: { sub: "SOMEONE_ELSE", "cognito:groups": "admins" } } },

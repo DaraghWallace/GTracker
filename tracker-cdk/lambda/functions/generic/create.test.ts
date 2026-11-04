@@ -1,14 +1,6 @@
 import { handler } from './create';
 
-const fakeSession = { sessionId: "item_1", userId: "TEST_USER", body: "New Data" };
-const fakeExercise = { exerciseId: "item_1", userId: "TEST_USER", body: "New Data"  };
-const fakeSessionExercise = { sessionExerciseId: "item_1", userId: "TEST_USER", body: "New Data"  }; // owner tracked in data, not in key
-
-const fakeTables: Record<string, { idField: string; item: Record<string, any> }> = {
-  Sessions: { idField: "sessionId", item: fakeSession },
-  Exercises: { idField: "exerciseId", item: fakeExercise },
-  SessionExercises: { idField: "sessionExerciseId", item: fakeSessionExercise },
-};
+let putItems: any[] = [];
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
   const actual = jest.requireActual('@aws-sdk/lib-dynamodb');
@@ -17,15 +9,7 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
     DynamoDBDocumentClient: {
       from: () => ({
         send: jest.fn((command) => {
-          const table = fakeTables[process.env.TABLE_NAME ?? ""];
-          if(!table)return Promise.resolve({});
-          if(!table.idField)return Promise.resolve({});
-          if(!table.item)return Promise.resolve({});
-          
-          if (command instanceof actual.PutCommand) {
-            return Promise.resolve({});
-          }
-
+          if (command instanceof actual.PutCommand) putItems.push(command.input.Item);
           return Promise.resolve({});
         })
       })
@@ -33,46 +17,68 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
   };
 });
 
+const member = (sub: string) => ({ sub, "cognito:groups": "members" });
+const admin  = (sub: string) => ({ sub, "cognito:groups": "admins" });
 
-describe.each([
-  { tableName: "Sessions",         groups: "members" },
-  { tableName: "Exercises",        groups: "admins"  },
-  { tableName: "SessionExercises", groups: "members" },
-])("create handler — $tableName", ({ tableName, groups }) => {
-  beforeEach(() => {
-    process.env.TABLE_NAME = tableName;
+async function create(tableName: string, claims: Record<string, any>, body?: string) {
+  process.env.TABLE_NAME = tableName;
+  return handler({ requestContext: { authorizer: { claims } }, body } as any);
+}
+
+beforeEach(() => { putItems = []; });
+
+// Any signed-in user may create these. Exercises are admin-only (tested below).
+describe.each(["Sessions", "SessionExercises"])("create handler: %s", (tableName) => {
+  test('member creates (200) and the item is stamped with the caller', async () => {
+    const r = await create(tableName, member("U1"), JSON.stringify({ someField: "x" }));
+    expect(r.statusCode).toBe(200);
+    expect(putItems[0].userId).toBe("U1");
   });
 
-  const claims = { sub: "TEST_USER", "cognito:groups": groups };
-
-  test('Allows create if allowed caller (200)', async () => {
-    const response = await handler({
-      requestContext: { authorizer: { claims } },
-      body: JSON.stringify({ someField: "New value" }),
-    } as any);
-    expect(response.statusCode).toBe(200);
+  test('a userId in the body is ignored', async () => {
+    await create(tableName, member("U1"), JSON.stringify({ userId: "VICTIM" }));
+    expect(putItems[0].userId).toBe("U1");
   });
 
-  test('Fails for missing Body (400)', async () => {
-    const response = await handler({
-      requestContext: { authorizer: { claims } },
-    } as any);
-    expect(response.statusCode).toBe(400);
-  });  
+  test('400 for missing body', async () => {
+    expect((await create(tableName, member("U1"))).statusCode).toBe(400);
+    expect(putItems.length).toBe(0);
+  });
 
-  if (tableName === "Exercises"){
-    test('Fails for wrong group (members) (401)', async () => {
-      const response = await handler({
-        requestContext: { authorizer: { sub: "TEST_USER", "cognito:groups": "members"  } },
-      } as any);
-      expect(response.statusCode).toBe(401);
-    }); 
-  
-    test('Spoofed  usertype fails (developer) (401)', async () => {
-      const response = await handler({
-        requestContext: { authorizer: { sub: "TEST_USER", "cognito:userType": "developer"  } },
-      } as any);
-      expect(response.statusCode).toBe(401);
-    }); 
-  }
+  test('400 for invalid JSON', async () => {
+    expect((await create(tableName, member("U1"), "{not valid json")).statusCode).toBe(400);
+    expect(putItems.length).toBe(0);
+  });
+
+  test('401 with no sub', async () => {
+    expect((await create(tableName, { sub: null }, JSON.stringify({ a: 1 }))).statusCode).toBe(401);
+    expect(putItems.length).toBe(0);
+  });
+});
+
+describe("create handler: Exercises (admin only)", () => {
+  test('admin creates (200)', async () => {
+    expect((await create("Exercises", admin("A1"), JSON.stringify({ name: "Curl" }))).statusCode).toBe(200);
+    expect(putItems.length).toBe(1);
+  });
+
+  test('member is rejected (403, nothing written)', async () => {
+    expect((await create("Exercises", member("U1"), JSON.stringify({ name: "Curl" }))).statusCode).toBe(403);
+    expect(putItems.length).toBe(0);
+  });
+
+  test('spoofed custom:userType developer, no group, is rejected (403)', async () => {
+    const claims = { sub: "ATTACKER", "custom:userType": "developer" };
+    expect((await create("Exercises", claims, JSON.stringify({ name: "x" }))).statusCode).toBe(403);
+    expect(putItems.length).toBe(0);
+  });
+
+  test('401 with no sub', async () => {
+    expect((await create("Exercises", { sub: null }, JSON.stringify({ a: 1 }))).statusCode).toBe(401);
+  });
+
+  test('admin: 400 for missing body and for invalid JSON', async () => {
+    expect((await create("Exercises", admin("A1"))).statusCode).toBe(400);
+    expect((await create("Exercises", admin("A1"), "{nope")).statusCode).toBe(400);
+  });
 });

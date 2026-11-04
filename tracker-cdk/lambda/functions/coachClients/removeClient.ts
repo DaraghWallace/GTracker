@@ -10,28 +10,26 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const trainerId = event.requestContext.authorizer?.claims?.sub;
+  const claims = event.requestContext.authorizer?.claims;
+  const trainerId = claims?.sub;
   if (!trainerId) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
 
-  let clientId
+  const isTrainer = isInGroup(claims, "trainers") || isInGroup(claims, "admins");
+  if (!isTrainer) {
+    return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not a trainer" }) };
+  }
+
+  let clientId: unknown;
   try {
-    const body = JSON.parse(event.body ?? "{}");
-    clientId = body.clientId;
-  } catch (error) {
+    clientId = JSON.parse(event.body ?? "{}")?.clientId;
+  } catch {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Invalid JSON" }) };
   }
 
-  if (!clientId) {
+  if (typeof clientId !== "string" || clientId === "") {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "clientId required" }) };
-  }
-
-  const claims = event.requestContext.authorizer?.claims;
-  const isTrainer = isInGroup(claims, "admins") || isInGroup(claims, "trainers") 
-
-  if (!isTrainer) {
-    return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not a trainer" }) };
   }
 
   try {
@@ -45,9 +43,10 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true }) };
   } catch (error: any) {
-  if (error.name === "ConditionalCheckFailedException") {
-    return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: "Client is not currently your client" }) };
-  }
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: String(error) }) };
+    if (error.name === "ConditionalCheckFailedException") {
+      return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: "Client is not currently your client" }) };
+    }
+    console.error("removeClient failed:", error);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: "Internal server error" }) };
   }
 };

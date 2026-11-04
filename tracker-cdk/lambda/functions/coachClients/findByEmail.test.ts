@@ -77,7 +77,7 @@ describe('findByEmail handler', () => {
 
   test('returns 200 with only userId and nickname on match (Admin)', async () => {
     const response = await handler({
-      queryStringWarameters: { email: "client@test.com" },
+      queryStringParameters: { email: fakeUser.email },
       requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "admins" } } },
     } as any);
     expect(response.statusCode).toBe(200);
@@ -94,7 +94,7 @@ describe('findByEmail handler', () => {
   test('response contains only safe fields', async () => {
     const response = await handler({
       requestContext: { authorizer: { claims: { sub: "TRAINER_1", "cognito:groups": "trainers" } } },
-      queryStringParameters: { email: fakeUser2.email },   // or pathParameters / body, whichever your handler reads
+      queryStringParameters: { email: fakeUser.email },
     } as any);
     const body = JSON.parse(response.body);
 

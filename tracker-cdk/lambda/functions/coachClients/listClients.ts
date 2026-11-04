@@ -10,14 +10,13 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const trainerId = event.requestContext.authorizer?.claims?.sub;
+  const claims = event.requestContext.authorizer?.claims;
+  const trainerId = claims?.sub;
   if (!trainerId) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
 
-  const claims = event.requestContext.authorizer?.claims;
-  const isTrainer = isInGroup(claims, "admins") || isInGroup(claims, "trainers") 
-
+  const isTrainer = isInGroup(claims, "trainers") || isInGroup(claims, "admins");
   if (!isTrainer) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not a trainer" }) };
   }
@@ -30,8 +29,19 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       ExpressionAttributeValues: { ":trainerId": trainerId },
     }));
 
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(result.Items ?? []) };
+    // Allow-list: only the fields the coaching screen shows. email, userType etc. stay private.
+    const clients = (result.Items ?? []).map((c) => ({
+      userId: c.userId,
+      nickname: c.nickname,
+      height_cm: c.height_cm,
+      cur_weight: c.cur_weight,
+      tar_weight: c.tar_weight,
+      goal: c.goal,
+    }));
+
+    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(clients) };
   } catch (error) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: String(error) }) };
+    console.error("listClients failed:", error);
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: "Internal server error" }) };
   }
 };

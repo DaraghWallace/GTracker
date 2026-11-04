@@ -10,14 +10,14 @@ const CORS_HEADERS = {
 };
 
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const trainerId = event.requestContext.authorizer?.claims?.sub;
+  const claims = event.requestContext.authorizer?.claims;
+  const trainerId = claims?.sub;
   if (!trainerId) {
     return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: "Unauthorized" }) };
   }
 
-  const claims = event.requestContext.authorizer?.claims;
-  const isTrainer = isInGroup(claims, "admins") || isInGroup(claims, "trainers") 
-  
+  // Roles come from Cognito groups only. custom:userType is user-editable, so it is never trusted.
+  const isTrainer = isInGroup(claims, "trainers") || isInGroup(claims, "admins");
   if (!isTrainer) {
     return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: "Not a trainer" }) };
   }
@@ -49,6 +49,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     const latest = result.Items?.[0] ?? null;
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(latest) };
   } catch (error) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: String(error) }) };
+    console.error("getClientLatestSession failed:", error); // detail stays in the logs
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: "Internal server error" }) };
   }
 };
