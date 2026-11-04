@@ -31,16 +31,28 @@ export class SessionExercises extends Construct {
     });
 
     // --- Lambdas ---
-    const createFn = this.fn("CreateFn", "lambda/functions/generic/create.ts", table.tableName);
     const getFn    = this.fn("GetFn", "lambda/functions/getBySession.ts", table.tableName, sessionsTable.tableName);
     const updateFn = this.fn("UpdateFn", "lambda/functions/generic/updateItem.ts", table.tableName);
     const deleteFn = this.fn("DeleteFn", "lambda/functions/generic/delete.ts", table.tableName);
 
-    table.grantWriteData(createFn);
     table.grantReadData(getFn);
     sessionsTable.grantReadData(getFn);
     table.grantReadWriteData(updateFn);
     table.grantReadWriteData(deleteFn);
+
+    // Dedicated create: checks the session is the caller's and refuses to overwrite an existing row
+    const createSessionExerciseFn = new NodejsFunction(this, "CreateSessionExerciseFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: "lambda/functions/createSessionExercise.ts",
+      environment: {
+        SESSION_EXERCISES_TABLE: table.tableName,
+        SESSIONS_TABLE: sessionsTable.tableName,
+      },
+      bundling: { forceDockerBundling: false },
+    });
+
+    table.grantWriteData(createSessionExerciseFn);
+    sessionsTable.grantReadData(createSessionExerciseFn);
 
     const getClientSessionExercisesFn = new NodejsFunction(this, "GetClientSessionExercisesFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
@@ -76,7 +88,7 @@ export class SessionExercises extends Construct {
     const sessionExercises = api.root.addResource("sessionExercises");
     const sessionExerciseById = sessionExercises.addResource("{sessionExerciseId}");
 
-    this.addMethod(sessionExercises,    "POST",   createFn, authorizer);
+    this.addMethod(sessionExercises,    "POST",   createSessionExerciseFn, authorizer);
     this.addMethod(sessionExercises,    "GET",    getFn,    authorizer);
     this.addMethod(sessionExerciseById, "PUT",    updateFn, authorizer);
     this.addMethod(sessionExerciseById, "DELETE", deleteFn, authorizer);

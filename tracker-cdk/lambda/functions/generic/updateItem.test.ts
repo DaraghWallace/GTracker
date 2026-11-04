@@ -1,11 +1,14 @@
 import { handler } from './updateItem';
 
+// --- The fake database: one pretend item per table ------------------------
 const fakeTables: Record<string, { idField: string; item: Record<string, any> }> = {
   Sessions:         { idField: "sessionId",         item: { sessionId: "item_1",         userId: "OWNER" } },
-  SessionExercises: { idField: "sessionExerciseId", item: { sessionExerciseId: "item_1", userId: "OWNER" } },
+  SessionExercises: { idField: "sessionExerciseId", item: { sessionExerciseId: "item_1", userId: "OWNER", sessionId: "SESSION_A" } },
+  // Exercises carry the id of the admin who created them, but that is NOT an owner.
   Exercises:        { idField: "exerciseId",        item: { exerciseId: "item_1",        userId: "SOME_ADMIN" } },
 };
 
+// Everything the handler wrote, so tests can check what was (or wasn't) saved.
 let putItems: any[] = [];
 let failNextPut = false;
 
@@ -22,7 +25,7 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
             if (!table) return Promise.resolve({ Item: undefined });
             const requestedKey = command.input.Key ?? {};
             const idMatches = requestedKey[table.idField] === table.item[table.idField];
-
+            // Only the Sessions key includes userId; if it does, it must match too.
             const keyHasUserId = "userId" in requestedKey;
             const userMatches = keyHasUserId ? requestedKey.userId === table.item.userId : true;
             return Promise.resolve({ Item: idMatches && userMatches ? table.item : undefined });
@@ -30,6 +33,7 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
 
           if (command instanceof actual.PutCommand) {
             if (failNextPut) return Promise.reject(new Error("DynamoDB exploded"));
+            // Real DynamoDB rejects undefined values, so the fake does too.
             for (const [name, value] of Object.entries(command.input.Item ?? {})) {
               if (value === undefined) return Promise.reject(new Error(`undefined value for ${name}`));
             }
@@ -44,6 +48,7 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
   };
 });
 
+// --- Helpers -------------------------------------------------------------
 const member = (sub: string) => ({ sub, "cognito:groups": "members" });
 const admin  = (sub: string) => ({ sub, "cognito:groups": "admins" });
 
@@ -67,13 +72,14 @@ beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {}); // keep test output quiet
 });
 
+// --- Identity (401) ------------------------------------------------------
 test('401 when there is no sub', async () => {
   const response = await update("Sessions", { sub: null }, { sessionId: "item_1" }, { focus: "x" });
   expect(response.statusCode).toBe(401);
   expect(putItems.length).toBe(0);
 });
 
-// --- Sessions ---
+// --- Sessions: owner only. Someone else's session is simply not found ----
 describe('Sessions', () => {
   test('owner updates own session (200)', async () => {
     const response = await update("Sessions", member("OWNER"), { sessionId: "item_1" }, { focus: "Legs" });
@@ -93,7 +99,7 @@ describe('Sessions', () => {
   });
 });
 
-// --- SessionExercises ---
+// --- SessionExercises: owner only. Key has no user, so the handler checks ---
 describe('SessionExercises', () => {
   test('owner updates own session exercise (200)', async () => {
     const response = await update("SessionExercises", member("OWNER"), { sessionExerciseId: "item_1" }, { sets: "5x5" });
@@ -116,9 +122,14 @@ describe('SessionExercises', () => {
     await update("SessionExercises", member("OWNER"), { sessionExerciseId: "item_1" }, { userId: "VICTIM", sets: "x" });
     expect(putItems[0].userId).toBe("OWNER");
   });
+
+  test("a sessionId in the body cannot move it into another session (item 2.2)", async () => {
+    await update("SessionExercises", member("OWNER"), { sessionExerciseId: "item_1" }, { sessionId: "VICTIM_SESSION", sets: "x" });
+    expect(putItems[0].sessionId).toBe("SESSION_A");
+  });
 });
 
-// --- Exercises ---
+// --- Exercises: admin only, regardless of who created the exercise -------
 describe('Exercises', () => {
   test('admin updates an exercise created by another admin (200)', async () => {
     const response = await update("Exercises", admin("ADMIN_2"), { exerciseId: "item_1" }, { name: "Curl" });
@@ -152,7 +163,7 @@ describe('Exercises', () => {
   });
 });
 
-// --- Bad input and failures ---
+// --- Bad input and failures ---------------------------------------------
 describe('bad input and failures', () => {
   test('400 for invalid JSON', async () => {
     const response = await update("Sessions", member("OWNER"), { sessionId: "item_1" }, "not json");
