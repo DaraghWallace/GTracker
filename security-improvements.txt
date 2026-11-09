@@ -4,13 +4,34 @@ Reviewed: frontend (FE.zip) and backend (BE.zip, CDK + Lambdas)
 Date: 2026-10-19
 
 Progress tracker: [ ] = todo, [R]= Reveiw [x] = done
+                  [~] = partly done (read the PROGRESS note under the item)
+Last updated: 2026-11-09 (backend re-read against the latest BE copy)
+
+STATUS NOTE: [R] means the code is written and its tests pass locally. NOTHING is
+live until 'cdk deploy', and no item should become [x] until it has also been
+checked with two real accounts (see the checklist at the bottom).
 
 
 ======================================================================
 SECTION 1 - BACKEND: AUTHENTICATION & ROLES
 ======================================================================
 
-    [ ] 1.1 [CRITICAL] Users can choose their own role
+    [~] 1.1 [CRITICAL] Users can choose their own role
+        PROGRESS (2026-11-09):
+          - Server side is CLOSED: no handler reads custom:userType any more,
+            and tests send a spoofed 'developer' and expect 403. A user who sets
+            it now gains nothing on the API.
+          - STILL OPEN in CDK (be/lib/constructs/auth.ts): userType is still in
+            the app client's writeAttributes (and readAttributes). Remove it
+            from writeAttributes now, and from readAttributes once the frontend
+            stops reading it.
+          - DO NOT delete the customAttributes.userType entry from the user
+            pool. As far as I know Cognito cannot change/remove a schema
+            attribute in place, so CloudFormation would REPLACE the pool, and
+            with removalPolicy DESTROY that deletes every user. Leave the
+            attribute defined and just stop using it. See 1.7.
+          - Frontend still sends and reads it: amplify.ts register(),
+            UserInForm.tsx, Header.tsx, Coaching.tsx.
         Where: be/lib/constructs/auth.ts (userPoolClient writeAttributes,
             customAttributes) ; fe/src/Helpers/amplify.ts (register)
         Problem: "custom:userType" is writable by the client app. Anyone calling the
@@ -25,7 +46,16 @@ SECTION 1 - BACKEND: AUTHENTICATION & ROLES
             Test it yourself: use the AWS SDK / CLI to sign up with
             custom:userType=developer and see what your API lets you do.
 
-    [ ] 1.2 [HIGH] Authorization uses two different sources of truth
+    [R] 1.2 [HIGH] Authorization uses two different sources of truth
+        PROGRESS (2026-11-09):
+          - isInGroup() in lambda/functions/auth.ts is now the single source of
+            truth. It splits the comma-separated cognito:groups string and
+            matches EXACTLY (tested against lookalike names). All generic
+            handlers and all trainer handlers use it.
+          - Remaining: post-confirm still copies custom:userType into the
+            profile table (1.9), and nothing assigns anyone to the 'members'
+            group (1.8). Needs cdk deploy plus a two-account test before it
+            counts as done.
         Where: lambda/functions/coachClients/*.ts (trainer check),
             generic/updateItem.ts, generic/delete.ts, generic/getItem.ts
         Problem: Trainer check = "cognito:groups contains 'trainers'" OR
@@ -39,7 +69,11 @@ SECTION 1 - BACKEND: AUTHENTICATION & ROLES
             token (string vs array). Search: "cognito:groups claim format API
             Gateway authorizer".
 
-    [ ] 1.3 [HIGH] Role checks are copy-pasted into ~8 handlers
+    [~] 1.3 [HIGH] Role checks are copy-pasted into ~8 handlers
+        PROGRESS (2026-11-09):
+          - The role logic is now one shared helper, but each handler still
+            repeats the 401/403/CORS boilerplate by hand. Acceptable for now; a
+            tiny reply()/requireGroup() helper would remove the rest.
         Where: coachClients/*.ts, generic/*.ts
         Problem: Every handler re-implements auth and CORS by hand. This is how
                 inconsistencies (1.2, 2.x) creep in, and one forgotten check means
@@ -49,6 +83,10 @@ SECTION 1 - BACKEND: AUTHENTICATION & ROLES
             impossible rather than unlikely.
 
     [ ] 1.4 [MEDIUM] Weak sign-in protections
+        PROGRESS (2026-11-09):
+          - Unchanged in auth.ts: userPassword flow still enabled, password min
+            8 with no symbols, no MFA, default token lifetimes. Do MFA (at least
+            for admins) when you assign real admins.
         Where: be/lib/constructs/auth.ts
         Problem: - Password policy: min 8, no symbols.
                 - No MFA configured.
@@ -69,11 +107,75 @@ SECTION 1 - BACKEND: AUTHENTICATION & ROLES
             "AWS WAF Cognito user pool".
 
 
+    [ ] 1.6 [MEDIUM] Role changes and disabled users take effect late
+        Where: Cognito tokens (groups claim) + API Gateway Cognito authorizer
+        Problem: cognito:groups lives inside the ID token. Removing someone
+                from 'trainers' or 'admins', or disabling their account, does
+                nothing until their existing token expires (default 1 hour)
+                and any authorizer cache expires. A trainer you just removed
+                keeps trainer access for up to an hour, and a refresh token
+                keeps minting new tokens until it is revoked.
+        Try: Search: 'Cognito token revocation', 'AdminUserGlobalSignOut',
+            'Cognito token validity'. Decide on a shorter ID-token lifetime
+            and use global sign-out when you revoke a role.
+
+    [ ] 1.7 [MEDIUM] Some pool settings can't be changed later without replacing the pool
+        Where: be/lib/constructs/auth.ts
+        Problem: signInCaseSensitive defaults to TRUE in CDK, so Dave@x.com
+                and dave@x.com are two different accounts (this also breaks
+                email lookups, see 2.6). Custom attributes and some sign-in
+                settings cannot be changed in place. With removalPolicy
+                DESTROY on the pool, 'changing a setting' can mean 'deleting
+                every user'.
+        Try: Decide the final pool shape (signInCaseSensitive:false, the
+            attributes you really need, MFA) BEFORE real users sign up, then
+            set RETAIN (4.1). Search: 'CDK UserPool signInCaseSensitive',
+            'Cognito schema attributes cannot be changed'.
+
+    [ ] 1.8 [MEDIUM] No defined way to assign roles
+        Where: Cognito groups members / trainers / admins (auth.ts creates
+            them, nothing populates them)
+        Problem: Nobody is added to 'members' (harmless, since 'not
+                trainer/admin' means member), and trainers/admins can only be
+                added by hand in the console. That is fine for a one-person
+                app, but it is undocumented, unaudited, and the console is the
+                only place a mistake can happen.
+        Try: Write a short runbook (AdminAddUserToGroup CLI command, who may
+            run it, require MFA for the admin account). If you ever want self-
+            service, it needs an approval flow, not a signup field (ties to
+            5.7).
+
+    [ ] 1.9 [MEDIUM] Post-confirmation trigger is fragile and copies unchecked data
+        Where: be/lambda/post-confirm/index.ts, lambda/services/UserService.ts
+        Problem: (a) It never checks event.triggerSource. Cognito also fires
+                this trigger for forgot-password confirmations; there the
+                profile already exists, the conditional Put fails, and the
+                handler passes the error back, which may break password reset.
+                VERIFY by running a password reset on a test account. (b)
+                nickname and custom:userType go into the table exactly as the
+                user sent them (any length, any value), so the profile's
+                userType is still user-controlled data. (c) If nickname or
+                email is missing (direct API sign-up) the Put throws on the
+                undefined value and confirmation fails. (d) The profile email
+                is copied once, so it goes stale if the user changes their
+                email in Cognito (matters for findByEmail). (e) UserService.ts
+                looks like a duplicate of the class inside index.ts.
+        Try: Return early unless triggerSource ===
+            'PostConfirmation_ConfirmSignUp'; validate/trim nickname; stop
+            storing userType (or store a constant); delete the duplicate file
+            if unused.
+
 ======================================================================
 SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
 ======================================================================
 
-    [ ] 2.1 [CRITICAL] A user can overwrite someone else's SessionExercise
+    [R] 2.1 [CRITICAL] A user can overwrite someone else's SessionExercise
+        PROGRESS (2026-11-09):
+          - Fixed for POST /sessionExercises: new dedicated Lambda
+            createSessionExercise.ts writes with ConditionExpression
+            attribute_not_exists(sessionExerciseId) (existing id -> 409) and
+            stamps userId from the token. Tests include 'existing id is not
+            overwritten'. Needs deploy plus a two-account test.
         Where: lambda/functions/generic/create.ts
             (+ be/lib/constructs/sessionExercises.ts, where it is wired up)
         Problem: The create handler strips "userId" from the body but keeps every
@@ -86,7 +188,14 @@ SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
             "server-generated IDs vs client-supplied IDs". Reproduce with two
             accounts.
 
-    [ ] 2.2 [CRITICAL] A user can attach exercises to someone else's session
+    [~] 2.2 [CRITICAL] A user can attach exercises to someone else's session
+        PROGRESS (2026-11-09):
+          - Closed on the direct routes: createSessionExercise checks the
+            session is the caller's, and updateItem pins sessionId from the
+            stored row so a PUT cannot move a row to another session.
+          - BUT see 2.12: the ownership check can be bypassed because Sessions
+            create lets the client choose the sessionId. Treat 2.2 as open until
+            2.12 is fixed.
         Where: lambda/functions/generic/create.ts, generic/updateItem.ts (case
             "SessionExercises")
         Problem: Creating a SessionExercise never checks that the sessionId in the
@@ -98,7 +207,12 @@ SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
             SessionExercises are protected. What check exists on READ that is
             missing on WRITE?
 
-    [ ] 2.3 [HIGH] Any logged-in user can create/modify Exercises
+    [R] 2.3 [HIGH] Any logged-in user can create/modify Exercises
+        PROGRESS (2026-11-09):
+          - Exercises create is now admin-only (exact group match), and
+            create/update/delete have per-table rules with tests (member,
+            spoofed userType, admin). Table-name switching inside the generic
+            Lambdas still exists (see 1.3 / 4.2).
         Where: lambda/functions/generic/create.ts, be/lib/constructs/exercises.ts
         Problem: update and delete require userType "developer", but create does
                 not. Create is the same Lambda used by every table and has no
@@ -109,7 +223,17 @@ SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
             create.ts. Then think about whether switching on a table name inside
             one "generic" Lambda is a good design (see 1.3).
 
-    [ ] 2.4 [HIGH] Mass assignment (any field the client sends is stored)
+    [~] 2.4 [HIGH] Mass assignment (any field the client sends is stored)
+        PROGRESS (2026-11-09):
+          - Done: createSessionExercise.ts and createSessionExerciseForClient.ts
+            copy only an allow-list of fields with type/length checks (400
+            otherwise). API Gateway models (additionalProperties:false) exist
+            for the three Sessions body routes.
+          - Still open: generic create.ts and updateItem.ts still spread the
+            whole body (Exercises and Sessions), and createSessionForClient.ts
+            still spreads ...sessionData. The gateway models are bypassable (see
+            3.7), so the Lambda allow-lists are the real defence. updateItem is
+            still a full PutItem replace.
         Where: generic/create.ts, generic/updateItem.ts,
             coachClients/createSessionForClient.ts,
             coachClients/createSessionExerciseForClient.ts
@@ -123,6 +247,8 @@ SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
             only). Why is an allow-list safer?
 
     [ ] 2.5 [HIGH] Trainers can add ANY user as a client with no consent
+        PROGRESS (2026-11-09):
+          - Unchanged. Note addClient is still an UpdateItem 'upsert' (2.11).
         Where: coachClients/addClient.ts, findByEmail.ts, removeClient.ts
         Problem: A trainer only needs a user's id to attach them, then can read
                 their sessions and write sessions/exercises into their account.
@@ -133,7 +259,14 @@ SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
             Search: "invitation / approval workflow", "data minimisation".
             Who is the data subject here and who should control access?
 
-    [ ] 2.6 [HIGH] User enumeration + full table scan for email search
+    [~] 2.6 [HIGH] User enumeration + full table scan for email search
+        PROGRESS (2026-11-09):
+          - Done: findByEmail now Queries an email-index GSI (no more Scan) and
+            returns only userId + nickname. Index is defined in user-profiles.ts
+            but NOT deployed yet.
+          - Still open: email matching is case-sensitive, trainers can still
+            probe which emails exist (no rate limit), and the profile email is
+            copied once at sign-up so it can go stale (see 1.9).
         Where: coachClients/findByEmail.ts
         Problem: Any account that passes the (spoofable, see 1.1) trainer check
                 can probe which emails are registered and get their user id and
@@ -144,7 +277,12 @@ SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
         Try: Search: "account enumeration", "DynamoDB Scan vs Query", "GSI on
             email", "DynamoDB pagination LastEvaluatedKey".
 
-    [ ] 2.7 [MEDIUM] Trainer gets the full profile of each client
+    [R] 2.7 [MEDIUM] Trainer gets the full profile of each client
+        PROGRESS (2026-11-09):
+          - Done: listClients now role-checks (it had no check before) and
+            returns only userId, nickname, height_cm, cur_weight, tar_weight,
+            goal. findByEmail returns only userId + nickname. Tests assert the
+            exact key list.
         Where: coachClients/listClients.ts
         Problem: Returns whole DynamoDB items (email, createdAt, anything else
                 stored). The "only return what's needed" comment exists in
@@ -152,7 +290,11 @@ SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
         Try: What fields does the trainer UI actually use? Search: "response
             shaping / projection", "DynamoDB ProjectionExpression".
 
-    [ ] 2.8 [MEDIUM] "developer" is also a trainer, everywhere
+    [R] 2.8 [MEDIUM] "developer" is also a trainer, everywhere
+        PROGRESS (2026-11-09):
+          - Done: 'developer' / custom:userType is no longer read anywhere, so
+            it no longer implies trainer powers. Trainers and admins are exactly
+            the two Cognito groups.
         Where: all coachClients/*.ts
         Problem: A developer account silently has trainer powers over any user it
                 adds (see 2.5). Powers should be explicit and separate.
@@ -174,11 +316,57 @@ SECTION 2 - BACKEND: AUTHORIZATION BUGS IN LAMBDAS (OWNERSHIP / IDOR)
         Try: Search: "TOCTOU", "DynamoDB conditional writes".
 
 
+    [ ] 2.11 [MEDIUM] addClient can create junk profile rows
+        Where: lambda/functions/coachClients/addClient.ts
+        Problem: UpdateItem creates the item if it does not exist, and
+                'attribute_not_exists(currentTrainerId)' is true for a missing
+                item. Any trainer can create a row in GtUserProfiles for any
+                made-up clientId string (also with no length limit).
+                removeClient is fine because its condition requires an
+                existing trainer id.
+        Try: Add attribute_exists(userId) to the ConditionExpression (AND-ed
+            with the existing condition), cap the clientId length, and add a
+            test: 'unknown clientId -> 409/404, nothing created'.
+
+    [ ] 2.12 [HIGH] Client-chosen sessionId lets one user plant data in another user's session (bypasses 2.2)
+        Where: generic/create.ts (Sessions), sessions.ts model allows
+            sessionId; getBySession.ts, getClientSessionExercises.ts,
+            createSessionExerciseForClient.ts; and the ownership check in
+            createSessionExercise.ts
+        Problem: The Sessions table key is (sessionId, userId). The generic
+                create takes sessionId from the body and stamps the CALLER's
+                userId, so an attacker who learns a victim's sessionId (a
+                uuid: not guessable, but not secret either; trainers and the
+                UI see them) can create THEIR OWN session row with the same
+                sessionId. (1) createSessionExercise then finds (sessionId,
+                attacker) and passes its ownership check, so the attacker can
+                write SessionExercises with the victim's sessionId, and
+                getBySession returns every item on the sessionId-index, so the
+                junk shows up in the victim's session. (2) getBySession,
+                getClientSessionExercises and createSessionExerciseForClient
+                all Query Sessions by sessionId alone with Limit 1, which
+                returns whichever row has the lowest userId. If the attacker's
+                row sorts first, the victim gets 403 on their own session, and
+                a trainer's checks run against the wrong owner.
+        Try: Make sessionId server-owned: generate it with randomUUID() in a
+            Sessions-specific create (as createSessionForClient already does)
+            and have the frontend use the returned id (5.6). Also look
+            sessions up with the FULL key (sessionId + the expected userId)
+            instead of Limit 1, and have SessionExercises reads return only
+            rows whose userId matches the session owner. Test it: two users,
+            same sessionId.
+
 ======================================================================
 SECTION 3 - BACKEND: API GATEWAY, CORS, ERRORS, INPUT HANDLING
 ======================================================================
 
-    [ ] 3.1 [HIGH] Unhandled errors and invalid JSON crash handlers
+    [~] 3.1 [HIGH] Unhandled errors and invalid JSON crash handlers
+        PROGRESS (2026-11-09):
+          - Fixed (try/catch, 400 for bad JSON, generic 500) in: the trainer
+            handlers, updateItem, getItem, scan, createSessionExercise.
+          - Still unguarded: generic create.ts (the PutCommand is not wrapped),
+            generic delete.ts, and getBySession.ts. A DynamoDB error there is an
+            unhandled exception -> 502 with no CORS headers.
         Where: generic/create.ts (no try/catch around the DB write),
             generic/updateItem.ts (JSON.parse unguarded, DB calls unguarded),
             coachClients/addClient.ts and removeClient.ts (JSON.parse
@@ -191,13 +379,22 @@ SECTION 3 - BACKEND: API GATEWAY, CORS, ERRORS, INPUT HANDLING
             record what you get back. Search: "Lambda proxy integration error
             response format", "API Gateway payload limits".
 
-    [ ] 3.2 [MEDIUM] Internal error details leak to the client
+    [R] 3.2 [MEDIUM] Internal error details leak to the client
+        PROGRESS (2026-11-09):
+          - String(error) leaks removed from the trainer handlers, getItem,
+            scan, updateItem (detail goes to console.error, client gets a
+            generic message). Re-grep for String(error) and error.message in
+            response bodies after the remaining handlers are guarded (3.1).
         Where: scan.ts, getItem.ts, coachClients/*.ts (String(error) in 500s)
         Problem: Raw error text (table names, AWS messages) is returned to callers.
         Try: Search: "information disclosure error handling", "log detail
             server-side, return generic message + request id".
 
     [ ] 3.3 [MEDIUM] CORS is wide open and inconsistent
+        PROGRESS (2026-11-09):
+          - Unchanged: tracker-cdk-stack.ts still allows
+            ALL_ORIGINS/ALL_METHODS, only DEFAULT_4XX has CORS headers (no
+            DEFAULT_5XX), and every Lambda hardcodes '*'.
         Where: be/lib/tracker-cdk-stack.ts (ALL_ORIGINS, ALL_METHODS, '*' headers),
             every Lambda's CORS_HEADERS
         Problem: Any website may call your API from a browser (they'd still need a
@@ -209,6 +406,12 @@ SECTION 3 - BACKEND: API GATEWAY, CORS, ERRORS, INPUT HANDLING
             the single best place to define CORS?
 
     [ ] 3.4 [MEDIUM] No throttling, quotas, WAF or request validation
+        PROGRESS (2026-11-09):
+          - Unchanged: the RestApi has no deployOptions (no throttling, no
+            access logs, no metrics). Also consider reservedConcurrentExecutions
+            on the busiest Lambdas and an AWS Budgets alert: new accounts have a
+            low account-wide Lambda concurrency limit, so one abusive client can
+            starve every route.
         Where: be/lib/tracker-cdk-stack.ts
         Problem: Nothing limits request rate or body shape. One user (or a stolen
                 token) can run up your AWS bill or fill DynamoDB (PAY_PER_REQUEST
@@ -217,24 +420,63 @@ SECTION 3 - BACKEND: API GATEWAY, CORS, ERRORS, INPUT HANDLING
             based rule", "AWS Budgets alarm", "API Gateway request validator".
 
     [ ] 3.5 [MEDIUM] Query parameter handling
+        PROGRESS (2026-11-09):
+          - Unchanged: getByUser.ts has no date format check, no
+            pagination/Limit, and returns 500 if startDate is after endDate
+            (BETWEEN with start > end is rejected by DynamoDB). It also still
+            contains the temporary console.log('GROUPS CHECK') that prints token
+            claims: delete it.
         Where: getByUser.ts (startDate/endDate), getBySession.ts
         Problem: Dates are string-interpolated with no format validation; results
                 have no pagination or limits (DynamoDB returns max 1MB then
                 silently stops - data may be missing).
         Try: Search: "input validation allow-list", "DynamoDB Query pagination".
 
-    [ ] 3.6 [LOW] Dev-only leftovers
+    [R] 3.6 [LOW] Dev-only leftovers
+        PROGRESS (2026-11-09):
+          - updateItem now returns 404 for an unknown table (same as delete).
+            The default branch is no longer silent.
         Where: generic/updateItem.ts (default: break in switch), tests, README
         Problem: An unknown table name falls through to the default branch quietly
                 in update but returns an error in delete. Small things like this
                 are where bugs hide.
 
 
+    [ ] 3.7 [MEDIUM] API Gateway body models can be skipped
+        Where: be/lib/constructs/sessions.ts (requestModels keyed
+            'application/json')
+        Problem: The models only apply when the request's Content-Type is
+                application/json. A request with another Content-Type (or
+                none) is not validated at all, so the
+                'additionalProperties:false' allow-list and the length limits
+                do nothing. Only the Lambdas then stand between the caller and
+                the table.
+        Try: Search: 'API Gateway request validation $default content type'.
+            Either add a '$default' model or, better, enforce the same rules
+            inside the Lambdas (2.4).
+
+    [ ] 3.8 [LOW] Functional bugs found while reading (not security)
+        Where: generic/create.ts, getByUser.ts
+        Problem: create.ts always overwrites dateDone with new
+                Date().toISOString() (this was in the original code), so the
+                date the user picks in NewSessionForm is silently ignored for
+                new sessions and the model's date rule is moot. getByUser
+                returns 500 when startDate > endDate (should be 400).
+        Try: Decide whether the client may choose the date; if yes, validate
+            it (YYYY-MM-DD) in the Lambda and use it.
+
 ======================================================================
 SECTION 4 - BACKEND: INFRASTRUCTURE (CDK)
 ======================================================================
 
-    [ ] 4.1 [HIGH] All data is set to be destroyed with the stack
+    [~] 4.1 [HIGH] All data is set to be destroyed with the stack
+        PROGRESS (2026-11-09):
+          - Only the Sessions table is RETAIN. SessionExercises, Exercises,
+            GtUserProfiles and the user pool are still DESTROY, and there is no
+            point-in-time recovery anywhere. Mixed policies also mean a deleted
+            stack leaves Sessions behind but removes the matching
+            SessionExercises. Add RETAIN + pointInTimeRecovery to the tables and
+            RETAIN to the pool. Do this BEFORE real users sign up.
         Where: be/lib/constructs/*.ts (removalPolicy DESTROY on 4 tables AND the
             Cognito user pool)
         Problem: Deleting/rolling back the stack deletes every user account and
@@ -244,6 +486,10 @@ SECTION 4 - BACKEND: INFRASTRUCTURE (CDK)
             "deletionProtection", "separate dev and prod stacks".
 
     [ ] 4.2 [MEDIUM] Hardcoded physical names
+        PROGRESS (2026-11-09):
+          - Extra gotcha: Sessions is RETAIN with a hardcoded tableName. If the
+            stack is ever destroyed and redeployed, CloudFormation fails because
+            'Sessions' already exists.
         Where: table names "Sessions", "Exercises", "SessionExercises",
             "GtUserProfiles", pool name
         Problem: The stack can't be deployed twice (dev/prod) in one account, and
@@ -253,6 +499,12 @@ SECTION 4 - BACKEND: INFRASTRUCTURE (CDK)
         Try: Search: "CDK physical name vs generated name".
 
     [ ] 4.3 [MEDIUM] Least-privilege IAM not reviewed
+        PROGRESS (2026-11-09):
+          - Concrete over-grants: post-confirm has grantWriteData (needs PutItem
+            only); addClient/removeClient have grantReadWriteData (need
+            UpdateItem only); delete Lambdas have grantReadWriteData (need
+            GetItem + DeleteItem). Tighten with grant(fn, 'dynamodb:PutItem')
+            style calls.
         Where: grant* calls in each construct
         Problem: e.g. delete/update Lambdas get read+write on whole tables (do they
                 need all those actions?). Worth auditing each Lambda's actual
@@ -268,6 +520,13 @@ SECTION 4 - BACKEND: INFRASTRUCTURE (CDK)
             CDK", "CloudWatch alarms 4XX/5XX/throttles", "CloudTrail".
 
     [ ] 4.5 [LOW] Deployment/env script
+        PROGRESS (2026-11-09):
+          - sync-env.ts writes ../tracker-app/src/cdk-outputs.json and
+            ../tracker-app/.env (that folder name may be stale). The FE
+            .gitignore ignores .env but NOT cdk-outputs.json, and the BE
+            .gitignore does not mention it. It holds only IDs and the API URL
+            (not secrets), but ignore it anyway. UserPoolId/UserPoolClientId
+            CfnOutputs are also defined twice (Auth construct and the stack).
         Where: be/bin/scripts/sync-env.ts
         Problem: Writes outputs into a sibling project's .env and src/ folder.
                 Nothing here is secret (pool IDs, API URL), but confirm
@@ -275,6 +534,18 @@ SECTION 4 - BACKEND: INFRASTRUCTURE (CDK)
                 fails safely.
         Try: Check both .gitignore files for the outputs file.
 
+
+    [ ] 4.6 [LOW] Deploy-time gotchas for the changes already made
+        Where: be/lib/constructs/sessionExercises.ts, user-profiles.ts,
+            auth.ts
+        Problem: Removing the old generic CreateFn from SessionExercises makes
+                CloudFormation delete that Lambda (expected). DynamoDB allows
+                only ONE global secondary index to be created or deleted per
+                update, so deploy the email-index change on its own, not
+                bundled with another GSI change. Changing user pool schema or
+                sign-in settings can replace the pool (1.7).
+        Try: Run 'cdk diff' first and read it for the words 'replace' and
+            'destroy' before every deploy.
 
 ======================================================================
 SECTION 5 - FRONTEND
@@ -319,6 +590,11 @@ SECTION 5 - FRONTEND
         Try: Search: "validate on both sides", "zod".
 
     [ ] 5.5 [MEDIUM] Inconsistent, duplicated API layers
+        PROGRESS (2026-11-09):
+          - Matters more now: the server rejects bad requests (400/404/409).
+            createSessionExercise() and updateSessionExercise() in
+            APIfunctions.tsx never check response.ok, so the UI shows 'Set
+            created!' while nothing was saved (see 5.8).
         Where: Helpers/api.tsx vs Helpers/APIfunctions.tsx
         Problem: Two different fetch layers with different error handling and
                 different Authorization formats (some send "Bearer <token>", some
@@ -331,6 +607,11 @@ SECTION 5 - FRONTEND
             loudly vs fail silently".
 
     [ ] 5.6 [LOW] Client generates IDs for records
+        PROGRESS (2026-11-09):
+          - Now the only remaining cause of 2.12: sessions are still created
+            with a client-chosen uuidv4(). SessionExercises are safe (server
+            refuses to overwrite) but Sessions are not. Move Session id creation
+            to the server, as createSessionForClient already does.
         Where: Forms/NewSessionForm.tsx (uuid), NewExerciseForm.tsx
         Problem: Trusting client-supplied IDs is what makes 2.1 possible. IDs
                 should be decided where you can trust the code.
@@ -341,6 +622,16 @@ SECTION 5 - FRONTEND
             with the userType value), user object height/weight set to 0
         Problem: Confusing/incorrect data in client state; easy to misuse later.
         SOLUTION: commented out for now, removing this function for now, as coach would likley be a payed tier some form of admin would be needed to update user type.
+
+    [ ] 5.8 [MEDIUM] Frontend treats failed saves as success
+        Where: fe/src/Helpers/APIfunctions.tsx (createSessionExercise,
+            updateSessionExercise)
+        Problem: These functions read the response body but never check
+                response.ok. With the stricter server (400 for invalid fields,
+                404 for a session that is not yours, 409 for a reused id) the
+                UI still shows 'Set created!' while nothing was saved.
+        Try: Throw on !response.ok and show the error. Fix the other fetch
+            helpers at the same time (5.5).
 
 ======================================================================
 SECTION 6 - DEPENDENCIES & PROJECT HYGIENE
@@ -360,11 +651,19 @@ SECTION 6 - DEPENDENCIES & PROJECT HYGIENE
             --omit=dev", "Dependabot / Renovate", "lockfile hygiene".
 
     [R] 6.2 [LOW] Unused / questionable dependencies
+        PROGRESS (2026-11-09):
+          - Backend too: lambda/package.json lists aws-sdk (v2, end-of-support)
+            and @types/uuid; the post-confirm code uses SDK v3 only. Remove
+            them.
         Where: fe/package.json ("dotenv" is in dependencies but Vite doesn't need
             it in browser code; I found no use of it in src)
         Try: Search: "depcheck".
 
     [R] 6.3 [LOW] README claims more than the code does
+        PROGRESS (2026-11-09):
+          - Re-check after the next deploy: the 'In place / In progress'
+            security lists in both READMEs must match this file (2.2 is now
+            'partial' until 2.12 is fixed).
         Where: fe/README.md (line ~21 and ~89), be/README.md (line ~89)
         Problem: It says "Lambda handlers verify ownership on every read/write" -
                 not true today (see 2.1-2.3; create.ts does no ownership check). Portfolio readers (and employers)
@@ -377,7 +676,16 @@ SECTION 6 - DEPENDENCIES & PROJECT HYGIENE
                 copies get picked up by tooling). Make sure they aren't being
                 committed or deployed.
 
-    [ ] 6.5 [MEDIUM] Missing security-focused tests
+    [~] 6.5 [MEDIUM] Missing security-focused tests
+        PROGRESS (2026-11-09):
+          - Handler-level security tests now exist for: generic
+            create/update/delete/getItem, all trainer handlers,
+            createSessionExercise, auth helper (members rejected, spoofed
+            userType, other user's data, nothing written on reject). Gaps: no
+            tests for getBySession, getByUser, scan; no test with two users
+            sharing a sessionId (2.12); and no CDK assertion tests (e.g.
+            'userType not in writeAttributes', 'email-index exists', 'POST
+            /sessionExercises uses createSessionExercise').
         Where: lambda/functions/**/*.test.ts
         Problem: Check whether the tests ever try to do something they should NOT
                 be allowed to (user B touching user A's data, member calling a
@@ -388,17 +696,31 @@ SECTION 6 - DEPENDENCIES & PROJECT HYGIENE
 
 
 ======================================================================
-SUGGESTED ORDER OF ATTACK (and what you'll learn)
+UPDATED ORDER OF ATTACK (2026-11-09)
 ======================================================================
- 1. 1.1 + 1.2  -> Roles & authorization model (Cognito groups/claims)
- 2. 2.1, 2.2, 2.3 -> IDOR / broken access control (OWASP API #1)
- 3. 2.4        -> Mass assignment + input validation
- 4. 2.5, 2.6, 2.7 -> Consent, data minimisation, enumeration
- 5. 3.1, 3.2, 3.3 -> Error handling, info disclosure, CORS
- 6. 4.1        -> Don't lose real users' data (RETAIN, PITR)
- 7. 3.4, 4.4   -> Rate limits, logging, alarms
- 8. 5.x        -> Frontend hygiene
- 9. 6.x        -> Dependencies and tests
+ 1. 2.12 (+5.6)  Server-generated sessionId, full-key lookups. This is the one
+                 hole that undoes the 2.2 fix, so do it before deploying.
+ 2. 1.1 (CDK)    Remove userType from writeAttributes. Do NOT delete the
+                 customAttributes entry (1.7).
+ 3. Decide pool shape (1.7) and add RETAIN + PITR (4.1) BEFORE real users.
+ 4. DEPLOY (cdk diff first, 4.6), then the two-account test below.
+ 5. 2.4 + 3.1 + 3.7  Lambda allow-lists for generic create/update and
+                 createSessionForClient; try/catch in create, delete, getBySession.
+ 6. 1.9 + 2.11   Post-confirm triggerSource check; addClient attribute_exists.
+ 7. 3.3, 3.4     CORS to the real origin, API throttling, Budgets alert.
+ 8. 5.8, 5.3, 5.5 Frontend: check response.ok, remove console logs.
+ 9. 6.1, 6.2     npm audit --omit=dev; remove aws-sdk v2.
+10. 1.4, 1.6, 1.8 MFA for admins, token lifetime, role runbook.
+11. 2.5, 2.6, 2.9, 2.10, 4.3, 4.4, 6.5  The rest.
+
+TWO-ACCOUNT TEST (after each deploy; A = victim, B = attacker):
+  a. B calls every write route with A's ids (sessionId, sessionExerciseId): all rejected.
+  b. B creates a session reusing A's sessionId: rejected (after 2.12).
+  c. A member calls /coaching/* and Exercises writes: 403. Spoofed custom:userType: 403.
+  d. A trainer not assigned to A reads A's sessions: 403.
+  e. Password reset on a test account still works (1.9).
+  f. Sign up a new test user, confirm the profile row exists and has only expected fields.
+
 
 Good reading to anchor all of this:
  - OWASP API Security Top 10 (especially API1 Broken Object Level
@@ -407,5 +729,3 @@ Good reading to anchor all of this:
    Resource Consumption)
  - AWS Well-Architected: Security pillar (serverless lens)
  - Cognito developer guide: groups, custom attributes, token claims
-
-

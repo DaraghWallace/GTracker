@@ -38,22 +38,19 @@
 
 @media (min-width: 750px) {
   .sessions { flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm); }
-  .b_h_filters { width: 50%; }
 
   .b_h_filters {
     display: flex;
     flex-direction: row;
-    width: 50%;
     gap: var(--space-xs);
 
     display: flex;
     flex-direction: row;
-    /* justify-content: space-between; */
+    justify-content: space-between;
   }
 
   .b_h_filter{
     background-color: var(--color-bg-tertiary);
-    border-radius: var(--radius-pill);
     padding-left: var(--space-sm);
     padding-right: var(--space-sm);
     margin-right: 0;
@@ -61,7 +58,7 @@
     flex-direction: row;
     align-items: center;
     /* justify-content: space-between; */
-    /* font-size: 20px; */
+    font-size: 20px;
   }
 
   .b_h_f_text{

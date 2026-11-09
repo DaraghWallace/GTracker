@@ -56,7 +56,7 @@ export default function Body({
 
   const showHeader = page !== "dev" && page !== "coaching";
 
-  const [showFilter, setShowFilter] = useState(false);
+  const [showFilter, setShowFilter] = useState(true);
 
 
   function renderFilters() {
