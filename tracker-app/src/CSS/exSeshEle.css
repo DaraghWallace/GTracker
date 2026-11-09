@@ -37,3 +37,29 @@
 
   padding: 5px;
 }
+
+@media (max-width: 750px) {
+  .es_rep{
+    background-color: var(--color-accent);
+    border-radius: var(--radius-lg);
+
+    color: var(--color-bg-primary);
+    font-weight: 600;
+    font-size: 12px;
+
+    padding: 4px;
+  }
+}
+
+@media (min-width: 750px) {
+  .es_rep{
+    background-color: var(--color-accent);
+    border-radius: var(--radius-lg);
+
+    color: var(--color-bg-primary);
+    font-weight: 600;
+    font-size: 15px;
+
+    padding: 5px;
+  }
+}

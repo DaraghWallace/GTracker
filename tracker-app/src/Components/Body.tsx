@@ -10,7 +10,7 @@ import NewSessionForm from "./Forms/NewSessionForm";
 
 import "../CSS/Body.css";
 import "../CSS/form.css";
-import { FaPlus, FaPen, FaXmark, FaChartLine, FaTableList } from "react-icons/fa6";
+import { FaPlus, FaPen, FaXmark, FaChartLine, FaTableList, FaAngleUp, FaAngleDown } from "react-icons/fa6";
 
 /*
   Body.tsx - main content area of the app.
@@ -56,6 +56,9 @@ export default function Body({
 
   const showHeader = page !== "dev" && page !== "coaching";
 
+  const [showFilter, setShowFilter] = useState(false);
+
+
   function renderFilters() {
     const groups = [...new Set(exercises.map((ex) => ex.group))].filter((g) => g !== "Cardio");
 
@@ -100,6 +103,8 @@ export default function Body({
             </select>
           </div>
         )}
+
+
       </div>
     );
   }
@@ -185,8 +190,15 @@ export default function Body({
     <div className="Body">
       {showHeader && (
         <div className="b_header">
-          {renderFilters()}
-          {renderHeaderButtons()}
+          {showFilter && 
+            <div className="b_h_filters">
+              {renderFilters()}
+              {renderHeaderButtons()}            
+            </div>
+          }
+            <button className="hide_button" onClick={() => setShowFilter(!showFilter)}>
+              {showFilter ? <><FaAngleUp /> Hide <FaAngleUp /></> : <><FaAngleDown /> Filters? <FaAngleDown /></>}
+            </button>   
         </div>
       )}
 
