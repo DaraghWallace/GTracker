@@ -2,6 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { isInGroup } from "../auth";
+import { findSessionById } from "../sessionLookup";
 
 const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const CORS_HEADERS = {
@@ -27,17 +28,16 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   try {
-    const sessionResult = await docClient.send(new QueryCommand({
-      TableName: process.env.SESSIONS_TABLE!,
-      KeyConditionExpression: "sessionId = :sid",
-      ExpressionAttributeValues: { ":sid": sessionId },
-      Limit: 1,
-    }));
-
-    const session = sessionResult.Items?.[0];
-    if (!session) {
+    const lookup = await findSessionById(docClient, process.env.SESSIONS_TABLE!, sessionId);
+    if (lookup.status === "notFound") {
       return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Session not found" }) };
     }
+    if (lookup.status === "ambiguous") {
+      // Two rows share this sessionId (item 2.12). Refuse rather than guess whose it is.
+      console.error("Duplicate sessionId in Sessions table:", sessionId);
+      return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: "Session id is not unique" }) };
+    }
+    const session = lookup.session;
 
     const profile = await docClient.send(new GetCommand({
       TableName: process.env.USER_PROFILES_TABLE!,
@@ -52,7 +52,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       TableName: process.env.SESSION_EXERCISES_TABLE!,
       IndexName: "sessionId-index",
       KeyConditionExpression: "sessionId = :sid",
-      ExpressionAttributeValues: { ":sid": sessionId },
+      // Only rows owned by the session's owner. Anything else carrying this sessionId is not theirs.
+      FilterExpression: "userId = :owner",
+      ExpressionAttributeValues: { ":sid": sessionId, ":owner": session.userId },
     }));
 
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(result.Items ?? []) };

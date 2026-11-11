@@ -1,0 +1,136 @@
+GTracker FRONTEND changes that go with the backend changes
+==========================================================
+These are small before/after snippets, not whole files, because I only have the frontend zip from 2026-10-19 and
+your files may have moved on (for example register() in my copy sends height_cm / cur_weight / tar_weight, which
+your user pool does not define, so yours is probably different). Find the matching lines in YOUR files.
+Frontend and backend must be released together.
+
+1. Sessions: use the id the SERVER makes                                                        (item 2.12, 5.6)
+---------------------------------------------------------------------------------------------------------
+Helpers/APIfunctions.tsx : createSession()
+
+  BEFORE
+    export async function createSession(newSession: session) {
+        ...
+        console.log(newSession);
+        ...
+            const text = await response.text();
+            const result = JSON.parse(text);
+            console.log("Session created:", result);
+            return result;
+
+  AFTER (also removes two console.logs, item 5.3, and fails loudly, item 5.8)
+    export async function createSession(newSession: Omit<session, "sessionId">): Promise<session> {
+        const token = await getToken()
+        const url = `${API_URL}sessions`;
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : "",
+            },
+            body: JSON.stringify(newSession),
+        });
+
+        const result = await response.json().catch(() => null);
+        if (!response.ok) {
+            throw new Error(result?.error ?? "Failed to create session");
+        }
+        return result as session;   // has the server-made sessionId, userId and dateDone
+    }
+
+Components/Forms/NewSessionForm.tsx : handleSubmit()
+
+  BEFORE
+    const newSession: session = {
+      sessionId: uuidv4(),
+      userId,
+      dateDone: date,
+      userWeight: userWeight,
+      focus: focus || null,
+      notes: notes || null,
+    };
+    try {
+      setPostStatus("posting")
+      await createSession(newSession);
+      setMessage("Session created!");
+      setSessionData(prev => [...prev, newSession]);
+
+  AFTER
+    const newSession = {
+      userId,                // ignored by the server, kept so the API Gateway body check still passes
+      dateDone: date,        // required by the API Gateway body check; the server uses its own date (item 3.8)
+      userWeight: userWeight,
+      focus: focus || null,
+      notes: notes || null,
+    };
+    try {
+      setPostStatus("posting")
+      const created = await createSession(newSession);
+      setMessage("Session created!");
+      setSessionData(prev => [...prev, created]);     // the stored session, with the server's sessionId
+
+  Then delete the now-unused  import { v4 as uuidv4 } from "uuid";  in that file (the build fails on unused
+  imports because tsconfig has noUnusedLocals). Check no other file still needs it.
+
+  Note: the date picker has never changed the stored date (the old Lambda also overwrote it with "now"). After
+  this change the session you see straight after creating it shows the same date as after a reload.
+
+2. Sign-up must stop sending the role                                                              (item 1.1)
+---------------------------------------------------------------------------------------------------------
+Helpers/amplify.ts : register()
+  - delete the parameter   userType: string
+  - delete the line        "custom:userType": userType,
+Components/Forms/UserInForm.tsx
+  - delete   type UserType = "member" | "trainer";
+  - delete   const [userType, setUserType] = useState<UserType>("member");
+  - delete the whole <select value={userType} ...> with its two <option>s
+  - in handleSignUp(), remove the last argument:  register(email, password, nickname, height, currentWeight, targetWeight)
+  (Leaving any of these behind fails the build: noUnusedLocals / noUnusedParameters.)
+
+  Why: the app client can no longer write custom:userType. A sign-up that still sends it is rejected by Cognito.
+  Also: anyone who wants to be a trainer is now added to the "trainers" group by you (item 1.8), not by choosing it.
+
+3. Read the role from the GROUPS, not the attribute                                           (item 5.1, 1.1)
+---------------------------------------------------------------------------------------------------------
+New accounts have no custom:userType any more, so the trainer view and the member view would show nothing.
+Helpers/amplify.ts : getUserAttributes()
+
+  BEFORE
+    return {
+      userId: payload?.sub,
+      email: payload?.email,
+      nickname: payload?.nickname,
+      userType: payload?.["custom:userType"],
+    };
+
+  AFTER
+    // Roles come from the Cognito groups in the token. This only decides what the UI SHOWS; the API
+    // checks the same groups on the server.
+    const groups = (payload?.["cognito:groups"] as string[] | undefined) ?? [];
+    const userType = groups.includes("admins") ? "developer"
+                   : groups.includes("trainers") ? "trainer"
+                   : "member";
+    return {
+      userId: payload?.sub,
+      email: payload?.email,
+      nickname: payload?.nickname,
+      userType,
+    };
+
+  Nothing else changes: Header.tsx, Coaching.tsx and App.tsx keep switching on "developer" / "trainer" / "member".
+  Your own admin account must be in the "admins" group (it is, you saw it in the token), and every real trainer
+  must be in "trainers". Groups only appear in a token issued AFTER the user was added, so log out and in again.
+
+4. Don't show "saved" when the save failed                                                        (item 5.8)
+---------------------------------------------------------------------------------------------------------
+Helpers/APIfunctions.tsx : createSessionExercise() and updateSessionExercise()
+  After the fetch, before parsing/using the body:
+    if (!response.ok) {
+        const err = await response.json().catch(() => null);
+        throw new Error(err?.error ?? "Request failed");
+    }
+  The server now says 400 / 404 / 409 when something is wrong, and without this the UI still says "Set created!".
+  The callers already have try/catch that shows the message, so nothing else changes. Do the other fetch helpers the
+  same way when you get to item 5.5.

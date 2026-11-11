@@ -1,68 +1,41 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  PutCommand,
-} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { PostConfirmationTriggerEvent } from "aws-lambda";
 
-import {
-  PostConfirmationTriggerEvent,
-  Context,
-  Callback,
-} from "aws-lambda";
+const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
-//#region: User Profiles:
-class UserProfileService {
-  private docClient: DynamoDBDocumentClient;
-  private tableName: string;
+const NICKNAME_MAX_LENGTH = 50;
+const DEFAULT_NICKNAME = "Member";
 
-  constructor() {
-    const client = new DynamoDBClient({});
-    this.docClient = DynamoDBDocumentClient.from(client);
-    this.tableName = process.env.TABLE_NAME!;
-  }
-
-  async createUserProfile(nickname:string, userType: string, userId: string, email?: string) {
-    const command = new PutCommand({
-      TableName: this.tableName,
-      Item: {
-        userId,
-        email,
-        nickname,
-        userType,
-        createdAt: new Date().toISOString(),
-      },
-      ConditionExpression: "attribute_not_exists(userId)", // avoid overwrite
-    });
-
-    await this.docClient.send(command);
-  }
-}
-
-class PostConfirmationHandler {
-  private service = new UserProfileService();
-  async handle(event: PostConfirmationTriggerEvent) {
-    const userId = event.request.userAttributes.sub;
-    const email = event.request.userAttributes.email;
-    const nickname = event.request.userAttributes["nickname"];
-    const userType = event.request.userAttributes["custom:userType"];
-
-    await this.service.createUserProfile(nickname, userType, userId, email);
+// Runs after a user confirms their email. Creates their profile row.
+export const handler = async (event: PostConfirmationTriggerEvent) => {
+  if (event.triggerSource !== "PostConfirmation_ConfirmSignUp") {
     return event;
   }
-}
-//#endregion
 
+  const attributes = event.request.userAttributes;
+  const userId = attributes.sub;
+  const email = attributes.email;
+  const nickname = (attributes.nickname ?? "").trim().slice(0, NICKNAME_MAX_LENGTH) || DEFAULT_NICKNAME;
 
-const handlerInstance = new PostConfirmationHandler();
-export const handler = async (
-  event: PostConfirmationTriggerEvent,
-  context: Context,
-  callback: Callback
-) => {
   try {
-    const result = await handlerInstance.handle(event);
-    callback(null, result);
-  } catch (error) {
-    callback(error as Error);
+    await docClient.send(new PutCommand({
+      TableName: process.env.TABLE_NAME!,
+      Item: {
+        userId,
+        nickname,
+        createdAt: new Date().toISOString(),
+        ...(email ? { email } : {}), // only add email when there is one
+      },
+      ConditionExpression: "attribute_not_exists(userId)", // never overwrite an existing profile
+    }));
+  } catch (error: any) {
+    if (error?.name === "ConditionalCheckFailedException") {
+      return event; // do nothing profile is already there 
+    }
+    console.error("post-confirm failed:", error);
+    throw error;
   }
+
+  return event;
 };
