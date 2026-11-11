@@ -23,7 +23,7 @@
   .G_cell_small {
     font-size: 12px;
     flex-shrink: 0;
-    padding: var(--space-xs);
+    padding: 3px;
     text-align: center;
     overflow: hidden;
     white-space: nowrap;
@@ -89,8 +89,6 @@
 .G_cell_date {
   width: 100px;
   background-color: var(--color-bg-primary);
-  color: var(--color-text-secondary);
-  font-weight: 600;
   font-size: 13px;
 }
 

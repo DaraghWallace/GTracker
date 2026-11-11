@@ -10,21 +10,6 @@ import {
   getBuckets,
 } from "../Helpers/progressData";
 
-/*
-  ProgressGrid.tsx - table view of the Progress page.
-
-  Renders a grid with:
-    - a header row of date buckets (from the month/year filter)
-    - a row of average body weight per bucket ("-" when no data)
-    - one row per exercise showing its best rep per bucket
-
-  Cardio is always excluded, exercises are filtered by groupFilter ("All" = no filter),
-  and exercises with no data in range are omitted.
-*/
-
-// TODO: groupFilter (and StrengthRowItm.group) would ideally be typed as
-// `MuscleGroup | "All"` once MuscleGroup is exported from customTypes.ts
-// instead of living only in NewExerciseForm.tsx.
 type Props = {
   exercises: exercise[];
   sessionData: session[];
@@ -64,7 +49,8 @@ function renderWeightRow(buckets: Bucket[], weightProgArr: WeightRowItm[]) {
     <div className="G_row">
       <div className="G_cell_big">Weight</div>
       {buckets.map((b) => {
-        const matched = weightProgArr.filter((w) => b.matches(w.date));
+        const matched = weightProgArr.filter((w) => b.matches(w.date)).filter((w) => w.userWeight != 0);
+
         const avg = matched.reduce((sum, w) => sum + w.userWeight, 0) / matched.length;
 
         return (
