@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import NewExerciseForm from "./Forms/NewExerciseForm";
 import type { exercise, user } from "../Helpers/customTypes";
 
-import { FaPlus, FaAddressBook, FaArrowDownAZ } from "react-icons/fa6";
+import { FaArrowDownAZ } from "react-icons/fa6";
 import { LuBicepsFlexed } from "react-icons/lu";
 
 import "../CSS/dev.css";
