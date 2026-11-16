@@ -1,5 +1,4 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { v4 as uuidv4 } from 'uuid';
 import type { session } from "../../Helpers/customTypes";
 import { createSession } from "../../Helpers/APIfunctions";
 
@@ -36,9 +35,8 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
       return;
     }
 
-    const newSession: session = {
-      sessionId: uuidv4(),
-      userId,
+    const newSession = {
+      userId,                
       dateDone: date,
       userWeight: userWeight,
       focus: focus || null,
@@ -47,11 +45,10 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
 
     try {
       setPostStatus("posting")
-      await createSession(newSession);
+      const created = await createSession(newSession);
       setMessage("Session created!");
 
-      // Add it straight into state instead of refetching a (possibly narrower) range
-      setSessionData(prev => [...prev, newSession]);
+      setSessionData(prev => [...prev, created]);
 
       setNewSessionFormOpen(false)
       setPostStatus("done")
@@ -65,21 +62,19 @@ export default function NewSessionForm({ userId, setNewSessionFormOpen, setSessi
     <div className="form">
       <div className="f_panel">
         <div className="f_p_col">
-          <input type="text" placeholder="Focus" aria-label="Focus"  
-            size={7} maxLength={25} minLength={2}
-            value={focus} onChange={e => setFocus(e.target.value)} 
+          <input 
+            type="text" placeholder="Focus" aria-label="Focus"
+            value={focus} size={7} maxLength={25} minLength={2} 
+            onChange={e => setFocus(e.target.value)} 
           />
-          
           <div className="bold_text">Current Weight: 
-            <input type="number" aria-label="Current weight" 
+            <input 
+              type="number" aria-label="Current weight" value={userWeight} 
               max={486} min={5}
-              value={userWeight} onChange={e => setUserWeight(Number(e.target.value))} 
+              onChange={e => setUserWeight(Number(e.target.value))} 
             />Kgs
           </div>
-          
-          <div>
-            <input type="date" aria-label="Date" value={date} onChange={e => setDate(e.target.value)} />
-          </div>
+          <div><input type="date" aria-label="Date" value={date} onChange={e => setDate(e.target.value)} /></div>
         </div>
 
         <textarea placeholder="Notes (optional)" aria-label="Notes" value={notes} onChange={e => setNotes(e.target.value)} />

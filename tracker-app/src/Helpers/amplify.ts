@@ -19,7 +19,7 @@ Amplify.configure({
   }
 });
 
-export async function register(email: string, password: string, nickname: string, height: number, currentWeight: number, targetWeight: number/*, userType: string*/) {
+export async function register(email: string, password: string, nickname: string, height: number, currentWeight: number, targetWeight: number) {
   const result = await signUp({
     username: email,
     password,
@@ -32,7 +32,6 @@ export async function register(email: string, password: string, nickname: string
         "tar_weight": String(targetWeight),
         // "currentTrainerId": currentTrainerId,
         // "goal": goal,
-        "custom:userType": "member",
       }
     }
   });
@@ -63,10 +62,14 @@ export async function logout(){await signOut();}
 export async function getUserAttributes() {
   const session = await fetchAuthSession();
   const payload = session.tokens?.idToken?.payload;
+  const groups = (payload?.["cognito:groups"] as string[] | undefined) ?? [];
+  const userType = groups.includes("admins") ? "developer"
+                 : groups.includes("trainers") ? "trainer"
+                 : "member";
   return {
     userId: payload?.sub,
     email: payload?.email,
     nickname: payload?.nickname,
-    userType: payload?.["custom:userType"],
+    userType,
   };
 }

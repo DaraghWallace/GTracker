@@ -8,32 +8,29 @@ export async function getToken(): Promise<string> {
   return session.tokens?.idToken?.toString() ?? "";
 }
 
+async function readJsonOrThrow(response: Response, fallbackMessage: string) {
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+        throw new Error(body?.error ?? fallbackMessage);
+    }
+    return body;
+}
+
 //#region: Sessions
-// C works
-export async function createSession(newSession: session) {
+export async function createSession(newSession: Omit<session, "sessionId">): Promise<session> {
     const token = await getToken()
     const url = `${API_URL}sessions`;
 
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-            },
-            body: JSON.stringify(newSession),
-        });
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify(newSession),
+    });
 
-        const text = await response.text();
-        const result = JSON.parse(text);
-        console.log("Session created!");
-        console.log(newSession);
-        
-        return result;
-    } catch (error) {
-        console.error("Failed to Post:", error);
-        throw error;
-    }
+    return readJsonOrThrow(response, "Failed to create session");
 }
 // R works
 export async function getSessions(startDate: string, endDate: string) {
@@ -63,27 +60,16 @@ export async function updateSession(newSession: session) {
     const token = await getToken()
     const url = `${API_URL}sessions/${newSession.sessionId}`;
 
-    try {
-        console.log("updating session...");
+    const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify(newSession),
+    });
 
-        const response = await fetch(url, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-            },
-            body: JSON.stringify(newSession),
-        });
-
-        const text = await response.text();
-        const result = JSON.parse(text);
-
-        console.log("Session Updated!");
-        return result;
-    } catch (error) {
-        console.error("Failed to PUT:", error);
-        throw error;
-    }
+    return readJsonOrThrow(response, "Failed to update session");
 }
 // D
 export const deleteSession = async (sessionId: string) => {
@@ -101,6 +87,7 @@ export const deleteSession = async (sessionId: string) => {
     });
 
   if (!response.ok) {
+    console.log(response.json());
     throw new Error("Failed to delete session");
   } else console.log("Session Deleted");
 };
@@ -145,6 +132,7 @@ export async function getExercises() {
   const text = await response.text();
   return JSON.parse(text);
 }
+
 // U
 export async function updateExercise(newExercise: exercise) {
 	const token = await getToken()
@@ -163,16 +151,18 @@ export async function updateExercise(newExercise: exercise) {
 		});
 
 		const text = await response.text();
+		console.log("RAW RESPONSE:", text);
 
 		const result = JSON.parse(text);
 
-		console.log("Exercise Updated");
+		console.log("Exercise Updated:", result);
 		return result;
 	} catch (error) {
 		console.error("Failed to PUT:", error);
 		throw error;
 	}
 }
+
 // D
 export const deleteExercise = async (exerciseId: string) => {
     const token = await getToken()
@@ -186,6 +176,7 @@ export const deleteExercise = async (exerciseId: string) => {
     });
 
     if (!response.ok) {
+        console.log(response.json());
         throw new Error("Failed to delete exercise");
     } else console.log("Exercise Deleted");
 };
@@ -197,32 +188,16 @@ export async function createSessionExercise(newSessionExercise: sessionExercise)
     const token = await getToken()
     const url = `${API_URL}sessionExercises`;
 
-    try {
-        console.log("creating SessionExercise...");
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify(newSessionExercise),
+    });
 
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-            },
-            body: JSON.stringify(newSessionExercise),
-        });
-
-        const text = await response.text();
-
-        let result;
-        try {
-            result = JSON.parse(text);
-        } catch {
-            result = text;
-        }
-        console.log("SessionExercise created!");
-        return result;
-    } catch (error) {
-        console.error("Failed to Post:", error);
-        throw error;
-    }
+    return readJsonOrThrow(response, "Failed to create session exercise");
 }
 
 // R
@@ -237,8 +212,7 @@ export async function getSessionExerciseBySession(sessionId: string): Promise<se
         },
     });
 
-    const text = await response.text();
-    return JSON.parse(text);
+    return readJsonOrThrow(response, "Failed to load session exercises");
 }
 
 // U
@@ -246,27 +220,16 @@ export async function updateSessionExercise(newSessionExercise: sessionExercise)
     const token = await getToken()
     const url = `${API_URL}sessionExercises/${newSessionExercise.sessionExerciseId}`;
 
-    try {
-        console.log("updating session...");
+    const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify(newSessionExercise),
+    });
 
-        const response = await fetch(url, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-            },
-            body: JSON.stringify(newSessionExercise),
-        });
-
-        const text = await response.text();
-        const result = JSON.parse(text);
-
-        console.log("Session Updated!");
-        return result;
-    } catch (error) {
-        console.error("Failed to PUT:", error);
-        throw error;
-    }
+    return readJsonOrThrow(response, "Failed to update session exercise");
 }
 
 // D

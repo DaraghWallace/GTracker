@@ -111,7 +111,7 @@
     left: 0;
     will-change: transform;
     border-bottom: 1px solid var(--color-border-subtle);
-    width: 120px;
+    width: 170px;
     background-color: var(--color-bg-secondary);
     box-shadow: 2px 0 0 var(--color-bg-secondary), 4px 0 6px -3px rgba(0, 0, 0, 0.5);
     color: var(--color-text-light);
@@ -119,8 +119,6 @@
     text-align: left;
 
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
   }
   
   .graph_item {
