@@ -81,7 +81,7 @@ export default function DevExercise({ exercise }: Props) {
         )}
       </div>
 
-      <div className="G_cell">
+      <div className="G_cell_wide">
         {editExercise ? (
           <input type="text" placeholder={exercise.target} onChange={(e) => setExTarget(e.target.value)} />
         ) : (
@@ -89,7 +89,7 @@ export default function DevExercise({ exercise }: Props) {
         )}
       </div>
 
-      <div className="G_cell">
+      <div className="G_cell_small">
         {editExercise ? (
           <select defaultValue={exercise.ppl} onChange={(e) => setExPpl(e.target.value)}>
             {PPL_OPTIONS.map((ppl) => <option key={ppl}>{ppl}</option>)}
@@ -100,7 +100,7 @@ export default function DevExercise({ exercise }: Props) {
       </div>
 
       {/* Left button: confirm delete, or toggle edit mode. Right button: save, or toggle delete confirm. */}
-      <div className="G_cell">
+      <div className="G_cell_big">
         {confirmDelete ? (
           <button onClick={handleDelete}><FaCheck /></button>
         ) : (

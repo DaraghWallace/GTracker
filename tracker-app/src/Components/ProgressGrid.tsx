@@ -38,7 +38,7 @@ function renderDateRow(buckets: Bucket[]) {
     <div className="G_row">
       <div className="G_cell_big">Date</div>
       {buckets.map((b) => (
-        <div key={b.key} className="G_cell_date">{b.label}</div>
+        <div key={b.key} className="G_cell">{b.label}</div>
       ))}
     </div>
   );

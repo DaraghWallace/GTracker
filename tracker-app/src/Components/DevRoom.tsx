@@ -9,17 +9,6 @@ import "../CSS/dev.css";
 import "../CSS/progress.css";
 import DevExercise from "./Elements/DevExercise";
 
-/*
-  DevRoom.tsx - developer-only admin page.
-
-  Two tabs, switched with the icon buttons at the top:
-    - "exercises": grid of every exercise (DevExercise rows) that can be filtered by
-      group and push/pull and sorted A-Z by name. A + button opens NewExerciseForm.
-    - "users": placeholder "Fetch Users" button (not wired up yet).
-
-  Filter dropdown options are derived from the exercise data so they stay in sync.
-*/
-
 type Props = {
   user: user;
   exercises: exercise[];
@@ -53,18 +42,17 @@ export default function DevRoom({ user, exercises }: Props) {
 
   return (
     <div className="dev_cont">
-      {/* Tab buttons: each shows only when its tab is not the active one */}
       {display !== "exercises" && (
         <div>
           <button onClick={() => setDisplay("exercises")}><LuBicepsFlexed /></button>
         </div>
       )}
-      {display !== "users" && (
+      {/* {display !== "users" && (
         <div>
           <button onClick={() => setDisplay("users")}><FaAddressBook /></button>
           <button onClick={() => setNewExercise(true)}><FaPlus /></button>
         </div>
-      )}
+      )} */}
 
       {display === "exercises" && (
         <div>
@@ -79,21 +67,22 @@ export default function DevRoom({ user, exercises }: Props) {
 
             <div className="G_cell">
               <select value={groupFilter} onChange={(e) => setGroupFilter(e.target.value)}>
-                <option value={ALL}>All Groups</option>
+                <option value={ALL}>Groups</option>
                 {groupOptions.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
 
-            <div className="G_cell">Target Muscle</div>
+            <div className="G_cell_wide">Target Muscle</div>
 
-            <div className="G_cell">
+            <div className="G_cell_small">
               <select value={pushPullFilter} onChange={(e) => setPushPullFilter(e.target.value)}>
-                <option value={ALL}>All Push/Pull</option>
+                <option hidden>P/P/L</option>
+                <option value={ALL}>All</option>
                 {pushPullOptions.map((pp) => <option key={pp} value={pp}>{pp}</option>)}
               </select>
             </div>
 
-            <div className="G_cell">Edit/Del</div>
+            <div className="G_cell_big">Edit/Del</div>
           </div>
 
           {filteredExercises.map((exercise) => (
